@@ -1,4 +1,4 @@
 Miscellaneous
 =============
 
-Miscellaneous code that might be useful to others for learning/demonstration purposes.
+Miscellaneous R and possibly other code that might be useful to others for learning/demonstration purposes.
