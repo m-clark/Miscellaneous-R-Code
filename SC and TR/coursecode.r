@@ -3,7 +3,7 @@
 ### at Notre Dame.  The course page and associated handout can be found at:              ###
 ### http://csr.nd.edu/statistical-services/non-credit-short-courses/introduction-to-r/   ###
 ############################################################################################
-testtest
+
 #######################
 ### Getting Started ###
 #######################
