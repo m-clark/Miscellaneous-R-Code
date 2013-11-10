@@ -19,7 +19,7 @@ myvar1
 myvar2
 myvar3
 
-#library(Rcmdr)
+# library(Rcmdr)
 
 #################################
 ### Working with the language ###
