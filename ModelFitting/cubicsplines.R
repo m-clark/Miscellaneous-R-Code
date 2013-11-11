@@ -3,7 +3,7 @@
 ### Generalized Additive Models or my handout ###
 ### at  www.nd.edu/~mclark19/learn/GAMS.pdf   ###
 #################################################
-
+ 
 ### Create the data
 size = c(1.42,1.58,1.78,1.99,1.99,1.99,2.13,2.13,2.13,
          2.32,2.32,2.32,2.32,2.32,2.43,2.43,2.78,2.98,2.98)
