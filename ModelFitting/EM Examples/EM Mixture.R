@@ -149,5 +149,3 @@ ggplot(aes(x=eruptions, y=waiting), data=faithful) +
 ggplot(aes(x=eruptions, y=waiting), data=faithful) +
   geom_point(aes(color=test2$resp[,1])) +
   ggtheme
-
-# Now, let me know when a mixture of gaussians is a realistic approach for your data.
