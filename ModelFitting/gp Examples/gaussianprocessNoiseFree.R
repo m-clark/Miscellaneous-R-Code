@@ -1,6 +1,6 @@
 ########################################################################################
-### 'Noisy' gaussian process demo.  The matrix labeling is in keeping with Murphy    ###
-### 2012 and Rasmussen and Williams 2006.  See those sources for more detail.        ###
+### 'Noise-free' gaussian process demo.  The matrix labeling is in keeping with      ###
+### Murphy 2012 and Rasmussen and Williams 2006.  See those sources for more detail. ###
 ### Murphy's matlab code can be found here: https://code.google.com/p/pmtk3/, though ###
 ### the relevant files are housed alongside this code.                               ###
 ###                                                                                  ###
