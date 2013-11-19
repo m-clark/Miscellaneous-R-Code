@@ -1,7 +1,7 @@
 Miscellaneous R Code
 ====================
 
-Miscellaneous R and possibly other code that might be useful to others for learning/demonstration purposes.  
+Miscellaneous R and other code that might be useful to others for learning/demonstration purposes.  
 
 
 Model Fitting
@@ -19,6 +19,6 @@ Random shenanigans.
 
 Future
 ------
-It may also include data sets at some point.
+It may also include data sets, viz and other stuff at some point.
 
 
