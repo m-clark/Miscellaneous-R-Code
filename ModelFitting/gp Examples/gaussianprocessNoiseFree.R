@@ -34,8 +34,8 @@ Kfn = function(x, l=1, sigmaf=1){
 ### Preliminaries ###
 #####################
 
-l = 1           # see note at covariance function
-sigmaf = 1      # see note at covariance function
+l = 1           # for l, sigmaf, see note at covariance function
+sigmaf = 1      
 keps = 1e-8     # see note at Kstarstar
 nprior = 5      # number of prior draws
 npostpred = 3   # number of posterior predictive draws
@@ -57,7 +57,7 @@ gdat = melt(data.frame(x=xg1, y=t(yg1), sd=apply(yg1, 2, sd)), id=c('x', 'sd'))
 # head(gdat) # inspect if desired
 
 g1 = ggplot(aes(x=x, y=value), data=gdat) + 
-  geom_line(aes(group=variable), color='#FF5500') +
+  geom_line(aes(group=variable), color='#FF5500', alpha=.5) +
   labs(title='Prior') +
   ggtheme
 
@@ -78,10 +78,10 @@ nTest = length(Xtest)
 #####################################
 
 # Create K, K*, and K** matrices as defined in the texts
-K = Kfn(Xtrain)  
-K_ = Kfn(c(Xtrain, Xtest))                    # initial matrix
-Kstar = K_[1:nTrain, (nTrain+1):ncol(K_)]     # dim = N x N*
-tKstar = t(Kstar)                             # dim = N* x N
+K = Kfn(Xtrain, l=l, sigmaf=sigmaf)  
+K_ = Kfn(c(Xtrain, Xtest), l=l, sigmaf=sigmaf)                                 # initial matrix
+Kstar = K_[1:nTrain, (nTrain+1):ncol(K_)]                                      # dim = N x N*
+tKstar = t(Kstar)                                                              # dim = N* x N
 Kstarstar = K_[(nTrain+1):nrow(K_), (nTrain+1):ncol(K_)] + keps*diag(nTest)    # dim = N* x N*; the keps part is for positive definiteness
 Kinv = solve(K)
 
