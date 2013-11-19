@@ -25,7 +25,7 @@ muFn = function(x){
 # See ?covSEiso in the gpr package for example, which is also based on Rasmussen and
 # Williams Matlab code (gpml Matlab library)
 
-Kfn = function(x, y=NULL, l=1, sigmaf=1, sigman = .5 ){
+Kfn = function(x, y=NULL, l=1, sigmaf=1, sigman=.5){
   if(!is.null(y)){
     sigmaf * exp( -(1/(2*l^2)) * as.matrix(dist(x, upper=T, diag=T)^2) ) + sigman*diag(length(x))    
   }
