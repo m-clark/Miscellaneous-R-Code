@@ -143,13 +143,13 @@ model {                     // Model block; declarations and statements.
 }
 
 generated quantities {     // Generated quantities block; declarations and statements.
-  real num;                
-  real denom;
-  real R2;                 // Calculate Rsq as a demo
+  real rss;                
+  real totalss;
+  real R2;                 // Calculate Rsq as a demonstration
 
-  num <- dot_product(mu-mean(mu), y-mean(y)) / (N-1);
-  denom <- sd(mu)*sd(y);
-  R2 <- square(num/denom); 
+  rss <- dot_self(mu-y);
+  totalss <- dot_self(y-mean(y));
+  R2 <- 1 - rss/totalss;
 }
 '
 
