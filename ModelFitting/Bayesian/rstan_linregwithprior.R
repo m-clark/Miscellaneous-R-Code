@@ -92,7 +92,7 @@ library(rstan)
 ### Run the model and examine results ###
 # fit
 fit <- stan(model_code = stanmodelcode, model_name = "example", 
-            data = dat, iter = 22000, warmup=2000, thin=10, chains = 3, sample_file = 'norm.csv',
+            data = dat, iter = 22000, warmup=2000, thin=10, chains = 3, # sample_file = 'norm.csv', if you want to save
             verbose = F) 
 
 # summary
