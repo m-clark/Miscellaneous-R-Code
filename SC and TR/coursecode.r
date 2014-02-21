@@ -23,7 +23,7 @@ myvar3
 ### Functions ###
 # Simple function to calculate the mean
 mymean = function(x){
-  if (!is.numeric(x)){                 # If it is the case that x is not numeric...
+  if (!is.numeric(x)){                 # If x is not numeric...
     stop('STOP! Does not compute.')    # Stop with message
     }
   
@@ -32,7 +32,7 @@ mymean = function(x){
 
 var1 = 1:5
 mymean(var1)
-mymean('saywhatnow') # error!
+mymean('thisisnotanumber')             # error!
 
 
 ### Loops etc. ###
@@ -64,11 +64,11 @@ x2 = rbinom(5, 1, .5)
 x3 = rnorm(50, mean=50, sd=10)
 
 
-cormat=matrix(c(1, .5, .5, 1), nrow=2) # type cormat at the command prompt if you want to look at it after creation
+cormat=matrix(c(1, .5, .5, 1), nrow=2) #type cormat at the command prompt if you want to look at it after creation
 
 library(MASS) # the following function is found in the MASS library
 
-xydata=mvrnorm(40, mu=c(0, 0), Sigma=cormat, empirical=T) # empirical = F will produce data that will randomly deviate from the assumed correlation matrix
+xydata=mvrnorm(40, mu=c(0, 0), Sigma=cormat, empirical=T) #empirical = F will produce data that will randomly deviate from the assumed correlation matrix
 
 head(xydata) #take a look at it
 cor(xydata)
@@ -110,12 +110,12 @@ state2 <- data.frame(state.x77)
 str(state2)  #object structure
 
 
-head(state2, 10) # first 10 rows
-tail(state2, 10) # last 10 rows
-state2[,3]       # third column
-state2[14,]      # 14th row
-state2[3,6]      # 3rd row, 6th column
-state2[,'Frost'] # variable by name
+head(state2, 10) #first 10 rows
+tail(state2, 10) #last 10 rows
+state2[,3]       #third column
+state2[14,]      #14th row
+state2[3,6]      #3rd row, 6th column
+state2[,'Frost'] #variable by name
 
 # Data Sets & Subsets
 mysubset = subset(state2, state.region== 'South') #note that state.region is a separate R object
@@ -124,11 +124,15 @@ mysubset = state2[state.region== 'South',]        # alternate method
 
 mysubset = state2[,c(1:2, 7:8)]                                # grab columns 1 and 2 and 7 and 8
 mysubset = state2[,c('Population', 'Income', 'Frost', 'Area')] # grab columns by name
+mysubset = state2[grep('^I.*a$', rownames(state2)),]           # get any States starting with 'I' and ends with 'a' using regular expressions
+head(mysubset)
+
 
 library(ggplot2)
 qplot(x=HS.Grad, y=Murder, data=state2[state.region=='South',])
 
 # Merging and Reshaping
+
 mydat <- data.frame(id=factor(1:12), group=factor(rep(1:2, e=3)) )
 x = rnorm(12)
 y = sample(70:100, 12)
@@ -152,11 +156,9 @@ mydataLong <- reshape(mydataWide, direction='long')
 
 # Miscellaneous
 # Create a factor
-# 2 steps
 gender <- c(rep('male', 20), rep('female', 20))
 gender <- factor(gender) #levels are now noted, class changes from character to factor
 
-# 1 step
 gender <- factor(rep(c(0, 1), each=20), labels=c('Male', 'Female'))
 
 
@@ -192,7 +194,7 @@ barplot(table(state.region), col=c('lightblue', 'mistyrose', 'papayawhip', 'lave
 plot(state2$Illiteracy ~ state2$Population)
 
 # stripchart
-stripchart(state2$Illiteracy ~ state.region, data=state2, col=rainbow(4), method='jitter')
+stripchart(state2$Illiteracy~state.region, data=state2, col=rainbow(4), method='jitter')
 
 
 ######################
@@ -204,8 +206,7 @@ mod1 = lm(Income ~ Illiteracy, data=state2)
 summary(mod1)  # model summary
 
 # add population and high school graduation rate; ~. means keep all predictors from mod1
-mod2 = lm(Income ~ Illiteracy + Population + HS.Grad, data=state2) # standard approach
-mod2 = update(mod1, ~. + Population + HS.Grad)                     # alternative using update function
+mod2 = update(mod1, ~. + Population + HS.Grad)
 summary(mod2)
 
 # remove population from previous model
@@ -223,7 +224,9 @@ mod1$coef
 coef(mod1)
 mod1$res
 confint(mod1)
-plot(mod1)
+par(mfrow=c(2,2))
+plot(mod1, ask=F)
+par(mfrow=c(1,1))
 
 ####################################
 ### Visualization of Information ###
@@ -232,7 +235,7 @@ x <- rnorm(100)
 hist(x)
 boxplot(x)
 
-qplot(depth, data=diamonds, geom='bar',fill=cut, xlim=c(55, 70) )
+qplot(depth, data=diamonds, geom='bar',fill=cut, xlim=c(55, 70) ) #used to create margin histogram
 
 library(MASS) #for the data
 

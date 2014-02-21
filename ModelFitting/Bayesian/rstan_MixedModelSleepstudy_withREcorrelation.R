@@ -108,6 +108,7 @@ traceplot(fit, pars=c('mu','sigma_y', 'sigma_u', 'Omega[1,2]'))
 ###############################
 ### A parallelized approach ###
 ###############################
+
 library(parallel)
 cl = makeCluster(3)
 clusterEvalQ(cl, library(rstan))
