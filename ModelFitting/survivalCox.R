@@ -142,7 +142,7 @@ attach(ovarian)
 
 
 ### Create a function to feed to optim ###
-# requires pl function above for time-varying though one could extend to pl_tv
+# requires pl function above though one could extend to pl_tv
 pl_strat = function(pars, preds, died, t, strata) {
   strat = as.factor(strata)
   d = data.frame(preds, died, t, strat)
