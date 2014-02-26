@@ -13,7 +13,7 @@ Code related to fitting of various models.
 [hurdle negbin](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/hurdle.R), 
 [ZIP](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/poiszeroinfl.R), 
 [ZINB](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/NBzeroinfl.R), 
-[Cox](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/survivalCox.R),
+[Cox survival](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/survivalCox.R),
 [EM mixture univariate](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20Mixture.R),
 [EM mixture multivariate](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20Mixture%20MV.R),
 [EM probit](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20algorithm%20for%20probit%20example.R),
