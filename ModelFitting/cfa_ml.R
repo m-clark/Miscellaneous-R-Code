@@ -1,8 +1,9 @@
-# 
-# This more or less comes follows Bollen (1989) for maximum likelihood estimation of a confirmatory 
-# factor analysis. In the following example we will examine a situation where there are two 
-# underlying (correlated) latent variables for 8 observed responses.  The code as is will only 
-# work with this toy data set.
+#########################################################################################################
+### This more or less comes follows Bollen (1989) for maximum likelihood estimation of a confirmatory ###
+### factor analysis. In the following example we will examine a situation where there are two         ###
+### underlying (correlated) latent variables for 8 observed responses.  The code as is will only      ### 
+### work with this toy data set.  Results are checked against the lavaan package.                     ###
+#########################################################################################################
 
 ###########################
 ### Create the data set ###
@@ -39,6 +40,7 @@ corrplot(cor(y))
 
 # example exploratory fa
 #fa(y, nfactors=2, rotate="oblimin") 
+
 
 #########################
 ### Primary Functions ###
@@ -104,6 +106,7 @@ cfa.cor = function (parms, data) {
   out
 }
 
+
 ####################
 ### optimization ###
 ####################
@@ -125,7 +128,6 @@ loads.cor= matrix(c(out.cor$par[1:4], rep(0,4), rep(0,4), out.cor$par[5:8]), nco
 disturbs.cor = out.cor$par[9:16]
 
 
-
 #################################
 ### Gather output for summary ###
 #################################
@@ -142,9 +144,10 @@ output=list(raw=list(loadings = round(data.frame(loads.cov, Variances=disturbs.c
             )
 output
 
-######################
-### Confirm lavaan ###
-######################
+
+###########################
+### Confirm with lavaan ###
+###########################
 
 library(lavaan)
 y = data.frame(y)
@@ -157,7 +160,6 @@ fit.std <- cfa(model, data=y, mimic='Mplus', estimator='ML', std.lv=T, std.ov=T)
 # note that lavaan does not count the intercepts among the free params for AIC/BIC 
 # by default, but the mimic='Mplus' should have them correspond to optim's output
 summary(fit, fit.measures=TRUE)   
-
 
 
 ########################
