@@ -26,7 +26,7 @@ standat = list(N=nrow(faithful), K=2, y=faithful$eruptions,
                sigmaupper=1, sigmastart=1)
 
 standat = list(N=length(y), K=2, y=y, 
-               mustart=quantile(y, prob=c(.1,.9)),       
+               mustart=quantile(y, prob=c(.25,.75)),       
                sigmaupper=sd(y), sigmastart=5)
 
 
