@@ -119,6 +119,7 @@ summary(flexmod3)
 parameters(flexmod3)
 
 ### try hard
+library(parallel)
 cl = makeCluster(3)
 clusterEvalQ(cl, library(rstan))
 
@@ -139,7 +140,7 @@ traceplot(fit)
 # pairs(fit)
 
 mus = extract(fit, par='finalmu')$finalmu
-library(ggplot2); library(reshape2)0
+library(ggplot2); library(reshape2)
 gdat = melt(mus)
 
 ggplot(aes(x=waiting), data=faithful) +
