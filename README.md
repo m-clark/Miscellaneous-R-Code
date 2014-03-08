@@ -1,4 +1,4 @@
-Miscellaneous R Code
+Miscellaneous (mostly) R Code
 ====================
 
 This is a place for miscellaneous R and other code I've put together for clients, co-workers or myself for learning and demonstration purposes. The attempt is made to put together some well-commented and/or conceptually clear code from scratch, though most functionality is readily available in any number of well-developed R packages.  Typically examples are provided using such packages for comparison of results.
