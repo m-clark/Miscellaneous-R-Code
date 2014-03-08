@@ -115,6 +115,7 @@ yRep = extract(fit, par='yRep')$yRep
 # mean difference
 muDiff = extract(fit, par='muDiff')$muDiff
 means = tapply(y, groupID, mean)
+sds = tapply(y, groupID, sd)
 mu1-mu2           # based on population values
 abs(diff(means))  # observed in data
 
@@ -127,7 +128,6 @@ CohensD = extract(fit, par='CohensD')$CohensD
 # population will be greater than a randomly sampled score from the other
 CLES = extract(fit, par='CLES')$CLES
 pnorm((mu1-mu2) / sqrt(sig1^2+sig2^2))        # population
-sds = tapply(y, groupID, sd)
 pnorm((means[1]-means[2]) / sqrt(sum(sds^2))) # observed
 
 

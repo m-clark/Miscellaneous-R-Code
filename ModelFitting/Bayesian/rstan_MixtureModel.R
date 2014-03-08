@@ -132,7 +132,7 @@ parfit = parSapply(cl, 1:3, function(i) stan(model_code = stanmodelcode, model_n
                    simplify=F) 
 
 proc.time() - p
-
+stopCluster(cl)
 
 fit = sflist2stanfit(parfit) 
 print(fit, digits=3)
