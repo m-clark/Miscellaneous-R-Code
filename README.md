@@ -40,6 +40,7 @@ Random shenanigans.
 [FizzBuzz test](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.R),
 [Scrape xkcd R](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.R), 
 [Scrape xkcd Python](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.py), 
+[Shakespearean Insulter](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/shakespeareanInsulter.R), 
 ...
 
 
