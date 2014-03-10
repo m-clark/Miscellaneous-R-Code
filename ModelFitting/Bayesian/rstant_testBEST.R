@@ -65,6 +65,8 @@ model {
   sigma ~ cauchy(0, 5);
   nu ~ exponential(1.0/29);                     // Based on Kruschke; makes mean nu 29 (might consider upper bound, too large and might as well switch to normal)
   
+  
+  // likelihood
   for (n in 1:N){
     y[n] ~ student_t(nu, mu[groupID[n]], sigma[groupID[n]]);
     //y[n] ~ normal(mu[groupID[n]], sigma[groupID[n]]);           // for comparison, remove all nu specifications if you do this
