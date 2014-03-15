@@ -7,7 +7,7 @@
 ### Main Function ###
 #####################
 
-PCAEM = function(X, nComp=2, tol=.00001, maxits=100, showits=T){       
+PCAEM = function(X, nComp=2, tol=.00001, maxits=100, showits=T){
   # Arguments X: numeric data, nComp: number of components
   # tol = tolerance level, maxits: maximum iterations, showits: show iterations
   require(pracma) # for orthonormal basis of W; pcaMethods package has also

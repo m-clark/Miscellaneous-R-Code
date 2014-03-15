@@ -5,8 +5,9 @@
 ### EM for gaussian mixture ###
 ###############################
 gaussmixEM = function(params, X, clusters = 2, tol=.00001, maxits=100, showits=T){
-  # Arguments are starting parameters (means, covariances, cluster probability), data, 
-  # number of clusters desired, tolerance, maximum iterations, and whether to show iterations
+  # Arguments are params: starting parameters (means, covariances, cluster probability), 
+  # X: data, clusters: number of clusters desired, tol: tolerance, maxits: maximum iterations, 
+  # showits: whether to show iterations
   
   require(mvtnorm)
   # Starting points
@@ -17,7 +18,7 @@ gaussmixEM = function(params, X, clusters = 2, tol=.00001, maxits=100, showits=T
   
   # initializations
   ri = matrix(0, ncol=clusters, nrow=N)         # cluster 'responsibilities', i.e. probability of cluster membership for each observation i
-  ll = 0                                        # loglike
+  ll = 0                                        # log likelihood
   it = 0                                        # iteration count
   converged = FALSE                             # convergence
   
@@ -26,7 +27,7 @@ gaussmixEM = function(params, X, clusters = 2, tol=.00001, maxits=100, showits=T
   
   while (!converged & it < maxits) { 
     probsOld = probs
-#   muOld = mu                                 # Use direct values or loglike for convergence
+#   muOld = mu                                  # Use direct values or loglike for convergence
 #   varOld = var
     llOld = ll
     riOld = ri
