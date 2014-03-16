@@ -12,12 +12,12 @@ PCAEM = function(X, nComp=2, tol=.00001, maxits=100, showits=T){
   # tol = tolerance level, maxits: maximum iterations, showits: show iterations
   require(pracma) # for orthonormal basis of W; pcaMethods package has also
   
-  #starting points and other initializations
+  # starting points and other initializations
   N = nrow(X)
   D = ncol(X)
   L = nComp
   Xt = t(X)
-  Z = t(replicate(L, rnorm(N)))                                    # scores
+  Z = t(replicate(L, rnorm(N)))                                    # latent variables
   W = replicate(L, rnorm(D))                                       # loadings
   
   it = 0
@@ -69,8 +69,6 @@ outEM
 Xrecon = outEM$Xrecon
 mean((Xrecon-X)^2)  
 
-plot(Xrecon[,1], X[,1])
-plot(Xrecon[,2], X[,2])
 
 ### compare results to output from pcaMethods; note that signs for loadings/scores may be different
 library(pcaMethods)
@@ -81,8 +79,7 @@ sum((abs(loadings(outpcam))-abs(outEM$loadings))^2)
 abs(round(cbind(scores(outpcam), outEM$scores), 2))
 
 # compare reconstructed data sets
-Xrecon2 = loadings(outpcam) %*% t(scores(outpcam))
-Xrecon2 = t(Xrecon2)
+Xrecon2 = scores(outpcam) %*% t(loadings(outpcam))
 mean((Xrecon2-X)^2)
 mean(abs(Xrecon2-Xrecon))
 
