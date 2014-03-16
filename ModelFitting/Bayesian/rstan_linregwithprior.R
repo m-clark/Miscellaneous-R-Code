@@ -1,9 +1,7 @@
 #--------------------------------------------------------------------------------#
 # The following provides a simple working example of a standard regression model #
 # using Stan/rStan. It is just for demonstration, and hopefully to allow some to #
-# more easily jump right in to using stan if they are comfortable with R (the    #
-# manual doesn't have working examples though many can be found on the program's #
-# github page https://github.com/stan-dev/stan).                                 #
+# more easily jump right in to using stan if they are comfortable with R         #
 #--------------------------------------------------------------------------------#
 
 
