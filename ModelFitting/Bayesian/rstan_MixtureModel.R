@@ -1,102 +1,87 @@
-### Mixture model (draft); The Stan manual notes issues with mixture modeling, esp. label switching 
-### (as does the bugs book),  but the code in the manual chapter on mixture 
-### modeling does not appear able to reproduce the old faithful mixture or even 
-### a simulated mixture of normals, even with some heavy hand holding on 
-# starting points, limits etc.  On occasion the means can be recovered, but the 
-# variances are all over the place and notably influenced by the prior.
+#---------------------------------------------------------------------------------#
+# Mixture model (draft); The Stan manual notes issues with mixture modeling, esp. #
+# label switching (as does the bugs book), but the code in the manual chapter on  #
+# mixture modeling does not appear able to reproduce the old faithful mixture or  #
+# even a simulated mixture of normals, even with some heavy hand holding on       # 
+# starting points, limits etc.  On occasion the means can be recovered, but the   #
+# variances are all over the place and notably influenced by the prior.  The      #
+# Stan manual chapter on problematic posteriors covers many of the issues.        #
+#                                                                                 #
+# The following stan code however is verbatim from github and should work fine,   #
+# albeit slowly.                                                                  #
+# github stan/src/models/basic_estimators/normal_mixture_k_prop.stan              #
+#---------------------------------------------------------------------------------#
 
 data(faithful)
 head(faithful)
 par(mfrow=c(1,2))
-apply(faithful, 2, hist, 'FD', freq=F)
+apply(faithful, 2, ggplot2:::qplot, geom='density')
 layout(1)
 
-y1 = rnorm(500, 50, 5)
-y2 = rnorm(500, 80, 10)
-y = c(y1, y2)
-psych::describe(data.frame(y1, y2))
+
+y = rnorm(500, c(50,80), c(5,10))
+ggplot2:::qplot(y, geom='density')
+psych::describe(data.frame(y[seq(1,500, 2)], y[seq(2,500, 2)]))
+
 
 # take your pick
-standat = list(N=nrow(faithful), K=2, y=faithful$waiting,
-               mustart=quantile(faithful$waiting, prob=c(.25,.75)),
-               sigmaupper=10, sigmastart=1)
+standat = list(N=nrow(faithful), K=2, y=faithful$waiting)
 
-standat = list(N=nrow(faithful), K=2, y=faithful$eruptions, 
-               mustart=quantile(faithful$eruptions, prob=c(.25,.75)),
-               sigmaupper=1, sigmastart=1)
+standat = list(N=nrow(faithful), K=2, y=faithful$eruptions)
 
-standat = list(N=length(y), K=2, y=y, 
-               mustart=quantile(y, prob=c(.25,.75)),       
-               sigmaupper=sd(y), sigmastart=5)
+standat = list(N=length(y), K=2, y=y)
 
 
 stanmodelcode = '
 data {
-  int<lower=1> N;                             // Sample size
-  int<lower=2> K;                             // K mixture components
-  vector[N] y;                                // response
-  vector[K] mustart;                          // starting values
-  real sigmastart;                            // sigma to go with starting values
-  real sigmaupper;                            // upper bound
-}
-
-transformed data {
-  vector[N] ycen;                             // centered response
-  real meany;
-  vector[K] mustartcen;
-  
-  meany <- mean(y);
-  ycen <- y-meany;
-  mustartcen <- mustart-meany;
-  
+  int<lower=1> K;                                                  # K components
+  int<lower=1> N;                                                  # N observations
+  real y[N];                                                       # variable of interest
 }
 
 parameters {
-  simplex[K] theta;                           // mixing proportions; simplex will sum to 1
-  ordered[K] mu;                              // locations of mixture components
-  real<lower=0, upper=sigmaupper> sigma[K];   // scales of mixture components
+  simplex[K] theta;                                                # mixing proportions
+  simplex[K] mu_prop;
+  real mu_loc;
+  real<lower=0> mu_scale;
+  real<lower=0> sigma[K];                                          # sds of the components
 }
 
-transformed parameters{
-
+transformed parameters {
+  ordered[K] mu;
+  mu <- mu_loc + mu_scale * cumulative_sum(mu_prop);               # means of the components
 }
 
 model {
-  // model calculations
-  real ps[K];                                 // initial log component densities
-  
-  for (n in 1:N){
-    for (k in 1:K){
-      ps[k] <- log(theta[k]) + normal_log(ycen[n], mu[k], sigma[k]);
-    }
-  }
-
-  // priors
-  theta ~ beta(1,1);
-  //sigma ~ cauchy(0, 2.5);
-  sigma ~ cauchy(0, 5);
-
-  for (k in 1:K){
-    mu[k] ~ normal(mustartcen[k], sigmastart);
-    //mu[k] ~ normal(0, 1);
-  }
+  // prior
+  mu_loc ~ cauchy(0,5);
+  mu_scale ~ cauchy(0,5);
+  sigma ~ cauchy(0,5);
 
   // likelihood
-  increment_log_prob(log_sum_exp(ps));
-}
+  {
+    real ps[K];
+    vector[K] log_theta;
+    log_theta <- log(theta);
 
-generated quantities {
-  vector[K] finalmu;
-  for (k in 1:K){
-    finalmu[k] <-  mu[k]+meany;                // back to original scale
+    for (n in 1:N) {
+      for (k in 1:K) {
+        ps[k] <- log_theta[k]
+                 + normal_log(y[n],mu[k],sigma[k]);
+      }
+      increment_log_prob(log_sum_exp(ps));
+    }
   }
 }
 '
 
 
-
+################
 ### Test Run ###
+################
 library(rstan)
+
+# the following may take several minutes per chain depending on the data
 test <- stan(model_code = stanmodelcode, model_name = "example", 
             data = standat, iter = 7000, warmup=2000, thin=5, chains = 2, 
             verbose = F)   
@@ -104,21 +89,18 @@ test <- stan(model_code = stanmodelcode, model_name = "example",
 traceplot(test)
 print(test, digits=3)
 
-
+### compare to flexmix
 library(flexmix)
-flexmod1 = flexmix(eruptions~1, k=2, data=faithful, control=list(tolerance=1e-12, iter.max=1000))
+flexmod1 = flexmix(standat$y~1, k=2, control=list(tolerance=1e-12, iter.max=1000))
 summary(flexmod1)
 parameters(flexmod1)
 
-flexmod2 = flexmix(waiting~1, k=2, data=faithful, control=list(tolerance=1e-8, iter.max=1000))
-summary(flexmod2)
-parameters(flexmod2)
 
-flexmod3 = flexmix(y~1, k=2, control=list(tolerance=1e-8, iter.max=1000))
-summary(flexmod3)
-parameters(flexmod3)
+######################
+### Production run ###
+######################
 
-### try hard
+# This can take a notably long time (i.e. hours) depending on the data.
 library(parallel)
 cl = makeCluster(3)
 clusterEvalQ(cl, library(rstan))
@@ -137,14 +119,5 @@ stopCluster(cl)
 fit = sflist2stanfit(parfit) 
 print(fit, digits=3)
 traceplot(fit)
-# pairs(fit)
-
-mus = extract(fit, par='finalmu')$finalmu
-library(ggplot2); library(reshape2)
-gdat = melt(mus)
-
-ggplot(aes(x=waiting), data=faithful) +
-  geom_vline(aes(xintercept=value), col='gray90',alpha=.05, data=gdat) +
-  geom_density() +
-  geom_point(aes(x=value, y=0), alpha=.05, data=gdat) +
-  ggtheme
+# # pairs(fit)
+ 
