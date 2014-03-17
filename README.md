@@ -25,7 +25,8 @@ Code related to fitting of various models.
 
 ### Bayesian (mostly with Stan/rstan)
 [BEST t-test](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstant_testBEST.R),
-[linear regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_linregwithprior.R), 
+[linear regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_linregwithprior.R)
+(Compare with [BUGS version](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/bugs_linreg.R), [JAGS](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/jags_linreg.R)),
 [mixed model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_MixedModelSleepstudy.R), 
 [mixed model with correlated random effects](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_MixedModelSleepstudy_withREcorrelation.R), 
 [beta regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstanBetaRegression.R),
