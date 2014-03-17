@@ -76,9 +76,11 @@ cat(
 )
 sink()
 
-inits <- function(){
-  list(beta=rep(0,4), sigma.y=runif(1,0,10), xi=rnorm(1), tau.eta=runif(1) )
-}
+
+# initial values not necessary, but can specify as follows
+# inits <- function(){
+#   list(beta=rep(0,4), sigma.y=runif(1,0,10), xi=rnorm(1), tau.eta=runif(1) )
+# }
 parameters <- c('beta', 'sigma.y')
 
 
@@ -88,13 +90,21 @@ parameters <- c('beta', 'sigma.y')
 #####################
 library(R2OpenBUGS)
 
-# note that n.thin appears to mean something different than other packages.  To  
-# quote the argument itself: 'Setting n.thin=2, doubles the number of iterations 
-# OpenBUGS performs, but does not change n.iter'. As for now, the following produces 
-# 3 chains of 1000 samples each with thin = 10 as in the stan and jags code for 
-# this same data. To verify see lmbugs$n.keep, which is the total N per chain.
+# note that n.thin argument is used differently than other packages.  The 
+# gist is, specify the n posterior draws (per chain) you to keep want as n.iter-n.burnin.  
+# The thinned samples aren't stored. In other packages: n.iter is total before 
+# thinning and including burnin, and n.keep is (n.iter-n.burnin) / n.thin.  With bugs, 
+# n.keep is the same, but as far as arguments your you'll want to think of n.iter 
+# your n posterior draws after thinning. So the following all produce 1000 posterior  
+# draws in R2OpenBUGS:
+# n.iter=3000, n.thin=1, n.burnin=2000
+# n.iter=3000, n.thin=10, n.burnin=2000
+# n.iter=3000, n.thin=100, n.burnin=2000
+# 
+# In other packages, with those arguments you'd end up with 1000, 300, 30 n posterior
+# draws.
 
-lmbugs <- bugs(bugsdat, inits, parameters, model.file='lmbugs.txt', n.chains=3, 
+lmbugs <- bugs(bugsdat, inits=NULL, parameters, model.file='lmbugs.txt', n.chains=3, 
                n.iter=3000, n.thin=10, n.burnin=2000, codaPkg=F, debug=F)
 print(lmbugs, digits=3)
 plot(lmbugs)
