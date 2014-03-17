@@ -88,16 +88,11 @@ parameters <- c('beta', 'sigma.y')
 #####################
 library(R2OpenBUGS)
 
-# note that n.thin appears to mean nothing of what it does elsewhere in Bayesian 
-# literature I've seen, including that of one of the authors of the package.  To  
+# note that n.thin appears to mean something different than other packages.  To  
 # quote the argument itself: 'Setting n.thin=2, doubles the number of iterations 
-# OpenBUGS performs, but does not change n.iter'. Argument description from
-# n.iter: 'number of total iterations...'.  So thin samples "aren't stored" but 
-# miraculously increase your number of iterations (i.e. n.sims) by (n.iter-burnin)*thin. 
-# As soon as I can find a dictionary that equates the word 'thin' to 'some sort of 
-# increase' I will let you know. As for now, the following produces 3 chains 
-# of 1000 samples each with thin = 10 as in the stan and jags code for this same 
-# data. To verify see lmbugs$n.keep, which is the total N per chain.
+# OpenBUGS performs, but does not change n.iter'. As for now, the following produces 
+# 3 chains of 1000 samples each with thin = 10 as in the stan and jags code for 
+# this same data. To verify see lmbugs$n.keep, which is the total N per chain.
 
 lmbugs <- bugs(bugsdat, inits, parameters, model.file='lmbugs.txt', n.chains=3, 
                n.iter=3000, n.thin=10, n.burnin=2000, codaPkg=F, debug=F)

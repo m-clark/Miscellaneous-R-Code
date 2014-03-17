@@ -90,7 +90,7 @@ library(rstan)
 ### Run the model and examine results ###
 # fit
 fit <- stan(model_code = stanmodelcode, model_name = "example", 
-            data = dat, iter = 22000, warmup=2000, thin=10, chains = 3, # sample_file = 'norm.csv', if you want to save
+            data = dat, iter = 12000, warmup=2000, thin=10, chains = 3, # sample_file = 'norm.csv', if you want to save
             verbose = F) 
 
 # summary
@@ -127,11 +127,13 @@ parameters {                // Parameters block; declarations only
 }
 
 transformed parameters {    // Transformed parameters block; declarations and statements.
-  vector[N] mu;
-  mu <- X * beta;           // creation of linear predictor
+
 }
 
 model {                     // Model block; declarations and statements.
+  vector[N] mu;
+  mu <- X * beta;           // creation of linear predictor
+
   // priors
   beta ~ normal(0, 10);
   sigma ~ cauchy(0, 2.5);   // With sigma bounded at 0, this is half-cauchy as 
@@ -144,7 +146,9 @@ generated quantities {     // Generated quantities block; declarations and state
   real rss;                
   real totalss;
   real R2;                 // Calculate Rsq as a demonstration
-
+  vector[N] mu;
+  
+  mu <- X * beta;
   rss <- dot_self(mu-y);
   totalss <- dot_self(y-mean(y));
   R2 <- 1 - rss/totalss;
@@ -154,7 +158,7 @@ generated quantities {     // Generated quantities block; declarations and state
 ### Run the model and examine results ###
 # Note that you should be able to see a slight speed gain
 fit <- stan(model_code = stanmodelcode, model_name = "example", 
-            data = dat, iter = 22000, warmup=2000, thin=10, chains = 3, #sample_file = 'norm.csv', if you want to save
+            data = dat, iter = 12000, warmup=2000, thin=10, chains = 3, #sample_file = 'norm.csv', if you want to save
             verbose = F)  
 
 # summary; Note the pars in the following- specify desired parameters or it will print out everything, including 
