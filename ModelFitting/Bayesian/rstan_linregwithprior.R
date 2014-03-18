@@ -136,7 +136,7 @@ model {                     // Model block; declarations and statements.
 
   // priors
   beta ~ normal(0, 10);
-  sigma ~ cauchy(0, 2.5);   // With sigma bounded at 0, this is half-cauchy as 
+  sigma ~ cauchy(0, 5);   // With sigma bounded at 0, this is half-cauchy 
 
   // likelihood
   y ~ normal(mu, sigma);
