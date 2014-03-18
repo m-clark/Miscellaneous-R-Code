@@ -73,14 +73,14 @@ cat(
   # Scale parameter is 5, so precision of z = 1/5^2 = 0.04
   z ~ dnorm(0, .04)I(0,)
   chSq ~ dgamma(0.5, 0.5)                                                       # chi^2 with 1 d.f.
-  sigma.y <- z/sqrt(chSq)                                                  # prior for sigma; cauchy = normal/sqrt(chi^2)
+  sigma.y <- z/sqrt(chSq)                                                       # prior for sigma; cauchy = normal/sqrt(chi^2)
   inv.sigma.sq <- pow(sigma.y, -2)                                              # precision
 }'
 )
 sink()
 
 
-# initial values not necessary, but can specify as follows
+# explicitly provided initial values not necessary, but can specify as follows
 # inits <- function(){
 #   list(beta=rep(0,4), sigma.y=runif(1,0,10) )
 # }
