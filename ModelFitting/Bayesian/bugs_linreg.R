@@ -68,19 +68,23 @@ cat(
   
   # Half-cauchy as in Gelman 2006
   # Scale parameter is 5, so precision of z = 1/5^2 = 0.04
+  sigma.y <- abs(z)/sqrt(chSq)                                                  # prior for sigma; cauchy = normal/sqrt(chi^2)
   z ~ dnorm(0, .04)
   chSq ~ dgamma(0.5, 0.5)                                                       # chi^2 with 1 d.f.
-  sigma.y <- abs(z)/sqrt(chSq)                                                  # prior for sigma; cauchy = normal/sqrt(chi^2)
+  # sigma.y ~ dgamma(.001,.001)                                                 # prior for sigma; a typical approach used.
   inv.sigma.sq <- pow(sigma.y, -2)                                              # precision
 }'
 )
 sink()
+ 
 
+# explicitly provided initial values not necessary, but can specify as follows; 
+# may have problems with large variance parameters if you don't; Note also that
+# sigma.y is unnecesary if using the half-cauchy approach.
 
-# explicitly provided initial values not necessary, but can specify as follows
-# inits <- function(){
-#   list(beta=rep(0,4), sigma.y=runif(1,0,10))
-# }
+inits <- list(list(beta=rep(0,4), sigma.y=runif(1,0,10)),
+              list(beta=rep(0,4), sigma.y=runif(1,0,10)),
+              list(beta=rep(0,4), sigma.y=runif(1,0,10)))
 parameters <- c('beta', 'sigma.y')
 
 
@@ -104,8 +108,12 @@ library(R2OpenBUGS)
 # In other packages, with those arguments you'd end up with 1000, 300, 30 n posterior
 # draws.
 
-lmbugs <- bugs(bugsdat, inits=NULL, parameters, model.file='lmbugs.txt', n.chains=3, 
-               n.iter=3000, n.thin=10, n.burnin=2000, codaPkg=F, debug=F)
+# I've found bugs to have a notable problem with the half-cauchy approach in
+# this model, with one or two chains getting stuck at times. Neither jags (which
+# uses the exact same approach) nor stan (which samples from the cauchy directly)
+# have any issue.
+lmbugs <- bugs(bugsdat, inits=inits, parameters, model.file='lmbugs.txt', n.chains=3, 
+               n.iter=3000, n.thin=10, n.burnin=2000, codaPkg=F, debug=T)
 print(lmbugs, digits=3)
 plot(lmbugs)
 

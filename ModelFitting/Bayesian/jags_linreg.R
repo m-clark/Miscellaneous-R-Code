@@ -71,9 +71,9 @@ cat(
   
   # Half-cauchy as in Gelman 2006
   # Scale parameter is 5, so precision of z = 1/5^2 = 0.04
+  sigma.y <- z/sqrt(chSq)                                                       # prior for sigma; cauchy = normal/sqrt(chi^2)
   z ~ dnorm(0, .04)I(0,)
   chSq ~ dgamma(0.5, 0.5)                                                       # chi^2 with 1 d.f.
-  sigma.y <- z/sqrt(chSq)                                                       # prior for sigma; cauchy = normal/sqrt(chi^2)
   inv.sigma.sq <- pow(sigma.y, -2)                                              # precision
 }'
 )
