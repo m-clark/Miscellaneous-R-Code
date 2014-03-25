@@ -8,6 +8,8 @@ Model Fitting
 -------------
 Code related to fitting of various models. 
 
+[standard regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/standardLM.R), 
+[penalized regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/penalizedML.R), 
 [cubic spline](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/cubicsplines.R), 
 [hurdle poisson](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/hurdle.R), 
 [hurdle negbin](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/hurdle.R), 
