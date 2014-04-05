@@ -36,7 +36,7 @@ PPCAEM = function(X, nComp=2, tol=.00001, maxits=100, showits=T){
   
   if (showits)                                                     # Show iterations
     cat(paste("Iterations of EM:", "\n"))
-  while ((!converged) & (it < maxits)) {                           # while no convergence and we haven't reached our max iterations do this stuff 
+  while ((!converged) & (it < maxits)) {                           
     # create 'old' values for comparison
     if(exists('W.new')){
       W.old = W.new
@@ -50,7 +50,7 @@ PPCAEM = function(X, nComp=2, tol=.00001, maxits=100, showits=T){
     Psi = sigma2*diag(L)
     M = t(W.old) %*% W.old + Psi
     
-    W.new = S%*%W%*%solve(Psi + solve(M)%*%t(W.old)%*%S%*%W.old)   # E and M together
+    W.new = S%*%W.old%*%solve(Psi + solve(M)%*%t(W.old)%*%S%*%W.old)   # E and M 
     sigma2 = 1/D * tr(S - S%*%W.old%*%solve(M)%*%t(W.new))
 
     Z = solve(M)%*%t(W.new)%*%t(X)
@@ -71,7 +71,7 @@ PPCAEM = function(X, nComp=2, tol=.00001, maxits=100, showits=T){
     converged = max(abs(ll.old-ll)) <= tol
   }
   
-  W = orth(W)
+  W = orth(W.new)
   evs = eigen(cov(X %*% W))
   evecs = evs$vectors
   
@@ -109,24 +109,24 @@ mean((Xrecon-X)^2)
 
 # note that signs for loadings/scores may be opposite
 library(pcaMethods)
-outpcam = ppca(X, nPcs=2, threshold=1e-3)
+outpcam = ppca(X, nPcs=2, threshold=1e-8)
 
 # compare loadings and scores
-cbind(loadings(outpcam), outEM$loadings)
+round(cbind(loadings(outpcam), outEM$loadings), 3)
 sum((abs(loadings(outpcam))-abs(outEM$loadings))^2)
 abs(round(cbind(scores(outpcam), outEM$scores), 2))
 # abs(scores(outpcam)) - abs(scores(pca(X,n=2))) # ppca is pretty close to reproducing pca
 
 # compare reconstructed data sets
-Xrecon2 = scores(outpcam) %*% t(loadings(outpcam))
-mean((Xrecon2-X)^2)
-mean(abs(Xrecon2-Xrecon))
+Xrecon_pcam = scores(outpcam) %*% t(loadings(outpcam))
+mean((Xrecon_pcam-X)^2)
+mean(abs(Xrecon_pcam-Xrecon))
 
 # plots
 library(car)
-scatterplotMatrix(cbind(X[,1],Xrecon[,1], Xrecon2[,1]))
-scatterplotMatrix(cbind(X[,2],Xrecon[,2], Xrecon2[,2]))
+scatterplotMatrix(cbind(X[,1],Xrecon[,1], Xrecon_pcam[,1]))
+scatterplotMatrix(cbind(X[,2],Xrecon[,2], Xrecon_pcam[,2]))
 
-plot(Xrecon[,1], Xrecon2[,1], pch=19, col='gray50')
+plot(Xrecon[,1], Xrecon_pcam[,1], pch=19, col='gray50')
 
 scatterplotMatrix(cbind(outEM$scores, outpcam@scores) )
