@@ -10,7 +10,7 @@
 
 
 fizzbuzz = function(min, max, num1, num2){
-  x_ = seq(min, max)
+  x_ = min:max
   x = x_
   x[x_%%num1 == 0] = "Fizz"
   x[x_%%num2 == 0] = "Buzz"
