@@ -47,9 +47,8 @@ Other
 Random shenanigans.
 
 [ggplot2 theme](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/ggtheme.R),
-[FizzBuzz test](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.R),
-[Scrape xkcd R](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.R), 
-[Scrape xkcd Python](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.py), 
+FizzBuzz test [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.R) [(julia)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.jl),
+Scrape xkcd [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.R) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.py), 
 [Shakespearean Insulter](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/shakespeareanInsulter.R), 
 ...
 
