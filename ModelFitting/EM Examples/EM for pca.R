@@ -1,6 +1,7 @@
 # --------------------------------------------------------------------#
 # The following is an EM algorithm for principal components analysis. #
-# See Murphy, 2012 Probabilistic Machine Learning 12.2.5              #
+# See Murphy, 2012 Probabilistic Machine Learning 12.2.5. Some of the #
+# constructed object is based on output from pca function used below. # 
 # --------------------------------------------------------------------#
 
 #####################
@@ -62,24 +63,30 @@ PCAEM = function(X, nComp=2, tol=.00001, maxits=100, showits=T){
 ### Get data and run
 # state.x77 is the data; various state demographics
 X = scale(state.x77)
-outEM = PCAEM(X=X, nComp=4, tol=1e-12, maxit=1000)
+outEM = PCAEM(X=X, nComp=2, tol=1e-12, maxit=1000)
 outEM
 
-# Examine reconstructed values vs. original
+# Extract reconstructed values and loadings for comparison
 Xrecon = outEM$Xrecon
-mean((Xrecon-X)^2)  
+loadingsEM = outEM$loadings
+scoresEM = outEM$scores
+
+# mean squared reconstruction error
+mean((Xrecon-X)^2)  # outEM$reconerr/prod(dim(X))
 
 
 ### compare results to output from pcaMethods; note that signs for loadings/scores may be different
 library(pcaMethods)
-outpcam = pca(X, nPcs=4, method='svd')
+outpcam = pca(X, nPcs=2, method='svd', scale='none', center=F)
+loadings_pcam = loadings(outpcam)
+scores_pcam = scores(outpcam)
 
 # compare loadings and scores
-sum((abs(loadings(outpcam))-abs(outEM$loadings))^2)
-abs(round(cbind(scores(outpcam), outEM$scores), 2))
+sum((abs(loadings_pcam)-abs(loadingsEM))^2)
+abs(round(cbind(scores_pcam, scoresEM), 2))
 
 # compare reconstructed data sets
-Xrecon2 = scores(outpcam) %*% t(loadings(outpcam))
+Xrecon2 = scores_pcam %*% t(loadings_pcam)
 mean((Xrecon2-X)^2)
 mean(abs(Xrecon2-Xrecon))
 
