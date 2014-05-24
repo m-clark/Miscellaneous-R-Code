@@ -49,7 +49,7 @@ modlm = lm(y~., data.frame(d))
 
 
 ##################
-### BUGS setup ###
+### JAGS setup ###
 ##################
 
 jagsdat = list('y'=y, 'X'=X, 'N'=N, 'K'=K)
@@ -101,7 +101,7 @@ lmjags = coda.samples(lmjagsmod, c('beta', 'sigma.y'), n.iter=10000, thin=10, n.
 summary(lmjags)
 effectiveSize(lmjags)
 
-# visulize
+# visualize
 library(coda); library(scales); library(ggthemes)
 traceplot(lmjags, col=alpha(gg_color_hue(3), .5))
 densityplot(lmjags, col=alpha(gg_color_hue(3), .5))
