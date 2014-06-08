@@ -11,8 +11,11 @@ Code related to fitting of various models.
 [standard regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/standardLM.R), 
 [penalized regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/penalizedML.R), 
 one factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.R) 
- [(Julia)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.jl) 
+[(Julia)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.jl) 
 [(Matlab)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.m), 
+two factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.R) 
+[(Julia)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.jl) 
+[(Matlab)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.m), 
 [cubic spline](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/cubicsplines.R), 
 [hurdle poisson](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/hurdle.R), 
 [hurdle negbin](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/hurdle.R), 
