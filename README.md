@@ -8,7 +8,7 @@ Model Fitting
 -------------
 Code related to fitting of various models. 
 
-[standard regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/standardLM.R), 
+[standard regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/standardlm.R), 
 [penalized regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/penalizedML.R), 
 one factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.R) 
 [(Julia)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.jl) 
