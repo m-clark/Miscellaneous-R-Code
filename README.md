@@ -8,8 +8,14 @@ Model Fitting
 -------------
 Code related to fitting of various models. 
 
-[standard regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/standardLM.R), 
+[standard regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/standardlm.R), 
 [penalized regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/penalizedML.R), 
+one factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.R) 
+[(Julia)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.jl) 
+[(Matlab)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.m), 
+two factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.R) 
+[(Julia)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.jl) 
+[(Matlab)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.m), 
 [cubic spline](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/cubicsplines.R), 
 [hurdle poisson](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/hurdle.R), 
 [hurdle negbin](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/hurdle.R), 
@@ -40,6 +46,8 @@ SC and TR
 Code specific to short courses and technical reports I put together from time to time.
 
 [Introduction to R](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/coursecode.r),
+[Generalized Additive Models](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/GAMS.R),
+[Machine Learning](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/MLcode.R),
 ...
 
 Other
