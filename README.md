@@ -46,6 +46,7 @@ SC and TR
 Code specific to short courses and technical reports I put together from time to time.
 
 [Introduction to R](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/coursecode.r),
+[Generalized Additive Models](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/GAMS.R),
 ...
 
 Other
