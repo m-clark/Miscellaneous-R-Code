@@ -19,7 +19,7 @@ function sfran_loglike(par::Vector)
 
     for i in 1:d
       yi = y[i,:]'
-      l = l - .5*(yi-mu)'* (Sigmai\(yi-mu))
+      l = l - .5(yi-mu)' * (Sigmai\(yi-mu))
     end
 
 #    l = zeros(10)
