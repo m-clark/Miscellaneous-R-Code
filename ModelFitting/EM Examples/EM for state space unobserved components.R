@@ -1,25 +1,26 @@
 ### The following regards chapter 11 in Statistical Modeling and Computation, 
 ### the first example for an unobserved components model.  The data regards 
 ### inflation based on the U.S. consumer price index (infl = 
-### 400*log(cpi_t/cpi_{t-1})), from the second quarter of 1947 to the second
-### quarter of 2011.  You can acquire the data here
-### (http://www.maths.uq.edu.au/~kroese/statbook/Statespace/USCPI.csv) just 
-### note that it has 2 mystery columns and one mystery row presumably supplied 
-### by Excel.  You can also get the CPI data yourself at http://www.bls.gov/cpi/
-### in a frustrating fashion, or in a much easier fashion here 
+### 400*log(cpi_t/cpi_{t-1})), from the second quarter of 1947 to the second 
+### quarter of 2011.  You can acquire the data here 
+### (http://www.maths.uq.edu.au/~kroese/statbook/Statespace/USCPI.csv) or in
+### Datasets repo. just note that it has 2 mystery columns and one mystery row
+### presumably supplied by Excel.  You can also get the CPI data yourself at
+### http://www.bls.gov/cpi/ in a frustrating fashion, or in a much easier
+### fashion here 
 ### http://research.stlouisfed.org/fred2/series/CPIAUCSL/downloaddata.
 
 
 ### For the following I use n instead of t or T because those are transpose and
-### TRUE in R. The model is basically y = tau + error, with error ~ N(0, sigma2), 
-### and tau = tau_{n-1} + u_n with u ~ N(0, omega2).  Thus each y is
+### TRUE in R. The model is basically y = τ + ϵ, with ϵ ~ N(0, σ^2), 
+### and τ = τ_{n-1} + υ_n with υ ~ N(0, ω^2).  Thus each y is
 ### associated with a latent variable that follows a random walk over time.
-### omega2 serves as a smoothing parameter, which itself may be estimated but
+### ω^2 serves as a smoothing parameter, which itself may be estimated but
 ### which is fixed in the following. See the text for more details.
 
-d = read.csv('../../data/USCPI.csv', header=F)
-y = d[,1]
-summary(y)
+d = read.csv('../Datasets/USCPI.csv', header=F)
+inflation = d[,1]
+summary(inflation)
 
 
 ################################
@@ -79,20 +80,16 @@ statespaceEM = function(params, y, omega2_0, omega2, tol=.00001, maxits=100, sho
 }
 
 # debugonce(statespaceEM)
-ssMod_1 = statespaceEM(params=data.frame(sigma2=var(y)), y=y, tol=1e-4, omega2_0=9, omega2=1^2)
-ssMod_.5 = statespaceEM(params=data.frame(sigma2=var(y)), y=y, tol=1e-4, omega2_0=9, omega2=.5^2)
+ssMod_1 = statespaceEM(params=data.frame(sigma2=var(inflation)), y=inflation, tol=1e-4, omega2_0=9, omega2=1^2)
+ssMod_.5 = statespaceEM(params=data.frame(sigma2=var(inflation)), y=inflation, tol=1e-4, omega2_0=9, omega2=.5^2)
 ssMod_1$sigma2
 ssMod_.5$sigma2
 
 library(lubridate)
 series = ymd(paste0(rep(1947:2014, e=4),'-', c('01','04','07','10'), '-', '01'))
-seriestext = series[1:length(y)]
+seriestext = series[1:length(inflation)]
 
 # fig. 11.1 in the text
-par(mfrow=c(2,1))
-plot(seriestext, y, pch=19, cex=.5, col='gray50', ylim=c(-10,20), bty='n')
+plot(seriestext, inflation, pch=19, cex=.5, col='gray50', ylim=c(-10,20), bty='n')
 lines(seriestext, ssMod_1$tau, col="#FF5500")
-
-plot(seriestext, y, pch=19, cex=.5, col='gray50', ylim=c(-10,20), bty='n')
-lines(seriestext, ssMod_.5$tau, col="#FF5500")
-layout(1)
+lines(seriestext, ssMod_.5$tau, col="skyblue3")
