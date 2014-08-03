@@ -1,0 +1,39 @@
+model {
+  for (n in 1:N){
+    logit(mu[n]) <- (Intercept + IntRE[id[n]]) + (betaTemp + SlopeRE[id[n]])*tempCen[n]
+    A[n] <- mu[n]*phi
+    B[n] <- (1.0-mu[n])*phi
+    yield[n] ~ dbeta(A[n], B[n])
+  }
+
+  Intercept ~ dnorm(0, 1/10^2)
+  betaTemp ~ dnorm(0, 1)
+  
+  for (l in 1:L){
+    IntRE[l] <- gammaIntercept[l]*sd_int
+    SlopeRE[l] <- gammaTemp[l]*sd_beta
+
+    gammaIntercept[l] ~ dnorm(0, 1)
+    gammaTemp[l] ~ dnorm(0, 1)
+  }
+
+  # Half-cauchy as in Gelman 2006
+  # If scale parameter in cauchy is 5, precision of z = 1/5^2 = 0.04
+  # sigma int
+#   sd_int <- zInt/sqrt(chSqInt)                                                  # prior for sigma; cauchy = normal/sqrt(chi^2)
+#   zInt ~ dnorm(0, .04)I(0,)
+#   chSqInt ~ dgamma(0.5, 0.5)                                                    # chi^2 with 1 d.f.
+  sd_int ~ dt(0, .04, 1)I(0,)
+
+  # sigma beta
+#   sd_beta <- zbeta/sqrt(chSqbeta)                                               
+#   zbeta ~ dnorm(0, .04)I(0,)
+#   chSqbeta ~ dgamma(0.5, 0.5)                                                   
+  sd_beta ~ dt(0, .04, 1)I(0,)
+
+  # phi
+#   phi <- zphi/sqrt(chSqphi)                                                     
+#   zphi ~ dnorm(0, .04)I(0,)
+#   chSqphi ~ dgamma(0.5, 0.5)       
+  phi ~ dt(0, .04, 1)I(0,)
+}

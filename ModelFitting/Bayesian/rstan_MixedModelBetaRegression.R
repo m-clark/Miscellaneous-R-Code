@@ -1,10 +1,10 @@
 ####################################################################################
 ### The following is an attempt to use Stan/rstan for a mixed model assuming a   ###
-### beta distribution for the response response. See the helpfile for            ###
-### GasolineYield for information on the data.  A similar example in JAGS can be ###
-### found in jags_MixedModelBetaRegression.R. In general you'd probably want     ###
-### tweak the settings for both some more for optimal results, but for           ###
-### demonstration the following will produce adequate results.                   ###
+### beta distribution for the response. See the helpfile for GasolineYield for   ###
+### information on the data.  A similar example in JAGS can be found in          ###
+### jags_MixedModelBetaRegression.R. In general you'd probably want tweak the    ###
+### settings for both some more for optimal results, but for demonstration the   ###
+### following will produce adequate results.                                     ###
 ####################################################################################
 
 ####################
@@ -16,14 +16,15 @@ hist(GasolineYield$yield)
 
 # for a quick comparison we might use the mgcv package; note that mgcv seems to 
 # be the closest one can get to an 'out-of-the-package' mixed model for a beta 
-# distributed response in R. However, for random slopes, e.g. with gamm4/gamm, 
-# you no longer have access to the beta distribution due to underlying use of 
-# lme4/nlme. The addition of random slopes doesn't seem to have too much effect 
-# here, so it can still be a useful comparison to see if it and Stan are in the 
-# same ball park as far as the random intercepts go; otherwise take out the 
-# random slopes of the Stan model for a direct comparison, and you'll get 
-# practically identical estimates. As mentioned above, a JAGS version of the
-# model is available for direct comparison.
+# distributed response in R (maybe try gamlss, but its results seem problematic).
+# However, for random slopes, e.g. with gamm4/gamm, you no longer have access to
+# the beta distribution due to underlying use of lme4/nlme. The addition of
+# random slopes doesn't seem to have too much effect here, so it can still be a
+# useful comparison to see if it and Stan are in the same ball park as far as
+# the random intercepts go; otherwise take out the random slopes of the Stan
+# model for a direct comparison, and you'll get practically identical estimates.
+# As mentioned above, a JAGS version of the model is available for direct
+# comparison.
 
 library(mgcv)
 modgam = gam(yield ~ scale(temp, scale=F) + s(batch, bs='re'), data=GasolineYield, family=betar(link="logit"))

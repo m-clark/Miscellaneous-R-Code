@@ -1,0 +1,18 @@
+model {
+  for (n in 1:N){
+    mu[n] <- beta[1]*X[n,1] + beta[2]*X[n,2] + beta[3]*X[n,3] + beta[4]*X[n,4]
+    y[n] ~ dnorm(mu[n], inv.sigma.sq)
+  }
+  
+  for (k in 1:K){
+    beta[k] ~ dnorm(0, .001)                                                    # prior for reg coefs
+  }
+  
+  # Half-cauchy as in Gelman 2006
+  # Scale parameter is 5, so precision of z = 1/5^2 = 0.04
+  sigma.y <- abs(z)/sqrt(chSq)                                                  # prior for sigma; cauchy = normal/sqrt(chi^2)
+  z ~ dnorm(0, .0016)
+  chSq ~ dgamma(0.5, 0.5)                                                       # chi^2 with 1 d.f.
+  # sigma.y ~ dgamma(.001,.001)                                                   # prior for sigma; a typical approach used.
+  inv.sigma.sq <- pow(sigma.y, -2)                                              # precision
+}
