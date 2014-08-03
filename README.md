@@ -63,8 +63,4 @@ Scrape xkcd [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/O
 ...
 
 
-Future
-------
-It may also include data sets, viz and other stuff at some point.
-
 
