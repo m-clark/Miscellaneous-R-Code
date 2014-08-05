@@ -52,30 +52,24 @@ getRollCall = function(congress, HoRSenBoth='Both', matrix=F, cores=2, Dir=NULL,
   
   
   ### autocreate descriptions for objects and files just for giggles
-  firsts = c(1, as.numeric(paste0(2:10, 1)))
-  seconds = c(2, as.numeric(paste0(2:10, 2)))
-  thirds = c(3, as.numeric(paste0(2:10, 3)))
-  
   suppressPackageStartupMessages(require(stringr))
-  descriptions = rep(NA, length(urls))
   descripN = as.numeric(str_extract(urls, '[0-9]+|[0-9]+'))
   descripB = str_extract(urls, 'hou|H|sen|S')
   
-  if (any(descripN %in% c(firsts, seconds, thirds))){
-    idx1 = which(descripN %in% firsts)
-    idx2 = which(descripN %in% seconds)
-    idx3 = which(descripN %in% thirds)
-    
-    ends = c(rep('st', length(idx1)), rep('nd', length(idx2)), rep('rd', length(idx3)))
-    idx = c(idx1, idx2, idx3)
-    descriptions = rep(NA, length(urls))
-    descriptions[idx] = paste0(descripN[idx], ends, ' U.S. ', 
-                               ifelse(descripB[idx] %in% c('hou','H'), 'House of Representatives', 'Senate')) 
+  toOrd = function(x){
+    lasttwo = x %% 100
+    lastone = x %% 10
+    suffix = sapply(as.character(lastone), switch,
+                    '1' = 'st',
+                    '2' = 'nd',
+                    '3' = 'rd',
+                    'th',
+                    simplify=T)
+    suffix[lasttwo %in% 11:13] = 'th'
+    paste0(x, suffix)
   }
   
-  idx = is.na(descriptions)
-  descriptions[idx] = paste0(descripN[idx], 'th', ' U.S. ', 
-                             ifelse(descripB[idx] %in% c('hou','H'), 'House of Representatives', 'Senate'))
+  descriptions = paste0(toOrd(descripN), ' U.S. ', ifelse(descripB %in% c('hou','H'), 'House of Representatives', 'Senate'))
   
   
   ### set up parallel
