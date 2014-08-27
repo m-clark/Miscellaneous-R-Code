@@ -10,7 +10,7 @@ Code related to fitting of various models.
 
 [standard regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/standardlm.R), 
 [penalized regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/penalizedML.R), 
-[gradient descent regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/lm_gradientdescent.R) ([online](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/stochastic_gradientdescent.R)), 
+[gradient descent regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/lm_gradientdescent.R) [(online)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/stochastic_gradientdescent.R), 
 one factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.R) 
 [(Julia)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.jl) 
 [(Matlab)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.m), 
