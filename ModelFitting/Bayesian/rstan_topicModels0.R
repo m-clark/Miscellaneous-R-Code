@@ -10,13 +10,18 @@ data('AssociatedPress')
 ap = as.matrix(AssociatedPress)[1:100,]  # first 100 docs
 
 
-# convert the DTM to lists of word IDs
+# convert the DTM to lists of word IDs as a programming exercise
 library(plyr)
 apBoW = alply(ap, 1, function(wordcounts) rep(colnames(ap), wordcounts))
 apBoWIDs = lapply(apBoW, function(wordlist) which(colnames(ap) %in% wordlist)[factor(wordlist)])
 
 # examine, because yes that was only two lines of code with no loop
 rbind(apBoW[[12]], apBoWIDs[[12]])[,1:20]
+
+# alternatively one could extract directly from the simple triplet matrix DTM
+# apSTM = data.frame(doc=AssociatedPress$i, word=AssociatedPress$j, count=AssociatedPress$v)
+# apSTM = dplyr::filter(apSTM, doc %in% 1:100)
+# w = rep(apSTM$word, apSTM$count)
 
 w = unlist(apBoWIDs)
 V = ncol(ap)
