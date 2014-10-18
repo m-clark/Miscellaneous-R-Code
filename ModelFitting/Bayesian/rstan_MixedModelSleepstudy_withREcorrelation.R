@@ -30,57 +30,74 @@ data {                                    // data setup
   int<lower=1,upper=I> Subject[N];        // Subject
 }
 
+transformed data {
+  real IntBase;
+  real RTsd;
+  
+  IntBase <- mean(RT);                    // Intercept starting point
+  RTsd <- sd(RT);
+}
+
 parameters {
-  real Intercept;                         // fixed effects
-  real beta;
+  real Intercept01;                       // fixed effects
+  real beta01;
   vector<lower=0>[2] sigma_u;             // sd for ints and slopes
   real<lower=0> sigma_y;                  // residual sd
   vector[2] gamma[I];                     // individual effects
-  corr_matrix[2] Omega;                   // correlation matrix for random intercepts and slopes
+  cholesky_factor_corr[2] Omega_chol;     // correlation matrix for random intercepts and slopes (chol decomp)
 }
 
 transformed parameters {
   vector[I] gammaIntercept;               // individual effects (named)
   vector[I] gammaDays;
-  vector[N] yhat; 
-  matrix[2,2] D;
-  vector[2] mu;
-  
-  D <- diag_matrix(sigma_u);
+  real Intercept;
+  real beta;
 
-  mu[1] <- Intercept * 100;               // see "optimizing stan code" section of manual
-  mu[2] <- beta * 10;
+  Intercept <- IntBase + Intercept01 * RTsd;
+  beta <- beta01 * 10;
 
   for (i in 1:I){  
     gammaIntercept[i]  <- gamma[i,1];
     gammaDays[i] <- gamma[i,2];
   }
 
-  for (n in 1:N)                          // Linear predictor
-    yhat[n] <- gammaIntercept[Subject[n]] + gammaDays[Subject[n]] * Days[n];
 } 
 
 model {
-  matrix[2,2] C;                          // for cholesky decomposition of corr matrix
+  matrix[2,2] D;
   matrix[2,2] DC;
+  vector[N] yhat;                         // Linear predictor
+  vector[2] mu;                           // vector of Intercept and beta
+
+  D <- diag_matrix(sigma_u);
+  mu[1] <- Intercept;
+  mu[2] <- beta;
 
   // priors
-  Intercept ~ normal(0, 1);               // example of weakly informative priors;
-  beta ~ normal(0, 1);                    // remove to essentially duplicate lme4 via improper prior
+  Intercept01 ~ normal(0, 1);             // example of weakly informative priors;
+  beta01 ~ normal(0, 1);                  // remove to essentially duplicate lme4 via improper prior
 
-  Omega ~  lkj_corr(1.0); 
+  Omega_chol ~  lkj_corr_cholesky(2.0); 
 
-  sigma_u ~ cauchy(0, 2.5);
-  sigma_y ~ cauchy(0, 2.5);
+  sigma_u ~ cauchy(0, 2.5);               // prior for RE scale
+  sigma_y ~ cauchy(0, 2.5);               // prior for residual scale
 
-  C <- cholesky_decompose(Omega);
-  DC <- D * C;
+  DC <- D * Omega_chol;
 
   for (i in 1:I)                          // loop for Subject random effects
     gamma[i] ~ multi_normal_cholesky(mu, DC);
 
   // likelihood
+  for (n in 1:N)                          
+    yhat[n] <- gammaIntercept[Subject[n]] + gammaDays[Subject[n]] * Days[n];
+
   RT ~ normal(yhat, sigma_y);
+}
+
+generated quantities {
+  matrix[2,2] Omega;                      // correlation of RE
+  
+  Omega <- tcrossprod(Omega_chol);
 }
 '
 
@@ -93,8 +110,8 @@ fit = stan(model_code = stanmodelcode, model_name = "example",
             data = dat, iter = 2000, warmup=200, thin=1, chains = 2,
             verbose = F)
 
-print(fit, digits_summary=3, pars=c('mu','sigma_y', 'sigma_u', 'Omega[1,2]'),
-      probs = c(0, .025, .5, .975, 1))
+print(fit, digits_summary=3, pars=c('Intercept', 'beta','sigma_y', 'sigma_u', 'Omega[1,2]'),
+      probs = c(.025, .5, .975))
 
 ### Compare
 mod_lme
@@ -102,26 +119,28 @@ mod_lme
 print(fit, digits_summary=3, pars=c('gammaIntercept', 'gammaDays'))
 
 ### Diagnostic plots
-traceplot(fit, pars=c('mu','sigma_y', 'sigma_u', 'Omega[1,2]'))
+traceplot(fit, pars=c('Intercept', 'beta','sigma_y', 'sigma_u', 'Omega[1,2]'))
 
 
 ###############################
 ### A parallelized approach ###
 ###############################
+iter = 12000
+wu = 2000
+thin = 10
+chains = 4
 
 library(parallel)
-cl = makeCluster(3)
+cl = makeCluster(chains)
 clusterEvalQ(cl, library(rstan))
 
-clusterExport(cl, c('stanmodelcode', 'dat', 'fit')) 
+clusterExport(cl, c('stanmodelcode', 'dat', 'fit', 'iter', 'wu', 'thin', 'chains')) 
 
 p = proc.time()
-parfit = parSapply(cl, 1:3, function(i) stan(model_code = stanmodelcode, model_name = "mixedreg", #init=0,
-                                              fit = fit, # if using the same model code, this will use the previous compilation
-                                              data = dat, iter = 120000, warmup=20000, thin=10, chains = 1, chain_id=i,
-                                              control=list(stepsize=.01, stepsize_jitter=.5, max_treedepth=20),
-                                              verbose = T), 
-                    simplify=F) 
+parfit=parSapply(cl, 1:chains, function(i) stan(model_code=stanmodelcode, model_name="mixedreg",
+                                                fit=fit, data=dat, iter=iter, warmup=wu, 
+                                                thin=thin, chains=1, chain_id=i), 
+                 simplify=F) 
 
 proc.time() - p
 
@@ -137,15 +156,15 @@ samplerpar = get_sampler_params(fit2)[[1]]
 summary(samplerpar)
 
 
-print(fit2, pars= c('mu','sigma_y', 'sigma_u', 'Omega[1,2]', 'lp__'), digits=3, 
-      probs = c(.01, .025, .05, .5, .95, 0.975, .99))
+print(fit2, pars= c('Intercept', 'beta','sigma_y', 'sigma_u', 'Omega[1,2]', 'lp__'), digits=3, 
+      probs = c(.025, .5, 0.975))
 
 # Compare again
 mod_lme
 
 # Diagnostics
-traceplot(fit2, inc_warmup=F, pars=c('mu','sigma_y', 'sigma_u', 'Omega[1,2]', 'lp__'))
+traceplot(fit2, inc_warmup=F, pars=c('Intercept', 'beta','sigma_y', 'sigma_u', 'Omega[1,2]', 'lp__'))
 
 pairs(fit2, pars=c('sigma_u'))
-pairs(fit2, pars=c('mu'))
+pairs(fit2, pars=c('Intercept', 'beta'))
 # plot(fit2)
