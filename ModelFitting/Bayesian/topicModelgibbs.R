@@ -183,6 +183,7 @@ sapply(topicModelDemo[1:2], round, 2)
 ## paper)
 library(topicmodels)
 ldaout = LDA(dtm, k=2, method='Gibbs', control=list(alpha=alpha, delta=.01, iter=5500, 
+                                                    burnin=500, thin=10, initialize='random'))
 phiEstimatesCompared = data.frame(round(topicModelDemo$phi, 2), 
                                   paper=cbind(c(0,0,.39,.32,.29), c(.25,.4,.35,0,0)),
                                   ldapack=round(t(posterior(ldaout)$terms),2))
