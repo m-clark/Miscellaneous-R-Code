@@ -178,7 +178,7 @@ topicModelDemo = tmod(alpha = alpha, beta = beta, nsim = 5500, warmup=500, thin=
 str(topicModelDemo, 1)
 sapply(topicModelDemo[1:2], round, 2)
 
-## compared to reported paper estimates for phi and topicmodel package (note
+## compared to reported paper estimates for phi and topicmodels package (note
 ## delta is beta above; the vignette actually references Steyvers & Griffiths
 ## paper)
 library(topicmodels)
@@ -187,9 +187,6 @@ ldaout = LDA(dtm, k=2, method='Gibbs', control=list(alpha=alpha, delta=.01, iter
 phiEstimatesCompared = data.frame(round(topicModelDemo$phi, 2), 
                                   paper=cbind(c(0,0,.39,.32,.29), c(.25,.4,.35,0,0)),
                                   ldapack=round(t(posterior(ldaout)$terms),2))
-## copmared to reported paper estimates for phi
-phiEstimatesCompared = data.frame(round(topicModelDemo$phi, 2), 
-                                  paper=cbind(c(0,0,.39,.32,.29), c(.25,.4,.35,0,0)))
 phiEstimatesCompared
 
 
