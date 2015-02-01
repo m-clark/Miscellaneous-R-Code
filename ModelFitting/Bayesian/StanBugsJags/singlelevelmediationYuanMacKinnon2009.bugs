@@ -1,0 +1,31 @@
+model {
+# y[i], m[i], and x[i] denote data vectors of dependent variable, mediating 
+# variable and independent variable, respectively. N is the number of
+# observations
+for (i in 1:N){
+	# specify the mediation model M = Beta_2 + alpha*X + e_2;
+	# dnorm(mu, sigma) denotes a
+	# normal distribution with the mean mu and precision of sigma
+	# (or a variance of 1/sigma).
+	M[i] ~ dnorm(mean.m[i], prec.m)
+	mean.m[i] <- beta2 + alpha * x[i]
+	# specify the mediation model Y = Beta_3 + Beta*M + tau'*X + e_3;
+	y[i] ~ dnorm(mean.y[i], prec.y)
+	mean.y[i] <- beta3 + beta * m[i] + tau.prime * x[i]
+
+	
+# prior distribution of parameters. Huge variances, essentially noninformative.
+beta2 ~ dnorm(0, 1.0E– 6)
+beta3 ~ dnorm(0, 1.0E– 6)
+alpha ~ dnorm(0, 1.0E– 6)
+beta ~ dnorm(0, 1.0E– 6)
+tau.prime ~ dnorm(0, 1.0E– 6)
+
+# dgamma(a, b) is a gamma distribution with the shape parameter a and inverse 
+# scale parameter b.
+prec.y ~ dgamma(0.001, 0.001)
+prec.m ~ dgamma(0.001, 0.001)
+
+# define the mediated effect as function of parameters
+theta <- alpha * beta
+}
