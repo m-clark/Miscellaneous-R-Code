@@ -42,7 +42,8 @@ two factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code
 [beta regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstanBetaRegression.R),
 mixed model with beta response [(Stan)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_MixedModelBetaRegression.R) [(JAGS)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/jags_MixedModelBetaRegression.R),
 [mixture model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_MixtureModel.R),
-[topic model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/topicModelgibbs.R)
+[topic model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/topicModelgibbs.R),
+[multilevel mediation](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_multilevelMediation.R)
 ...
 
 SC and TR
