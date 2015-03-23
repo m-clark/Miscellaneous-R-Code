@@ -14,7 +14,8 @@ set.seed(8675309)
 # Mediator ~ alphaMed + betaMed*X
 # y ~ alphaMain + beta1Main*X + beta2Main*Mediator
 
-# additionally there will be random effects for a grouping variable for each coefficient
+# additionally there will be random effects for a grouping variable for each
+# coefficient, i.e. random intercepts and slopes
 
 library(MASS) # for mvrnorm
 
@@ -32,6 +33,7 @@ covmat_RE = matrix(c(1,-.15,0,0,0,
                      0,0,1,-.1,.15,
                      0,0,-.1,.49,0,
                      0,-.1,.15,0,.25), nrow=5, byrow = T)
+
 # inspect
 covmat_RE
 
@@ -81,8 +83,8 @@ y = (alphaMain + ranef_alphaMain) + (beta1Main+ranef_beta1Main)*X + (beta2Main +
 group = rep(1:50, e=10)
 
 
-### A piecemeal lme for comparison; can't calculate mediated effect, and it
-### won't pick up on correlation of RE between models
+### A piecemeal lme for comparison; can't directly estimate mediated effect, and it
+### won't pick up on correlation of random effects between models
 library(lme4)
 modMed = lmer(Med ~ X + (1+X|group))
 summary(modMed)
@@ -99,7 +101,9 @@ medLme = fixef(modMed)[2]*fixef(modMain)[3]
 ### Stan Code ###
 #################
 
-# In the following, the cholesky decomposition of the RE covariance matrix is used for efficiency.  As a rough guide, the default data where N=500 took about 5 min to run for the main model.
+# In the following, the cholesky decomposition of the RE covariance matrix is
+# used for efficiency.  As a rough guide, the default data where N=500 took
+# about 5 min to run for the main model with iter=12000 and warmup of 2000.
 
 modelStan <- "
 data {
@@ -126,11 +130,11 @@ parameters{
   real<lower=0> sigma_beta2;
   real<lower=0> sigma_y;
 
-  cholesky_factor_corr[5] Omega_chol;         # chol decomp of corr matrix for RE
+  cholesky_factor_corr[5] Omega_chol;            # chol decomp of corr matrix for random effects
 
-  vector<lower=0>[5] sigma_ranef;             # sd for random effects
+  vector<lower=0>[5] sigma_ranef;                # sd for random effects
 
-  matrix[J,5] gamma;                          # random effects
+  matrix[J,5] gamma;                             # random effects
 }
 
 transformed parameters{
@@ -175,7 +179,6 @@ model {
   alphaMain ~ normal(0, sigma_alpha);      
   beta1Main ~ normal(0, sigma_beta1);
   beta2Main ~ normal(0, sigma_beta2);
-
 
   # residual scale
   sigma_y ~ cauchy(0, 1);
@@ -271,6 +274,9 @@ fit = sflist2stanfit(parfit)
 ### Model Exploration ### 
 #########################
 ### Summarize model
+
+# main parameters include fixed and random effect sd, plus those related to
+# indirect effect
 mainpars = c('alphaMed', 'betaMed', 'sigmaMed',
              'alphaMain', 'beta1Main', 'beta2Main', 'sigma_y',
              'sigma_ranef',
@@ -283,7 +289,7 @@ print(fit, digits=3, probs = c(.025, .5, 0.975), pars=mainpars)
 
 ## Extract parameters for comparison
 pars1 = get_posterior_mean(fit, pars=mainpars)[,5]
-parsREcov = get_posterior_mean(fit, pars='Omega_chol')[,5]
+parsREcov = get_posterior_mean(fit, pars='Omega_chol')[,5] # or take 'covMatRE' from monte carlo sim
 parsRE = get_posterior_mean(fit, pars=c('sigma_ranef'))[,5]
 
 
@@ -322,3 +328,73 @@ summary(samplerpar)
 
 traceplot(fit, pars=mainpars, inc_warmup=F)
 plot(fit, pars=mainpars)
+
+
+
+
+# 3rd variant
+covmat_RE = matrix(c(4,-1.5,0,0,0,
+                     -1.5,2,0,0,-.5,
+                     0,0,4,-1,1,
+                     0,0,-1,2,0,
+                     0,-.5,1,0,1), nrow=5, byrow = T)
+# inspect
+covmat_RE
+
+# inspect as correlation
+cov2cor(covmat_RE)
+
+# simulate
+re = mvrnorm(50, mu=rep(0,5), Sigma=covmat_RE, empirical = T)
+
+# random effects for mediator model
+ranef_alphaMed = rep(re[,1], e=10)
+ranef_betaMed = rep(re[,2], e=10)
+
+# random effects for main model                                                 
+ranef_alphaMain = rep(re[,3], e=10)
+ranef_beta1Main = rep(re[,4], e=10)
+ranef_beta2Main = rep(re[,5], e=10)
+
+## fixed effects
+alphaMed = 4
+betaMed = 2
+
+alphaMain = 3
+beta1Main = 1
+beta2Main = -2
+
+# residual variance
+resid_Med = mvrnorm(500, 0, 2^2, empirical=T)
+resid_Main = mvrnorm(500, 0, 1^2, empirical=T)
+
+
+# Collect parameters for later comparison
+params = c(alphaMed=alphaMed, betaMed=betaMed, sigmaMed=sd(resid_Med), 
+           alphaMain=alphaMain, beta1Main=beta1Main, beta2Main=beta2Main, sigma_y=sd(resid_Main), 
+           alphaMed_sd=sqrt(diag(covmat_RE)[1]), betaMed_sd=sqrt(diag(covmat_RE)[2]), 
+           alpha_sd=sqrt(diag(covmat_RE)[3]), beta1_sd=sqrt(diag(covmat_RE)[4]), beta2_sd=sqrt(diag(covmat_RE)[5])
+)
+
+ranefs =  cbind(gammaAlphaMed=unique(ranef_alphaMed), gammaBetaMed=unique(ranef_betaMed), 
+                gammaAlpha=unique(ranef_alphaMain), gammaBeta1=unique(ranef_beta1Main), gammaBeta2=unique(ranef_beta2Main))
+
+
+### Create Data
+X = rnorm(500, sd=2)
+Med = (alphaMed + ranef_alphaMed) + (betaMed+ranef_betaMed)*X + resid_Med[,1]
+y = (alphaMain + ranef_alphaMain) + (beta1Main+ranef_beta1Main)*X + (beta2Main + ranef_beta2Main)*Med + resid_Main[,1]
+group = rep(1:50, e=10)
+
+
+### A piecemeal lme for comparison; can't directly estimate mediated effect, and it
+### won't pick up on correlation of random effects between models
+library(lme4)
+modMed = lmer(Med ~ X + (1+X|group))
+summary(modMed)
+
+modMain = lmer(y ~ X + Med + (1+X+Med|group))
+summary(modMain)
+
+# should equal the naive estimate in the following code
+medLme = fixef(modMed)[2]*fixef(modMain)[3]
