@@ -61,7 +61,7 @@ Other
 Random shenanigans.
 
 FizzBuzz test [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.R) [(julia)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.jl) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.py),
-Reverse a string recursively[(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/stringReverseRecursively.R) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/stringReverseRecursively.py),
+Reverse a string recursively [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/stringReverseRecursively.R) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/stringReverseRecursively.py),
 Recursive Word Wrap [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/wordWrap.R) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/wordWrap.py),
 [get US Congress roll call data](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/getRollCall.R),
 Scrape xkcd [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.R) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.py), 
