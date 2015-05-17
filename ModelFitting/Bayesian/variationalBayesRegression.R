@@ -1,22 +1,4 @@
----
-title: "Variational Bayes Regression"
-author: "MC"
-output: html_document
----
 
-### Intro
-The following provides a function for estimating the parameters of a linear regression via variational inference. See the corresponding .R file for the R code only, and my other scripts for Stan implementation via Hamiltonian Monte Carlo.  See Drugowitsch (2014) for an overview of the method outlined in Bishop (2006).
-
-For the primary function I will use the notation used in the Drugowitsch article in most cases. Here w, represents the coefficients, and τ the precision (inverse variance). The likelihood for response y is N(Xw, τ<sup>-1</sup>). Priors for w and tau are normal inverse gamma N(0, (τα)<sup>-1</sup>) Gamma(a0, b0). 
-
-#### References
-Drugowitsch: <http://arxiv.org/abs/1310.5438> See [here](https://github.com/jdrugo/vb_linear/blob/master/vb_linear_fit.m) and [here](https://github.com/jdrugo/vb_linear/blob/master/vb_linear_fit_ard.m) for his matlab implementation.
-
-Bishop: Pattern Recognition and Machine Learning
-
-First, the main function.  Here automatic relevance determination is an argument rather than a separate function.
-
-```{r vbreg, cache=TRUE}
 vbreg = function(X, y, a0=10e-2, b0=10e-4, c0=10e-2, d0=10e-4, tol=1e-8, maxiter=1000, ard=F){
   # X: model matrix
   # y: the response
@@ -89,11 +71,8 @@ vbreg = function(X, y, a0=10e-2, b0=10e-4, c0=10e-2, d0=10e-4, tol=1e-8, maxiter
     res = append(res, warning('Maximum iterations reached.'))
   } else {res}
 }
-```
 
-With function in place, we can simulate some data and see how it performs.  Note that here, I explicitly note the intercept, as it is added to the model matrix within the vbreg function.
 
-```{r dataPrep, cache=TRUE}
 ### Data set up
 set.seed(1234)
 n = 100
@@ -112,11 +91,8 @@ res
 # With automatic relevance determination
 res = vbreg(X, y, tol=1e-8, ard = T)
 res
-```
 
-We can also look at the higher dimension case as done in Drugowitsch section 2.6.2.
 
-```{r higherdim, cache=TRUE}
 n = 150
 ntest = 50
 d = 100
@@ -142,11 +118,8 @@ mseResults = data.frame(vb=rbind(vbTrainError, vbTestError),
                         glm=rbind(glmTrainError, glmTestError))
 rownames(mseResults) = c('train', 'test')
 mseResults
-```
 
-In general the results are as expected where the standard approach overfits relative to vb reg.  We can visualize the results as well, as in Drugowitsch figure 1.
 
-```{r visResults}
 library(ggvis)
 
 # create coefficient data set for plotting
@@ -170,13 +143,8 @@ gpred %>%
   ggvis(~y, ~value) %>%
   layer_lines(~y, ~y, strokeOpacity:=.5) %>%
   layer_points(fill=~variable, fillOpacity:=.75)
-```
 
-And now for a notably higher dimension case with irrelevant predictors as in Drugowitsch section 2.6.3.  This is problematic for the glm with having more covariates than data points (rank deficient), and as such it will throw a warning, as will the predict function.  It's really not even worth looking at but I do so for consistency with the article's approach.
 
-This will take a while for the standard vbreg, and even bumping up the iterations to 2000, it will still likely hit the max before reaching the default tolerance level.  However, the results appear very similar to that of Drugowitsch Figure 2.
-
-```{r ardDemo, cache=TRUE}
 n = 500
 ntest = 50
 d = 1000
@@ -208,18 +176,11 @@ mseResults = data.frame(vb=rbind(vbTrainError, vbTestError),
                         glm=rbind(glmTrainError, glmTestError))
 rownames(mseResults) = c('train', 'test')
 mseResults
-```
 
-Note how ARD correctly estimates zero for nonrelevant predictors.
 
-```{r sumzerocoefs, cache=TRUE}
 psych::describe(vbARDResult$coef[(deff+1):d])
-```
 
 
-Visualized, as before.
-
-```{r visResults2}
 library(ggvis)
 gcoef = data.frame(wGLM=coef(glmResult), 
                    wVB=vbResult$coef, 
@@ -242,4 +203,4 @@ gpred %>%
   ggvis(~y, ~value) %>%
   layer_lines(~y, ~y, strokeOpacity:=.5) %>%
   layer_points(fill=~variable, fillOpacity:=.75)
-```
+
