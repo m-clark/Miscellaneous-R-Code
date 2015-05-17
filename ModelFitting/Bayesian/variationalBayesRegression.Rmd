@@ -7,12 +7,14 @@ output: html_document
 ### Intro
 The following is a function for estimating the parameters of a linear regression via variational inference. See my other scripts for Stan implementation via Hamiltonian Monte Carlo.  See Drugowitsch (2014) for an overview of the method outlined in Bishop (2006).
 
-I will use the notation in Drugowitsch in most cases. Here w, represents the coefficients, and $\tau$ the precision (inverse variance). The likelihood for response y is $\mathcal{N}(Xw, \tau^{-1})$. Priors for w and tau are normal inverse gamma $\mathcal{N}(0, (\tau\alpha)^{-1}) Gamma(a0,b0)$. See [here](https://github.com/jdrugo/vb_linear/blob/master/vb_linear_fit.m) and [here](https://github.com/jdrugo/vb_linear/blob/master/vb_linear_fit_ard.m) for his matlab implementation.
+I will use the notation in Drugowitsch in most cases. Here w, represents the coefficients, and τ the precision (inverse variance). The likelihood for response y is N(Xw, τ^-1). Priors for w and tau are normal inverse gamma N(0, (τα)^-1) Gamma(a0,b0). 
 
 #### References
-Drugowitsch: <http://arxiv.org/abs/1310.5438>
+Drugowitsch: <http://arxiv.org/abs/1310.5438> See [here](https://github.com/jdrugo/vb_linear/blob/master/vb_linear_fit.m) and [here](https://github.com/jdrugo/vb_linear/blob/master/vb_linear_fit_ard.m) for his matlab implementation.
 
 Bishop: Pattern Recognition and Machine Learning
+
+First, the main function.  Here automatic relevance determination is an argument rather than a separate function.
 
 ```{r vbreg, cache=TRUE}
 vbreg = function(X, y, a0=10e-2, b0=10e-4, c0=10e-2, d0=10e-4, tol=1e-8, maxiter=1000, ard=F){
@@ -29,7 +31,6 @@ vbreg = function(X, y, a0=10e-2, b0=10e-4, c0=10e-2, d0=10e-4, tol=1e-8, maxiter
   D = ncol(X)
   N = nrow(X)
   w = rep(0, D) 
-  tau = 1
   XX = crossprod(X)
   Xy = crossprod(X,y)
 
@@ -88,7 +89,11 @@ vbreg = function(X, y, a0=10e-2, b0=10e-4, c0=10e-2, d0=10e-4, tol=1e-8, maxiter
     res = append(res, warning('Maximum iterations reached.'))
   } else {res}
 }
+```
 
+With function in place, we can simulate some data and see how it performs.  Note that here, I explicitly note the intercept, as it is added to the model matrix within the vbreg function.
+
+```{r dataPrep, cache=TRUE}
 ### Data set up
 set.seed(1234)
 n = 100
@@ -98,7 +103,7 @@ sigma = 2
 
 X = replicate(d, rnorm(n))
 colnames(X) = paste0('X', 1:d)
-y = cbind(1,X) %*% coefs  + rnorm(n, sd=sigma)
+y = cbind(1, X) %*% coefs  + rnorm(n, sd=sigma)
 
 ### Run 
 res = vbreg(X, y, tol=1e-8, ard = F)
@@ -115,14 +120,14 @@ We can also look at the higher dimension case as done in Drugowitsch section 2.6
 n = 150
 ntest = 50
 d = 100
-coefs = rnorm(d+1)
+coefs = rnorm(d + 1)
 sigma = 1
 
 Xtrain = cbind(1, replicate(d, rnorm(n)))
-ytrain = Xtrain %*% coefs  + rnorm(n, sd=sigma)
+ytrain = Xtrain %*% coefs + rnorm(n, sd=sigma)
 
 Xtest = cbind(1, replicate(d, rnorm(ntest)))
-ytest = Xtest %*% coefs  + rnorm(ntest, sd=sigma)
+ytest = Xtest %*% coefs + rnorm(ntest, sd=sigma)
 
 vbResult = vbreg(Xtrain[,-1], ytrain)
 glmResult = glm.fit(Xtrain, ytrain)
@@ -133,17 +138,24 @@ vbTestError = mean((ytest - Xtest %*% vbResult[['coef']])^2)
 glmTrainError = mean((ytrain - Xtrain %*% glmResult[['coefficients']])^2)
 glmTestError = mean((ytest - Xtest %*% glmResult[['coefficients']])^2)
 
-mseResults = data.frame(vb=rbind(vbTrainError, vbTestError), glm=rbind(glmTrainError, glmTestError))
+mseResults = data.frame(vb=rbind(vbTrainError, vbTestError), 
+                        glm=rbind(glmTrainError, glmTestError))
 rownames(mseResults) = c('train', 'test')
 mseResults
 ```
 
-In general the results are as expected where the standard approach overfits relative to vb reg.  We can visualize the results as well.
+In general the results are as expected where the standard approach overfits relative to vb reg.  We can visualize the results as well, as in Drugowitsch figure 1.
 
-```{r visResults, cache=TRUE}
+```{r visResults}
 library(ggvis)
-gcoef = data.frame(wGLM=coef(glmResult), wVB=vbResult$coef, w=coefs)
+
+# create coefficient data set for plotting
+gcoef = data.frame(wGLM=coef(glmResult), 
+                   wVB=vbResult$coef, 
+                   w=coefs)
 gcoef = reshape2::melt(gcoef, 'w')
+
+# same for predictions
 gpred = data.frame(predGLM = Xtest %*% coef(glmResult),
                    predVB = Xtest %*% vbResult$coef,
                    y = ytest)
@@ -160,7 +172,9 @@ gpred %>%
   layer_points(fill=~variable, fillOpacity:=.75)
 ```
 
-And now a notably higher dimension case with irrelevant predictors as in Drugowitsch section 2.6.3.  This will take a while.
+And now for a notably higher dimension case with irrelevant predictors as in Drugowitsch section 2.6.3.  This is problematic for the glm with having more covariates than data points (rank deficient), and as such it will throw a warning, as will the predict function.  It's really not even worth looking at but I do so for consistency with the article's approach.
+
+This will take a while for the standard vbreg, and even bumping up the iterations to 2000, it will still likely hit the max before reaching the default tolerance level.  However, the results appear very similar to that of Drugowitsch Figure 2.
 
 ```{r ardDemo, cache=TRUE}
 n = 500
@@ -196,6 +210,7 @@ mseResults
 ```
 
 Note how ARD correctly estimates zero for nonrelevant predictors.
+
 ```{r sumzerocoefs, cache=TRUE}
 psych::describe(vbARDResult$coef[(deff+1):d])
 ```
@@ -203,10 +218,14 @@ psych::describe(vbARDResult$coef[(deff+1):d])
 
 Visualized, as before.
 
-```{r visResults2, cache=TRUE}
+```{r visResults2}
 library(ggvis)
-gcoef = data.frame(wGLM=coef(glmResult), wVB=vbResult$coef, wVBARd = vbARDResult$coef, w=c(coefs, rep(0,d-deff)))
+gcoef = data.frame(wGLM=coef(glmResult), 
+                   wVB=vbResult$coef, 
+                   wVBARd = vbARDResult$coef, 
+                   w=c(coefs, rep(0,d-deff)))
 gcoef = reshape2::melt(gcoef, 'w')
+
 gpred = data.frame(predGLM = predict(glmResult, as.data.frame(Xtest)),
                    predVB = Xtest %*% vbResult$coef,
                    predVBARD = Xtest %*% vbARDResult$coef,
@@ -221,6 +240,5 @@ gcoef %>%
 gpred %>%
   ggvis(~y, ~value) %>%
   layer_lines(~y, ~y, strokeOpacity:=.5) %>%
-  layer_points(fill=~variable, fillOpacity:=.75) %>%
-  scale_numeric("y", domain = c(-15, 15))
+  layer_points(fill=~variable, fillOpacity:=.75)
 ```
