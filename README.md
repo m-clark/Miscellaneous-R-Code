@@ -43,7 +43,8 @@ two factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code
 mixed model with beta response [(Stan)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_MixedModelBetaRegression.R) [(JAGS)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/jags_MixedModelBetaRegression.R),
 [mixture model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_MixtureModel.R),
 [topic model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/topicModelgibbs.R),
-[multilevel mediation](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_multilevelMediation.R)
+[multilevel mediation](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_multilevelMediation.R), 
+[variational bayes regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/variationalBayesRegression.Rmd)
 ...
 
 SC and TR
@@ -59,10 +60,13 @@ Other
 -----
 Random shenanigans.
 
-[ggplot2 theme](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/ggtheme.R),
 FizzBuzz test [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.R) [(julia)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.jl) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.py),
+Reverse a string recursively [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/stringReverseRecursively.R) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/stringReverseRecursively.py),
+Recursive Word Wrap [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/wordWrap.R) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/wordWrap.py),
+[get US Congress roll call data](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/getRollCall.R),
 Scrape xkcd [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.R) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.py), 
 [Shakespearean Insulter](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/shakespeareanInsulter.R), 
+[ggplot2 theme](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/ggtheme.R),
 ...
 
 
