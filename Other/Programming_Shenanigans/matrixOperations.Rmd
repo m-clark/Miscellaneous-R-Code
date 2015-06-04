@@ -1,0 +1,224 @@
+---
+title: "Matrix Speedups in R"
+author: "MC"
+output: 
+  html_document: 
+    keep_md: yes
+    theme: cosmo
+    toc: yes
+---
+```{r set-options, echo=FALSE, cache=FALSE}
+options(width = 120)
+```
+## Intro and Data Prep
+The following provides some food for thought when creating or manipulating your data in R.  As we'll see, even just organizing your matrix operations to create smaller objects, or using R's built in vectorized approaches can go a long way toward more efficient processing in terms of time and/or memory.
+
+
+To demonstrate we'll look at a linear regression with a large row-wise data set, large enough to see some of the timing differences.  We'll demonstrate the [normal equations](https://en.wikipedia.org/wiki/Linear_least_squares_%28mathematics%29#Derivation_of_the_normal_equations) and via the standard lm approach.
+
+```{r, cache=TRUE}
+set.seed(1234)
+n = 10000000
+x = rnorm(n)
+
+y =  5 + 2*x + rnorm(n)
+
+X = cbind(1, x)
+
+# normal equations to get coefficients
+solve(crossprod(X)) %*% crossprod(X,y)
+```
+
+Compare to the lm approach.
+
+```{r, cache=TRUE}
+lm(y ~ x)
+```
+
+
+## Standard LM
+First, we'll look at lm as a baseline.
+
+```{r, cache=TRUE, echo=1}
+system.time(lm(y ~ x))
+rm(x)
+```
+
+A fairly slow operation, but one look at the lm function tells you its also doing a lot of other things.  
+```{r, cache=TRUE}
+head(lm, 20)
+```
+
+Many modeling functions are actually wrappers to the true underlying fit function, and as long as you can still get the specific results you want, sometimes it's worth using them directly.  In this case we can use lm.fit and see what kind of speed gain is possible. As the following demos can be fairly quick, we'll use microbenchmark and execute each task 10 times.
+
+```{r, cache=TRUE, echo=1:3, results=1}
+library(microbenchmark)
+resLM = microbenchmark(lm.fit(X, y), times=10)
+resLM
+```
+```{r, cache=TRUE, echo=FALSE, results='hide'}
+resLMmedian = print(resLM)$median
+```
+
+
+Even though lm.fit is doing quite a bit under the hood also, we still get a clear improvement in time, where we've gone from over 10 seconds to less than a second.  I also looked at a simulation style approach with n of 1000 and 1000 simulated x's and y's based on the same setup, and the results were similar, so we're not having to restricting ourselves to only big data situations.  Let's see what else we can do.
+
+## Matrix Operations and R functions
+Now we'll try various approaches to the matrix operations that can produce the model coefficients, and time them to see which approach might be fastest.  For the first alternative approach, we can start with an explicit matrix operations as depicted in textbooks. 
+
+
+```{r, cache=TRUE, eval=TRUE, echo=1:2}
+res0 = microbenchmark(solve(t(X) %*% X) %*% t(X) %*% y, times=10)
+res0
+```
+```{r, cache=TRUE, echo=FALSE, results='hide'}
+res0median = print(res0)$median
+```
+
+
+### Using the crossprod function
+As far as speed goes, we're getting a little faster still, and though it might not seem like much, it's about a `r round(100*(1-res0median/resLMmedian))` % reduction in median time (though again, lm.fit is doing a lot more). Let's try using the crossprod function. 
+
+```{r, cache=TRUE, echo=1:2}
+res1 = microbenchmark(solve(crossprod(X)) %*% t(X) %*% y, times=10)
+res1
+```
+```{r, cache=TRUE, echo=FALSE, results='hide'}
+res1median = print(res1)$median
+```
+
+Even just that slight change provides improvement, a  `r round(100*(1-print(res1)$median/print(res0)$median))` % reduction compared to the previous approach. The crossprod function is a slightly faster implementation of the otherwise same operation.  
+
+### Grouping
+However, we can still do better.  Let's now group the operation on the right and see what we get.  
+
+```{r, cache=TRUE}
+res2 = microbenchmark(solve(crossprod(X)) %*% (t(X) %*% y), times=10)
+res2
+```
+
+More improvement.  With this approach we have a final operation between a 2x2 matrix with a 2x1 matrix, whereas in the previous one we only get the crossprod gain, but are otherwise dealing with a 2x2 matrix, a 2xN matrix, and a Nx1 vector requiring more internal operations to be performed.  While they are simple operations, they do add up.
+
+
+As a final approach using just base R options, we can use the code initially presented at the beginning in which we use crossprod for the X covariance and Xy covariance.
+
+```{r, cache=TRUE}
+res3 = microbenchmark(solve(crossprod(X)) %*% crossprod(X,y), times=10)
+res3
+```
+
+Now that's *much* faster.
+
+### Matrix package
+Even then, there are still tools with R packages that might be useful for either speed or memory gains.  The following demonstrates the use of the Matrix package which is comparable for this problem but might be more generally efficient in some situations. 
+
+
+```{r, cache=TRUE, message=FALSE}
+library(Matrix)
+X2 = Matrix(X); class(X2)
+y2 = Matrix(y)
+
+res4 = microbenchmark(solve(crossprod(X2)) %*% crossprod(X2, y2), times=10)
+res4
+
+XX = crossprod(X2)
+Xy = crossprod(X2, y2)
+solve(XX, Xy)
+
+res4b = microbenchmark(solve(XX, Xy), times=10)
+res4b
+```
+
+Note that the results in 4b are in microseconds rather than milliseconds.  Compare to base R crossprod with matrix classes.
+
+```{r, cache=TRUE}
+XX0 = crossprod(X)
+Xy0 = crossprod(X, y)
+microbenchmark(solve(XX0, Xy0), solve(XX, Xy), times=100)
+```
+
+Thus using Matrix S4 classes can result in notable speedups as well.  See the associated [vignettes](http://cran.r-project.org/package=Matrix) for more information.
+
+## Visual Summary of Benchmarks
+
+A quick visual comparison, and we'll do the operations 100 times.
+
+```{r, cache=TRUE, message=FALSE, warning=FALSE, echo=1:3}
+res5 = microbenchmark(lm.fit(X, y), 
+                      solve(t(X) %*% X) %*% t(X) %*% y,
+                      solve(crossprod(X)) %*% t(X) %*% y, 
+                      solve(crossprod(X)) %*% (t(X) %*% y), times=100)
+res6 = microbenchmark(solve(crossprod(X)) %*% crossprod(X, y),
+                      solve(crossprod(X2)) %*% crossprod(X2, y2), times=100)
+res7 = microbenchmark(solve(XX0, Xy0), solve(XX, Xy), times=100)
+```
+
+```{r, cache=TRUE, message=FALSE, warning=FALSE, echo=FALSE, fig.height=6}
+library(ggplot2)
+g1 = autoplot(res5) +
+  ylim(c(150, 750)) +
+  ylab('Milliseconds') +
+  theme_minimal()
+
+g2 = autoplot(res6) +
+  ylim(c(55, 75)) +
+  ylab('Milliseconds') +
+  theme_minimal()
+
+g3 = autoplot(res7) +
+  ylim(c(5, 50)) +
+  ylab('Microseconds') +
+  theme_minimal()
+
+library(gridExtra)
+grid.arrange(g1, g2, g3)
+```
+
+
+## Alternatives
+I've focused on matrix/vectorized operations here, but there are many ways to speed up R generally speaking. 
+
+
+### Parallelism
+Parallelism is possible for a lot of common, iterative operations one does in statistical programming.  If you're waiting minutes or hours for multiple tasks or models to run, you should at least try to get comfortable with R's parallel package that comes with the base installation.  But for a glimpse at the myriad possibilities, see the CRAN Task View for [high performance computing](http://cran.r-project.org/web/views/HighPerformanceComputing.html).  I would add [Spark R](https://amplab-extras.github.io/SparkR-pkg/) as something to keep an eye on as well.
+
+### Other packages 
+Several package like the 'big' family (e.g. biglm) are useful for memory intensive data and specifically geared for bigger data situation.  With such a simple model demonstrated here it offers no advantage though. See also, speedglm, whose speedlm.fit was about five times faster than lm.fit.  In addition, many packages can take advantage of your parallel setup.
+
+
+### Alternative Rs 
+In addition there are several projects that could further enhance the speed capabilities of your R.  The following list is certainly not exhaustive, but does provide some places to go for further examination.
+
+- A list from Wickham's book [link](http://adv-r.had.co.nz/Performance.html#faster-r)
+- Revolution Analytics [RRO](http://mran.revolutionanalytics.com/download/#download)
+
+### Alternate libraries
+- R via the Atlas library [link](http://cran.r-project.org/bin/windows/contrib/ATLAS/)  (32 bit only)
+
+### Just in time compiler
+Compiled functions will typically run faster, and we can use the compiler package for this.  However, it's not always apparent when this would be useful as many functions are can take on complexity that would nullify the gains otherwise seen, or are using functions that R internally compiled already.
+
+```{r, cache=TRUE, eval=TRUE}
+library(compiler)
+# from ?compile
+myFunc = function(X, FUN, ...) {
+  FUN <- match.fun(FUN)
+  if (!is.list(X))
+  X <- as.list(X)
+  rval <- vector("list", length(X))
+  for (i in seq(along = X))
+  rval[i] <- list(FUN(X[[i]], ...))
+  names(rval) <- names(X)
+  return(rval)
+}
+
+
+# enableJIT(0)
+myFuncCompiled = cmpfun(myFunc)
+
+microbenchmark(myFunc(1:100, is.null), myFuncCompiled(1:100, is.null))
+```
+
+## Summary
+
+In general it is best to familiarize oneself with some of the ways in which to speed up code.  For more advanced R users, it's a must, but any R user can benefit. But don't forget programming time either.  Even if R is slower than other language options, the greatest speed benefit is comes from all the coding time saved by using it in the first place.
