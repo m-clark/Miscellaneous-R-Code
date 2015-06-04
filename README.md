@@ -67,7 +67,7 @@ Recursive Word Wrap [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/
 Scrape xkcd [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.R) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.py), 
 [Shakespearean Insulter](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/shakespeareanInsulter.R), 
 [ggplot2 theme](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/ggtheme.R),
-...
+[R matrix speedups] (https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/matrixOperations.md), ...
 
 
 
