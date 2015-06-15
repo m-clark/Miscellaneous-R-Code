@@ -44,7 +44,8 @@ mixed model with beta response [(Stan)](https://github.com/mclark--/Miscellaneou
 [mixture model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_MixtureModel.R),
 [topic model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/topicModelgibbs.R),
 [multilevel mediation](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_multilevelMediation.R), 
-[variational bayes regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/variationalBayesRegression.Rmd)
+[variational bayes regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/variationalBayesRegression.Rmd),
+[reproducing kernel hilbert space regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/RKHSreg.md)
 ...
 
 SC and TR
