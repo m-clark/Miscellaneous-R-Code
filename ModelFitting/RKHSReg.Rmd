@@ -1,4 +1,12 @@
-# Reproducing Kernel Hilbert Space Regression
+---
+title: "Reproducing Kernel Hilbert Space Regression"
+output: 
+  html_document:
+    highlight: pygments
+    keep_md: yes
+    theme: cosmo
+    toc: yes
+---
 
 # Introduction
 *Rescued* this R code from Reproducing Kernel Hilbert Spaces for Penalized Regression: A tutorial, [Nosedal-Sanchez et al. (2010)](http://www.tandfonline.com/doi/abs/10.1080/00031305.2012.678196), specifically, their code in the appendix.  The original code had several issues most of which has been cleaned up. Blocked text represents quotes taken directly from the article, while I add additional notes elsewhere. I leave their inline comments intact, though in some places the deletion of unnecessary code may put them a bit out of context, and may add my own in a few empty spots.  I also made some textual and code corrections.  The purled code (i.e. with no text) can be found in this same directory/filename with .R extension.
@@ -12,8 +20,7 @@ where $β_0 = 2$, $β_1 = 3$, $β_2 = 0$ and $ϵ_i$ has a N(0, 0.2^2^) . The dis
 x2, is uniform in [0, 1]^2^ so that x2 is uninformative. The following lines of code generate the data.
 
 ## Data
-
-```r
+```{r}
 set.seed(3)
 n = 20
 x1 = runif(n)
@@ -27,8 +34,7 @@ y = 2 + 3 * x1 + rnorm(n, sd = 0.25)
 
 MC note: can use base::solve, though this function avoids a computationally singular result.
 
-
-```r
+```{r}
 my.inv = function(X, eps = 1e-12) {
   eig.X = eigen(X, symmetric = T)
   P = eig.X[[2]] 
@@ -42,8 +48,7 @@ my.inv = function(X, eps = 1e-12) {
 ```
 
 ### Reproducing Kernel
-
-```r
+```{r}
 rk = function(s, t) {
   crossprod(s, t)              # MC note: slightly more succinct than the original double loop; also sum(s*t)
 } 
@@ -53,8 +58,7 @@ rk = function(s, t) {
 ### Gram matrix
 MC note: for the first example involving ridge regression, the get.gramm function just produces tcrossprod(X).  I generalize it in case a different kernel is desired and add that as an additional argument.  This will avoid having to redo the function later as the authors did in their appendix.
 
-
-```r
+```{r}
 get.gramm = function(X, rkfunc=rk) {
   apply(X, 1, function(Row) apply(X, 1, function(tRow) rkfunc(Row, tRow)))  
 }
@@ -63,8 +67,7 @@ get.gramm = function(X, rkfunc=rk) {
 
 ### Ridge regression
 
-
-```r
+```{r}
 ridge.regression = function(X, y, lambda) {
   Gramm = get.gramm(X)                               # Gramm matrix (nxn)
   n = length(y)                                      # n=length of y
@@ -88,22 +91,22 @@ ridge.regression = function(X, y, lambda) {
 
 
 
-
-```r
+```{r}
 lambda = 1e-8
 reps = 40
 lambda = 1.5^(1:reps-1) * lambda
 V = sapply(lambda, function(lam) ridge.regression(X, y, lam)$gcv)
 ```
 
-<img src="RKHSReg_files/figure-html/unnamed-chunk-7-1.png" title="" alt="" style="display: block; margin: auto;" />
+```{r, echo=FALSE, fig.align='center'}
+plot(lambda, V, type = 'l', main = 'GCV score', lwd = 2, ylab = 'GCV', bty='n' ) 
+```
 
 
 
 > The GCV plot produced by this code is displayed in Figure A.2. Now, by following Section 4.2, $\hat{β_0}$, $\hat{β_1}$ and $\hat{β_2}$ can be obtained as follows.
 
-
-```r
+```{r}
 opt.mod = ridge.regression(X, y, lambda[which.min(V)])     # fit optimal model
 
 ### finding beta.0, beta.1 and beta.2 ##########
@@ -116,25 +119,9 @@ beta.hat = crossprod(gamma.hat[-1,], X)         # slope and noise term coefficie
 
 MC note: I add a comparison to glmnet, where alpha=0 is equivalent to ridge regression.
 
-
-```r
+```{r, message=FALSE}
 c(beta.hat.0, beta.hat)
-```
-
-```
-## [1] 2.1253369 2.6566261 0.1597225
-```
-
-```r
 coef(glmnet::glmnet(X, y, alpha=0, lambda=lambda[which.min(V)]))
-```
-
-```
-## 3 x 1 sparse Matrix of class "dgCMatrix"
-##                    s0
-## (Intercept) 2.1360199
-## V1          2.6394944
-## V2          0.1552121
 ```
 
 
@@ -146,8 +133,7 @@ $y_i = sin(2πx_i) + ϵ_i$ where ϵ~i~ has a N(0, 0.2^2^) . The following code g
 and y...
 
 ## Data 
-
-```r
+```{r}
 set.seed(3)
 n = 50
 x = matrix(runif(n), nrow=n, ncol=1)
@@ -164,8 +150,7 @@ estimation along with the true function and data.
 
 ### Reproducing Kernel
 
-
-```r
+```{r}
 rk.1 = function(s, t) {
   return(.5*min(s, t)^2 * max(s, t) + (1/6)*min(s, t)^3)
 }
@@ -175,8 +160,7 @@ rk.1 = function(s, t) {
 MC note: no need to redo the gram function do to previous change that accepts the kernel as an argument
 
 ### Smoothing Spline
-
-```r
+```{r}
 smoothing.spline = function(X, y, lambda) {
   Gramm = get.gramm(X, rkfunc=rk.1)                  # Gramm matrix (nxn)
   n = length(y)
@@ -202,8 +186,7 @@ smoothing.spline = function(X, y, lambda) {
 > A simple direct search for the GCV optimal smoothing parameter can be made as follows:
 Now we have to find an optimal lambda using GCV...
 
-
-```r
+```{r, fig.align='center'}
 lambda = 1e-8
 reps = 60
 
@@ -212,25 +195,33 @@ V = sapply(lambda, function(lam) smoothing.spline(x.star, y, lam)$gcv)
 
 # Plot of GCV
 plot(1:reps, V, type = 'l', main = 'GCV score', xlab = 'i', ylab = 'GCV', bty='n') 
-```
 
-<img src="RKHSReg_files/figure-html/unnamed-chunk-13-1.png" title="" alt="" style="display: block; margin: auto;" />
+```
 
 MC note: I've added comparisons to an additive and gaussian process model.
 
-
-```r
+```{r, echo=1:5, eval=-c(4,5), message=FALSE, warning=FALSE, fig.align='center'}
 opt.mod.2 = smoothing.spline(x.star, y, lambda[which.min(V)])       # fit optimal model
 
 # comparison models
-## mgcv::gam(y ~ s(x.star))
-## kernlab::gausspr(y ~ x.star, kernel='splinedot')
-```
+mgcv::gam(y ~ s(x.star))
+kernlab::gausspr(y ~ x.star, kernel='splinedot')
 
-```
-##  Setting default kernel parameters
-```
+# Graph (Cubic Spline)
+plot(x.star, y, col=scales::alpha('#ff5500', .5), pch=19, xlab = 'X', 
+     ylim = c(-2.5, 1.5), xlim=c(-0.1, 1.1), ylab = 'Response', 
+     main = 'Cubic Spline', bty='n', col.main='gray25')
 
-<img src="RKHSReg_files/figure-html/unnamed-chunk-14-1.png" title="" alt="" style="display: block; margin: auto;" />
+# true
+lines(x.star, sin(2*pi*x.star), lty = 1, lwd = 2, col=scales::alpha('darkred', .75))
+# predictions
+lines(x.star, opt.mod.2$f.hat, col = 'dodgerblue')
+lines(x.star, predict(mgcv::gam(y~s(x.star))), col = 'springgreen1')
+lines(x.star, kernlab::gausspr(y~x.star, kernel='splinedot')@fitted, col = 'mistyrose4')
+
+legend(-0.1,-1.5, c('True', 'Predictions', 'gam', 'gp'), bty = 'n',
+       lwd = c(2,2), col = c( scales::alpha('darkred', .75), 'dodgerblue', 'springgreen1', 'mistyrose4'),
+       cex=.75)
+```
 
 > This graph is plotted in Figure A.2.
