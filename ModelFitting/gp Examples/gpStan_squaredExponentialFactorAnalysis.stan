@@ -17,7 +17,7 @@ transformed data {
 parameters {
   real<lower=0, upper=1> eta_sq;                 # parameters of squared exponential covariance function
   real<lower=0, upper=1> sigma_sq;               # eta_sq + sigma_sq = var of predicted y; eta_sq is variance explained by the function so can put an upper limit
-  vector<lower=0, upper=10>[D] l_;               # characteristic length
+  vector<lower=0, upper=100>[D] l_sq;               # characteristic length
   real<lower=-2, upper=2> lambda;                # factor loadings, for this problem a single value, as one of them will be fixed to 1 for identification purposes
 
 //   real<lower=0> eta_sq_scale;                    # hyperpriors
@@ -32,7 +32,7 @@ transformed parameters {
   L[1,1] <- 1;
   L[2,1] <- lambda;
 
-  for (d in 1:D) inv_l_sq[d] <- 1/pow(l_[d],2);
+  for (d in 1:D) inv_l_sq[d] <- 1/l_sq[d];
 }
 
 model {
@@ -59,7 +59,7 @@ model {
   # priors
   eta_sq ~ cauchy(0, 5);
   sigma_sq ~ cauchy(0, 5);
-  l_ ~ cauchy(0, 5);
+  l_sq ~ cauchy(0, 5);
   lambda ~ normal(0, 1);
 
   # sampling distribution
@@ -67,41 +67,41 @@ model {
 }
 
 generated quantities {
-//   vector[Ntest] muTest;                          # The following produces the posterior predictive draws
-//   vector[Ntest] yRep;                            # see GP section of Stan man- 'Analytical Form...'
-//   matrix[Ntest,Ntest] L;
-//   {
-//     matrix[N,N] Sigma;
-//     matrix[Ntest,Ntest] Omega;
-//     matrix[N,Ntest] K;
-//     matrix[Ntest,N] K_transpose_div_Sigma;
-//     matrix[Ntest,Ntest] Tau;
-//
-//     # Sigma
-//     for (i in 1:N)
-//       for (j in 1:N)
-//         Sigma[i,j] <- eta_sq * exp(-pow(x[i] - x[j], 2)) + if_else(i==j, .1, 0.0);
-//
-//     # Omega
-//     for (i in 1:Ntest)
-//       for (j in 1:Ntest)
-//         Omega[i,j] <- eta_sq * exp(-pow(xtest[i] - xtest[j], 2)) + if_else(i==j, .1, 0.0);
-//
-//     # K
-//     for (i in 1:N)
-//       for (j in 1:Ntest)
-//         K[i,j] <- eta_sq * exp(-pow(x[i] - xtest[j], 2));
-//
-//     K_transpose_div_Sigma <- K' / Sigma;
-//     muTest <- K_transpose_div_Sigma * y;
-//     Tau <- Omega - K_transpose_div_Sigma * K;
-//
-//     for (i in 1:(Ntest-1))
-//       for (j in (i+1):Ntest)
-//         Tau[i,j] <- Tau[j,i];
-//
-//     L <- cholesky_decompose(Tau);
-//   }
-//
-//   yRep <- multi_normal_cholesky_rng(muTest, L);
+  vector[Ntest] muTest;                          # The following produces the posterior predictive draws
+  vector[Ntest] yRep;                            # see GP section of Stan man- 'Analytical Form...'
+  matrix[Ntest,Ntest] Q;
+  {
+    matrix[N,N] Sigma;
+    matrix[Ntest,Ntest] Omega;
+    matrix[N,Ntest] K_;
+    matrix[Ntest,N] K_transpose_div_Sigma;
+    matrix[Ntest,Ntest] Tau;
+
+    # Sigma
+    for (i in 1:N)
+      for (j in 1:N)
+        Sigma[i,j] <- eta_sq * exp(-.5 * quad_form(tcrossprod(L) + diag_matrix(inv_l_sq), to_vector(X[i] - X[j]))) + if_else(i==j, sigma_sq, 0.0);
+
+    # Omega
+    for (i in 1:Ntest)
+      for (j in 1:Ntest)
+        Omega[i,j] <- eta_sq * exp(-.5 * quad_form(tcrossprod(L) + diag_matrix(inv_l_sq), to_vector(Xtest[i] - Xtest[j]))) + if_else(i==j, sigma_sq, 0.0);
+
+    # K
+    for (i in 1:N)
+      for (j in 1:Ntest)
+        K_[i,j] <- eta_sq * exp(-.5 * quad_form(tcrossprod(L) + diag_matrix(inv_l_sq), to_vector(X[i] - Xtest[j]))); 
+
+    K_transpose_div_Sigma <- K_' / Sigma;
+    muTest <- K_transpose_div_Sigma * y;
+    Tau <- Omega - K_transpose_div_Sigma * K_;
+
+    for (i in 1:(Ntest-1))
+      for (j in (i+1):Ntest)
+        Tau[i,j] <- Tau[j,i];
+
+    Q <- cholesky_decompose(Tau);
+  }
+
+  yRep <- multi_normal_cholesky_rng(muTest, Q);
 }
