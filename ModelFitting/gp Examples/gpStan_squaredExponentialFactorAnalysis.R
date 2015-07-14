@@ -1,13 +1,16 @@
 # create factor structure and reproduce correlation matrix ----------------
 
 ### setup
+# create initial cor/covmat
 covmat = diag(1,6)
 covmat[lower.tri(covmat)] = c(.6,.6,0, 0,0,
                               .6,0,0,0,
                               0,0,0,
                               .6,.6,.6)
-covmat[upper.tri(covmat)] = t(covmat)[upper.tri(t(covmat))]
 
+covmat = covmat + t(covmat) - diag(diag(covmat))
+
+# create data
 d = MASS::mvrnorm(100, mu=rep(0,6), Sigma=covmat, empirical=T)
 
 # check
@@ -33,7 +36,7 @@ covmatReprod = tcrossprod(loadings(fact)) + diag(fact$uniquenesses)
 
 round(covmatReprod, 3)
 
-# example of the operation to produce the cov of d[1:2,]
+### example of the operation to produce the cov of d[1:2,]
 vecdiff = d[1,] - d[2,]
 lambda = loadings(fact)
 exp(-.5 * t(vecdiff) %*% (crossprod(t(lambda)) + diag(fact$uniquenesses)) %*% vecdiff)
