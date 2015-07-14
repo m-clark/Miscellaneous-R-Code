@@ -142,9 +142,9 @@ library(rstan)
 fit0 = stan(data=standata, file = 'ModelFitting/gp Examples/gpStan_squaredExponentialFactorAnalysis.stan', iter = 1, chains=1)
 
 # timed fit for 1000 iterations(12 min for N0=15, 2.5 for N0=10)
-p = proc.time()
-fit = stan(data=standata, file = 'ModelFitting/gp Examples/gpStan_squaredExponentialFactorAnalysis.stan', iter = 1000, warmup = 200, chains=1, fit = fit0)
-(proc.time() - p)/60
+# p = proc.time()
+# fit = stan(data=standata, file = 'ModelFitting/gp Examples/gpStan_squaredExponentialFactorAnalysis.stan', iter = 1000, warmup = 200, chains=1, fit = fit0)
+# (proc.time() - p)/60
 
 # parallelize chains
 iterations = 4000
@@ -180,4 +180,10 @@ print(fit, digits=3, par=c('eta_sq','sigma_sq','l_sq','lambda'))
 
 library(shinyStan)
 launch_shinystan(fit)
+
+# Visualize fit
+yRepMean = get_posterior_mean(fit, 'yRep')[,5]
+gdat = data.frame(x, y=yRepMean)
+car::scatter3d(y ~., data=gdat, point.col=rainbow(N), surface=F)
+
 
