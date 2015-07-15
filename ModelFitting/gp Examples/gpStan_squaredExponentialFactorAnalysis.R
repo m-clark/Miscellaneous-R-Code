@@ -150,33 +150,20 @@ fit0 = stan(data=standata, file = 'ModelFitting/gp Examples/gpStan_squaredExpone
 # (proc.time() - p)/60
 
 # parallelize chains
-iterations = 4000
+iterations = 6000
 wu = 1000
-th = 12
+th = 20
 chains = 4
 
-library(parallel)
-cl = makeCluster(4)
-clusterExport(cl, c('standata', 'fit0','iterations', 'wu', 'th', 'chains'))
-clusterEvalQ(cl, library(rstan))
-
+library(rstanmulticore)
 
 p = proc.time()
-fit = parLapply(cl, seq(chains), function(chain) stan(data=standata,
-                                                      iter = iterations,
-                                                      warmup = wu, thin=th,
-                                                      chains=1, chain_id=chain,
-                                                      fit = fit0)
-)
+fit = pstan(data=standata, iter = iterations, warmup = wu, thin=th, chains=4, fit = fit0)
 (proc.time() - p)/3600
-
-stopCluster(cl)
-
 
 
 # Summarize and Vis -------------------------------------------------------
 
-fit = sflist2stanfit(fit)
 # takes a bit to print
 print(fit, digits=3, par=c('eta_sq','sigma_sq','l_sq','lambda'))
 # traceplot(fit)
