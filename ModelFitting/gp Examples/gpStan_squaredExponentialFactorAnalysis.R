@@ -162,6 +162,7 @@ fit = pstan(data=standata, iter = iterations, warmup = wu, thin=th, chains=4, fi
 (proc.time() - p)/3600
 
 
+
 # Summarize and Vis -------------------------------------------------------
 
 # takes a bit to print
