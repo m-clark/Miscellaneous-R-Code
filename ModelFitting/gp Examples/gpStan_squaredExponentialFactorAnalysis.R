@@ -82,10 +82,10 @@ head(y)
 
 plot(x[,1],y)
 plot(x[,2],y)
-library(ggplot2)
+library(ggplot2); library(scales)
 pal = scale_color_gradient2(low = muted("red"), mid = "white",high = muted("blue"), midpoint=0)
 car::scatter3d(y ~ x[,1] + x[,2], point.col=rainbow(N), surface=F)
-car::scatter3d(y ~ x[,1] + x[,2], point.col=pal$palette(min2max(y, 1, 0)), surface=F)
+car::scatter3d(y ~ x[,1] + x[,2], point.col=pal$palette((y+abs(min(y)))/max(y+abs(min(y)))), surface=F)
 
 
 # original matlab code
@@ -137,7 +137,7 @@ plot(x[,1],y)
 plot(x[,2],y)
 car::scatter3d(x[,1], y, x[,2], surface=F, point.col=rainbow(N))
 
-xtest = x
+xtest = seq(x)
 
 standata = list(N=nrow(x), D=ncol(x), X=x, y=y[,1], K=1, Xtest=xtest, Ntest=nrow(xtest))
 
@@ -158,7 +158,7 @@ chains = 4
 library(rstanmulticore)
 
 p = proc.time()
-fit = pstan(data=standata, iter = iterations, warmup = wu, thin=th, chains=4, fit = fit0)
+fit = pstan(data=standata, iter = iterations, warmup = wu, thin=th, chains=chains, fit = fit0)
 (proc.time() - p)/3600
 
 
