@@ -86,10 +86,9 @@ chains = 4
 
 # With N = 20 Ntest = 200 takes about 2 min for gen squared expo
 
-library(rstanmulticore)
-
 p = proc.time()
-fit = pstan(data=standata, file=gp, iter = iterations, warmup = wu, thin=th, chains=chains, fit = fit0)
+fit = stan(data=standata, file=gp, iter = iterations, warmup = wu, thin=th, 
+           chains=chains, fit = fit0, cores=chains)
 (proc.time() - p)/3600
 
 

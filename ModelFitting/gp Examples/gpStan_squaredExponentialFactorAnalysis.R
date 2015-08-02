@@ -137,9 +137,9 @@ plot(x[,1],y)
 plot(x[,2],y)
 car::scatter3d(x[,1], y, x[,2], surface=F, point.col=rainbow(N))
 
-xtest = seq(x)
+# xtest = seq(x)
 
-standata = list(N=nrow(x), D=ncol(x), X=x, y=y[,1], K=1, Xtest=xtest, Ntest=nrow(xtest))
+standata = list(N=nrow(x), D=ncol(x), X=x, y=y[,1], K=1, Xtest=x, Ntest=nrow(x))
 
 library(rstan)
 fit0 = stan(data=standata, file = 'ModelFitting/gp Examples/gpStan_squaredExponentialFactorAnalysis.stan', iter = 1, chains=1)
@@ -155,10 +155,9 @@ wu = 1000
 th = 20
 chains = 4
 
-library(rstanmulticore)
 
 p = proc.time()
-fit = pstan(data=standata, iter = iterations, warmup = wu, thin=th, chains=chains, fit = fit0)
+fit = stan(data=standata, iter = iterations, warmup = wu, thin=th, chains=chains, fit = fit0, cores=chains)
 (proc.time() - p)/3600
 
 
@@ -167,10 +166,10 @@ fit = pstan(data=standata, iter = iterations, warmup = wu, thin=th, chains=chain
 
 # takes a bit to print
 print(fit, digits=3, par=c('eta_sq','sigma_sq','l_sq','lambda'))
-# traceplot(fit)
+traceplot(fit, par=c('eta_sq','sigma_sq','l_sq','lambda'), inc_=F)
 
-library(shinyStan)
-launch_shinystan(fit)
+# library(shinyStan)
+# launch_shinystan(fit)
 
 # Visualize fit
 yRepMean = get_posterior_mean(fit, 'yRep')[,5]

@@ -94,4 +94,5 @@ generated quantities {
   }
 
   yRep <- multi_normal_cholesky_rng(muTest, L);
+
 }
