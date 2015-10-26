@@ -32,7 +32,7 @@ two factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code
 [EM state space model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20for%20state%20space%20unobserved%20components.R),
 [Gaussian Process noisy](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoisy.R),
 [Gaussian Process noise-free](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoiseFree.R), 
-[reproducing kernel hilbert space regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/RKHSReg.md), ...
+[reproducing kernel hilbert space regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/RKHSReg/RKHSReg.md), ...
 
 ### Bayesian (mostly with Stan/rstan)
 [BEST t-test](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstant_testBEST.R),
