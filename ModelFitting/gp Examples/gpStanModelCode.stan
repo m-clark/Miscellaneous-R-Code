@@ -22,18 +22,13 @@ parameters {
   real<lower=0> sigma_sq_scale;
 }
 
-transformed parameters {
-  real<lower=0> rho_sq;
-  rho_sq <- inv(inv_rho_sq);
-}
-
 model {
   matrix[N,N] Sigma;
 
   # off-diagonal elements for covariance matrix
   for (i in 1:(N-1)) {
     for (j in (i+1):N) {
-      Sigma[i,j] <- eta_sq * exp(-rho_sq * pow(x[i] - x[j],2));
+      Sigma[i,j] <- eta_sq * exp( - pow(x[i] - x[j],2) / inv_rho_sq );
       Sigma[j,i] <- Sigma[i,j];
     }
   }
