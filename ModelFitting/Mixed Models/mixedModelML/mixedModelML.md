@@ -1,4 +1,4 @@
-# Mixed Model Estimation via Maximum Likelihood
+# Mixed Model Estimation via Maximum Likelihood, <br> and a Connection to Additive Models
 
 
 
@@ -12,7 +12,7 @@ We can start with a standard linear model expressed as follows:
 
 $$\mathbf{y} = \mathbf{Xb} + \mathbf{\epsilon} $$
 
-Here $\mathbf{y}$ is the target variable, $\mathbf{X}$ is a model matrix (first column representing the intercept, the rest are the covariates of interest), $\mathbf{b}$ are the coefficients, and error $\mathbf{\epsilon}$. Note that beyond this point I won't use bold to indicate vectors/matrices, nor subscripts for every *i*<sup>th</sup> observation. Let's just assume we are in a normal data situation involving more than one observation, a univariate vector target variable (y), a matrix of predictor variables (X) etc.
+Here $\mathbf{y}$ is the target variable, $\mathbf{X}$ is a model matrix (first column representing the intercept, the rest are the covariates of interest), $\mathbf{b}$ are the coefficients, and error $\mathbf{\epsilon}$. Note that beyond this point I'll largely refrain from using bold to indicate vectors/matrices, or using subscripts for every *i*<sup>th</sup> observation. Let's just assume we are in a typical data situation involving multiple observations, a univariate vector target variable (y), a matrix of predictor variables (X) etc.
 
 For a mixed model with a single random effect for some grouping factor (e.g. students within schools), this extends to:
 
@@ -49,7 +49,7 @@ We can combine the random and residuals into a single construct reflecting the c
 
 $$ e = Zg + \epsilon $$
 
-This makes $\mathbf{e}$ a multivariate vector with mean 0 and covariance:
+This makes $\mathbf{e}$ a multivariate vector with mean 0 and covariance (**I** is the unit matrix):
 
 $$Z\psi_{\theta}Z^\intercal + I\sigma^2$$
 
@@ -203,4 +203,214 @@ data.frame(ranefEstimated, lme4 = ranef(lmeMod)$Subject[[1]]) %>% round(2)
 ```
 
 
-I'd like to at some point demonstrate some concepts from section 6.6 in Wood, but that will have to wait for now.
+## Additive model as a mixed model 
+
+At this point I'd like to demonstrate some concepts from section 6.6 in Wood. Conceptually, the take home idea is that an additive model, or generalized additive model (GAM), can be seen as a mixed model, which is interesting in and of itself (at least to me), but it also means that GAMs meld nicely with mixed models generally.  For an intro on additive models, one can see my [document](https://sites.google.com/a/umich.edu/micl/miscfiles/GAMS.pdf), which is more or less an overview of Wood's text.
+
+### Data set up
+
+See Wood 3.2.  The data regards motor engine size and wear in 19 Volvos, with the initial assumption that larger capacity engines will wear out less quickly.
+
+
+```r
+size = c(1.42,1.58,1.78,1.99,1.99,1.99,2.13,2.13,2.13,2.32,2.32,2.32,2.32,2.32,2.43,2.43,2.78,2.98,2.98)
+wear = c(4.0,4.2,2.5,2.6,2.8,2.4,3.2,2.4,2.6,4.8,2.9,3.8,3.0,2.7,3.1,3.3,3.0,2.8,1.7)
+
+x = size - min(size)
+x = x / max(x)
+d = data.frame(wear, x)
+```
+
+
+### Relevant functions
+We'll create functions for the cubic spline operation, the creation of a model matrix, the creation of the penalty matrix, and finally the fitting function.
+
+
+```r
+# cubic spline function
+rk <- function(x, z) {
+  ((z-0.5)^2 - 1/12) * ((x-0.5)^2 - 1/12) / 4 -
+    ((abs(x-z)-0.5)^4 - (abs(x-z)-0.5)^2/2 + 7/240) / 24
+}
+
+# create the model matrix
+splineX <- function(x, knots) {
+  q <- length(knots) + 2 # number of parameters
+  n <- length(x) # number of observations
+  X <- matrix(1, n, q) # initialized model matrix
+  X[, 2] <- x # set second column to x
+  X[, 3:q] <- outer(x, knots, FUN = rk) # remaining to cubic spline
+  X
+}
+
+# set up the penalized regression spline penalty matrix, given knot sequence xk
+Sfunc = function(xk){
+  q = length(xk)+2
+  S = matrix(0, q, q) # initialize
+  S[3:q, 3:q] = outer(xk, xk, FUN=rk)
+  S
+}
+
+# Matrix sqrt function
+matSqrt = function(S){
+  UDU = eigen(S, symmetric=TRUE)
+  U = UDU$vectors
+  D = diag(UDU$values)
+  B = crossprod(U) %*% sqrt(D)
+  B
+}
+
+# the fitting function
+prsFit <- function(y, x, knots, lambda) {
+  q = length(knots) + 2 # dimension of basis
+  n = length(x) # number of observations
+  Xa = rbind(splineX(x, knots), matSqrt(Sfunc(knots)) * sqrt(lambda)) # augmented model matrix
+  y[(n + 1):(n + q)] = 0 #augment the data vector
+  lm(y ~ Xa - 1) # fit and return penalized regression spline
+}
+```
+
+### Fit a penalized model
+
+Now we can fit the model and visualize.
+
+
+```r
+xk = 1:7/8  # choose some knots
+mod = prsFit(y=wear, x=x, knots=xk, lambda=.0001) # fit the penalized spline
+
+xp = 0:100/100  # values for prediction
+Xp = splineX(xp, xk)
+
+plot(x, wear, xlab='Scaled Engine size', ylab='Wear Index', pch=19,
+     col="#FF5503", cex=.75, col.axis='gray50', bty='n')
+lines(xp,Xp%*%coef(mod), col='#2957FF') 
+```
+
+![](mixedModelML_files/figure-html/fitCSgam-1.png) 
+
+### As a mixed model
+
+One can use the result of eigen decomposition on the penalty matrix to ultimately produce a re-parameterization of the original matrix as fixed and random effects components.
+
+
+```r
+S = Sfunc(xk)
+init = eigen(S)
+U = init$vectors
+D = diag(init$values)
+poseigen = which(diag(D) > 0)  
+Dpos = D[poseigen, poseigen]           # smallest submatrix containing all positive values
+Xf = splineX(x, knots = xk)            # spline model matrix
+U_F = U[, (ncol(U)-1):ncol(U)]         # partition eigenvector matrix
+U_R = U[, 1:(ncol(U)-ncol(U_F))]
+X_F = Xf %*% U_F                       # fixed part  with B_F coef to be estimated (not penalized)
+X_R = Xf %*% U_R                       # random part with B_R random effects
+Z = X_R %*% sqrt(Dpos)
+```
+
+The above operations have effectively split the GAM into fixed and random parts:
+
+$$\mathbf{X}_F\mathbf{\beta}_F + \mathbf{X}_R\mathbf{b}_R, \\
+\mathbf{b}_R\sim \mathcal{N}(\mathbf{0}, \mathbf{D_+^{-1}}/\lambda) \\$$
+
+Here $\lambda$ is a smoothing parameter, which controls the amount of smoothing. For a penalized spline, the loss function is:
+
+$$\lVert y - X\beta \rVert^2 + \lambda\beta^{\intercal}S\beta ,$$
+
+with the second part the added penalty. As $\lambda$ approaches infinity, we essentially get straight line fit, while a $\lambda$ of 0 would be the same as an unpenalized fit.
+
+
+The Z above represents part of the mixed model Z we had before in the standard mixed model. We can represent it as follows:
+
+$$\mathbf{X}_F\mathbf{\beta}_F + \mathbf{Zg}, \\
+\mathbf{g} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}/\lambda) \\$$
+
+
+To incorporate a gamm, i.e. a *generalized additive mixed model*, the X_F above would become part of the 'fixed' effect part of the model, while Z would be part of the random effects, and estimation would proceed normally as for a mixed model.  
+
+
+Initially we'll just duplicate a standard mixed model using the mgcv package.
+
+
+```r
+library(mgcv); library(gamm4)
+```
+
+```
+## This is gamm4 0.2-3
+```
+
+```r
+sleepstudy$Subject = factor(sleepstudy$Subject)
+modGam = gamm4(Reaction ~ Days, random=~(1|Subject), data=sleepstudy)
+summary(modGam$mer)
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## 
+## REML criterion at convergence: 1786.5
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -3.2257 -0.5529  0.0109  0.5188  4.2506 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  Subject  (Intercept) 1378.2   37.12   
+##  Residual              960.5   30.99   
+## Number of obs: 180, groups:  Subject, 18
+## 
+## Fixed effects:
+##              Estimate Std. Error t value
+## X(Intercept) 251.4051     9.7467   25.79
+## XDays         10.4673     0.8042   13.02
+## 
+## Correlation of Fixed Effects:
+##       X(Int)
+## XDays -0.371
+```
+
+
+Now we'll add a cubic spline for the effect of Days.  We can see the smooth term listed as random effect.
+
+```r
+modGamS = gamm4(Reaction ~ s(Days, bs='cs'), random=~(1|Subject), data=sleepstudy)
+summary(modGamS$mer)    
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## 
+## REML criterion at convergence: 1795.3
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -3.2996 -0.5224  0.0399  0.5340  4.2989 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  Subject  (Intercept) 1378.144 37.123  
+##  Xr       s(Days)        4.455  2.111  
+##  Residual              960.806 30.997  
+## Number of obs: 180, groups:  Subject, 18; Xr, 9
+## 
+## Fixed effects:
+##   Estimate Std. Error t value
+## X   298.51       9.05   32.98
+```
+
+```r
+# summary(modGamS$gam)
+plot(modGamS$gam)
+```
+
+![](mixedModelML_files/figure-html/unnamed-chunk-1-1.png) 
+
+```r
+# lmer(Reaction ~ (1+Days|Subject), data=sleepstudy)
+```
+
+
+Another way to look at this is that we have added the capacity to examine nonlinear relationships and other covariance structures to the standard mixed model framework, making a very flexible modeling approach even more so.
