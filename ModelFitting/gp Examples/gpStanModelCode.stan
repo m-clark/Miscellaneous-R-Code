@@ -22,18 +22,13 @@ parameters {
   real<lower=0> sigma_sq_scale;
 }
 
-transformed parameters {
-  real<lower=0> rho_sq;
-  rho_sq <- inv(inv_rho_sq);
-}
-
 model {
   matrix[N,N] Sigma;
 
   # off-diagonal elements for covariance matrix
   for (i in 1:(N-1)) {
     for (j in (i+1):N) {
-      Sigma[i,j] <- eta_sq * exp(-rho_sq * pow(x[i] - x[j],2));
+      Sigma[i,j] <- eta_sq * exp( - pow(x[i] - x[j],2) / inv_rho_sq );
       Sigma[j,i] <- Sigma[i,j];
     }
   }
@@ -70,17 +65,17 @@ generated quantities {
     # Sigma
     for (i in 1:N)
       for (j in 1:N)
-        Sigma[i,j] <- eta_sq * exp(-pow(x[i] - x[j], 2)) + if_else(i==j, sigma_sq, 0.0);
+        Sigma[i,j] <- eta_sq * exp(-pow(x[i] - x[j], 2)/inv_rho_sq) + if_else(i==j, sigma_sq, 0.0);
 
     # Omega
     for (i in 1:Ntest)
       for (j in 1:Ntest)
-        Omega[i,j] <- eta_sq * exp(-pow(xtest[i] - xtest[j], 2)) + if_else(i==j, sigma_sq, 0.0);
+        Omega[i,j] <- eta_sq * exp(-pow(xtest[i] - xtest[j], 2)/inv_rho_sq) + if_else(i==j, sigma_sq, 0.0);
 
     # K
     for (i in 1:N)
       for (j in 1:Ntest)
-        K[i,j] <- eta_sq * exp(-pow(x[i] - xtest[j], 2));
+        K[i,j] <- eta_sq * exp(-pow(x[i] - xtest[j], 2)/inv_rho_sq);
 
     K_transpose_div_Sigma <- K' / Sigma;
     muTest <- K_transpose_div_Sigma * y;
