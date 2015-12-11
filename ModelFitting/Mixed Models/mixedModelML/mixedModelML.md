@@ -1,10 +1,10 @@
-# Mixed Model Estimation via Maximum Likelihood, <br> and a Connection to Additive Models
+# Mixed Model Estimation, <br> a Connection to Additive Models,<br>and Beyond...
 
 
 
 
 ## Introduction
-This is an example based on Wood, 2006, chapter 6 in particular.  It assumes familiarity with standard regression from a matrix perspective. 
+This following is based on Wood's 2006 text on additive models, chapter 6 in particular.  The goal is to express the tie between generalized additive models and mixed models, and open the door to further modeling expansion. It assumes familiarity with standard regression from a matrix perspective. 
 
 ## Model Formulation
 
@@ -98,7 +98,7 @@ llMixed = function(y, X, Z, theta){
 ```
 
 
-Here is an alternative function using a multivariate approach that doesn't use the transformation to independent, and might provide additional perspective..
+Here is an alternative function using a multivariate approach that doesn't use the transformation to independent, and might provide additional perspective.
 
 
 ```r
@@ -131,15 +131,15 @@ names(paramInit) = c('tau', 'sigma')
 modelResults = optim(llMixed, X=X, y=y, Z=Z, par=paramInit, control=list(reltol=1e-10))
 modelResultsMV = optim(llMixedMV, X=X, y=y, Z=Z, par=paramInit, control=list(reltol=1e-10))
 
-rbind(c(exp(modelResults$par), logLik = modelResults$value, coef(lm(y~X-1))),
-      c(exp(modelResultsMV$par), logLik = modelResultsMV$value, coef(lm(y~X-1)))) %>% 
+rbind(c(exp(modelResults$par), negLogLik = modelResults$value, coef(lm(y~X-1))),
+      c(exp(modelResultsMV$par), negLogLik = modelResultsMV$value, coef(lm(y~X-1)))) %>% 
   round(2)
 ```
 
 ```
-##        tau sigma logLik X(Intercept) XDays
-## [1,] 36.02  30.9 897.04       251.41 10.47
-## [2,] 36.02  30.9 897.04       251.41 10.47
+##        tau sigma negLogLik X(Intercept) XDays
+## [1,] 36.02  30.9    897.04       251.41 10.47
+## [2,] 36.02  30.9    897.04       251.41 10.47
 ```
 
 As we can see, both formulations produce identical results. We can now compare those results to the lme4 output for the same model.
@@ -167,7 +167,7 @@ lmeMod
 ##      251.41        10.47
 ```
 
-We can predict the random effects (Wood, 6.2.4), and after doing so compare to the lme4 estimates.
+We can predict the random effects (Wood, 6.2.4), and after doing so again compare the results to the lme4 estimates.
 
 
 ```r
@@ -321,16 +321,15 @@ $$\lVert y - X\beta \rVert^2 + \lambda\beta^{\intercal}S\beta ,$$
 with the second part the added penalty. As $\lambda$ approaches infinity, we essentially get straight line fit, while a $\lambda$ of 0 would be the same as an unpenalized fit.
 
 
-The Z above represents part of the mixed model Z we had before in the standard mixed model. We can represent it as follows:
+The Z in the code above represents part of the mixed model Z we had before in the standard mixed model. We can now represent our model as follows:
 
 $$\mathbf{X}_F\mathbf{\beta}_F + \mathbf{Zg}, \\
 \mathbf{g} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}/\lambda) \\$$
 
-
 To incorporate a gamm, i.e. a *generalized additive mixed model*, the X_F above would become part of the 'fixed' effect part of the model, while Z would be part of the random effects, and estimation would proceed normally as for a mixed model.  
 
 
-Initially we'll just duplicate a standard mixed model using the mgcv package.
+Initially we'll just duplicate a standard mixed model using the mgcv and associated gamm4 package.
 
 
 ```r
@@ -406,11 +405,11 @@ summary(modGamS$mer)
 plot(modGamS$gam)
 ```
 
-![](mixedModelML_files/figure-html/unnamed-chunk-1-1.png) 
-
-```r
-# lmer(Reaction ~ (1+Days|Subject), data=sleepstudy)
-```
+![](mixedModelML_files/figure-html/gammSleepStudy-1.png) 
 
 
-Another way to look at this is that we have added the capacity to examine nonlinear relationships and other covariance structures to the standard mixed model framework, making a very flexible modeling approach even more so.
+## Wrap Up
+So we've seen that GAMs can be seen as having a fixed and random effect as in mixed models, which means we can use them within the mixed model framework. Another way to look at this is that we have added the capacity to examine nonlinear relationships and other covariance structures to the standard mixed model framework, making a very flexible modeling approach even more so.
+
+### It's full of STARs...
+However, this goes even further.  ***St****ructured* ***A****dditive* ***R****egression models* (STAR) build upon the notion just demonstrated. Not only we can combine mixed and additive models, but other model classes as well.  This includes interactions and varying coefficient models, spatial effects, gaussian processes/kriging, markov random fields and others.  Each model class has a particular design and penalty matrix, but otherwise can be added to the current model considered.  We can also use other techniques, like boosting (which itself can be seen as an additive modeling approach!) to estimate them. Standard regression, glm, gam, etc. are thus special cases of the STAR model. In short, we now have a highly flexible modeling environment within which to tackle the questions we seek to answer with our data.
