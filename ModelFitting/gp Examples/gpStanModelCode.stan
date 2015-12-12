@@ -78,7 +78,7 @@ generated quantities {
     #Omega off-diagonal elements
     for (i in 1:(Ntest-1)) {
       for (j in (i+1):Ntest) {
-        Omega[i,j] <- eta_sq * exp(- pow(x[i] - x[j],2)/inv_rho_sq);
+        Omega[i,j] <- eta_sq * exp(- pow(xtest[i] - xtest[j],2)/inv_rho_sq);
         Omega[j,i] <- Omega[i,j];
       }
     }
