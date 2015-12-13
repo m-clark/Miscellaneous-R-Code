@@ -3,6 +3,8 @@ Miscellaneous (mostly) R Code
 
 This is a place for miscellaneous R and other code I've put together for clients, co-workers or myself for learning and demonstration purposes. The attempt is made to put together some well-commented and/or conceptually clear code from scratch, though most functionality is readily available in any number of well-developed R packages.  Typically examples are provided using such packages for comparison of results.
 
+At present I'm now doing these via markdown, so any demo code will have an md, Rmd, and html file rather than, or in addition to a (purled) R file.  For a quick peek that shows most things in the way intended, one can look at the md file directly within github. Otherwise, one can view the html files [here](https://htmlpreview.github.io/).
+
 
 Model Fitting
 -------------
@@ -32,7 +34,7 @@ two factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code
 [EM state space model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20for%20state%20space%20unobserved%20components.R),
 [Gaussian Process noisy](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoisy.R),
 [Gaussian Process noise-free](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoiseFree.R), 
-[reproducing kernel hilbert space regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/RKHSReg/RKHSReg.md), ...
+[reproducing kernel hilbert space regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/RKHSReg/RKHSReg.md), [comparison of mixed and additive models](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/mixedModelML/mixedModelML.md)...
 
 ### Bayesian (mostly with Stan/rstan)
 [BEST t-test](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstant_testBEST.R),
