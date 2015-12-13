@@ -4,17 +4,21 @@
 
 
 ## Introduction
-This following is based on Wood's 2006 text on additive models, chapter 6 in particular.  The goal is to express the tie between generalized additive models and mixed models, and open the door to further modeling expansion. It assumes familiarity with standard regression from a matrix perspective. 
+The goal is to express the tie between generalized additive models and mixed models, and open the door to further modeling expansion. The following is based on [Wood][]'s 2006 text on additive models, chapter 6 in particular. It assumes familiarity with standard regression from a matrix perspective and at least passing familiarity with mixed models. 
+
+
+<br>
+<br>
 
 ## Model Formulation
 
-We can start with a standard linear model expressed as follows:
+We can start with a standard linear model (SLiM) expressed as follows:
 
 $$\mathbf{y} = \mathbf{Xb} + \mathbf{\epsilon} $$
 
-Here $\mathbf{y}$ is the target variable, $\mathbf{X}$ is a model matrix (first column representing the intercept, the rest are the covariates of interest), $\mathbf{b}$ are the coefficients, and error $\mathbf{\epsilon}$. Note that beyond this point I'll largely refrain from using bold to indicate vectors/matrices, or using subscripts for every *i*<sup>th</sup> observation. Let's just assume we are in a typical data situation involving multiple observations, a univariate vector target variable (y), a matrix of predictor variables (X) etc.
+Here $\mathbf{y}$ is the target variable, $\mathbf{X}$ is a <span title="first column representing the intercept, the rest are the covariates of interest" style="color:#dd4814">model matrix</span>, $\mathbf{b}$ are the coefficients, and error $\mathbf{\epsilon}$. For cleaner presentation (and background coding on my part), note that beyond this point I'll largely refrain from using bold to indicate vectors/matrices, or using subscripts for every *i*<sup>th</sup> observation. Let's just assume we are in a typical data situation involving multiple observations, a univariate vector target variable ($y$), a (design) matrix of predictor variables ($X$) etc. Hopefully the context and code will make things very clear.
 
-For a mixed model with a single random effect for some grouping factor (e.g. students within schools), this extends to:
+Now consider a data situation in which observations are clustered, and so non-independent. For example, we might have data regarding students within schools, and we wish to account for the fact that observations of students within a particular school are likely correlated.  We can do this within a mixed model framework.  For a mixed model with a single random effect for some grouping factor (e.g. school), the SLiM extends to:
 
 $$y = Xb + Zg + \epsilon$$
 
@@ -37,19 +41,19 @@ Where Z is an indicator matrix pertaining to the grouping structure (sometimes r
  C   0    0    1  
 ------------------
 
-The coefficients $g$ are the random effects, assumed $\mathcal{N}(0,\tau)$, and while we are often interested in them, they do not have to be estimated directly.
+The coefficients $g$ are the random effects, assumed $\mathcal{N}(0,\tau^2)$, i.e. normally distributed with zero mean and $\tau$ standard deviation. While we are often interested in these specific effects, they do not have to be estimated directly for modeling purposes.
 
 $$y = Xb + Zg + \epsilon \\
 g \sim \mathcal{N}(0, \psi_\theta) \\
 \epsilon \sim \mathcal{N}(0, \Lambda\sigma^2)$$
 
-In this depiction $\psi_\theta$ can reflect some more interesting dependencies, but in the simple case of a random intercepts model it can be a single variance estimate $\tau^2$. $\Lambda$ can be used to model residual covariance but often is just the identity matrix, with the underlying assumption of constant variance $\sigma^2$ across observations.  
+In this depiction, $\psi_\theta$ can reflect some more interesting dependencies, but in the simple case of a random intercepts model it can be a single variance estimate $\tau^2$. $\Lambda$ can be used to model residual covariance but often is just the identity matrix, with the underlying assumption of constant variance $\sigma^2$ across observations.  
 
 We can combine the random and residuals into a single construct reflecting the covariance structure of the observations:
 
 $$ e = Zg + \epsilon $$
 
-This makes $\mathbf{e}$ a multivariate vector with mean 0 and covariance (**I** is the unit matrix):
+This makes $\mathbf{e}$ a multivariate normal vector with mean 0 and covariance (**$I$** is the unit matrix):
 
 $$Z\psi_{\theta}Z^\intercal + I\sigma^2$$
 
@@ -58,10 +62,15 @@ This puts us back to a standard linear model:
 $$ y = Xb + e, \\
 e \sim \mathcal{N}(0, \Sigma_\theta\sigma^2)$$
 
+where $\Sigma_\theta\ = \frac{Z\psi_{\theta}Z^\intercal}{\sigma^2} + I$.
+
+<br>
+<br>
 
 ## Maximum Likelihood Estimation
 
-Given where we are now, we can proceed to estimate the mixed model. For this we'll use the sleepstudy data from lme4. The data has reaction times for 18 individuals over 10 days each (see the help file for the sleepstudy object for more details).
+Given where we are now, we can proceed to estimate a mixed model via maximum likelihood. For this we'll use the sleepstudy data from the <span style="color:#1e90ff">lme4</span> package. The data has reaction times for 18 individuals over 10 days each (see the help file for the sleepstudy object for more details).
+
 
 ### Data
 
@@ -69,11 +78,14 @@ Given where we are now, we can proceed to estimate the mixed model. For this we'
 data(sleepstudy, package='lme4')
 X = model.matrix(~Days, sleepstudy)
 Z = model.matrix(~factor(sleepstudy$Subject)-1)
+colnames(Z) =  paste0('Subject_', unique(sleepstudy$Subject))  # for cleaner presentation later
+rownames(Z) = paste0('Subject_', sleepstudy$Subject)
 y = sleepstudy$Reaction
 ```
 
+
 ### ML function
-The following is based on the code in Wood (6.2.2), with a couple modifications for consistent nomenclature. $\theta$ represents the vector of parameters we wish to estimate. The (square root of the) variances will be estimated on the log scale. In Wood, he simply extracts the 'fixed effects' for the intercept and days effects using lm (6.2.3).
+The following is based on the code in Wood (6.2.2), with a couple modifications for consistent nomenclature and presentation. We use <span style="color:#8b0000">optim</span> and a minimizing function, in this case the negative log likelihood, to estimate the parameters of interest, collectively $\theta$, in the code below. The (square root of the) variances will be estimated on the log scale. In Wood, he simply extracts the 'fixed effects' for the intercept and days effects using lm (6.2.3), and we'll do the same.
 
 
 ```r
@@ -82,7 +94,7 @@ llMixed = function(y, X, Z, theta){
   sigma = exp(theta[2])
   n = length(y)
   
-  # evaluate cov mat for y
+  # evaluate covariance matrix for y
   e = tcrossprod(Z)*tau^2 + diag(n)*sigma^2
   L = chol(e)  # L'L = e
   
@@ -98,7 +110,7 @@ llMixed = function(y, X, Z, theta){
 ```
 
 
-Here is an alternative function using a multivariate approach that doesn't use the transformation to independent, and might provide additional perspective.
+Here is an alternative function using a multivariate normal approach that doesn't use the transformation to independent, and might provide additional perspective.
 
 
 ```r
@@ -107,7 +119,7 @@ llMixedMV = function(y, X, Z, theta){
   sigma = exp(theta[2])
   n = length(y)
   
-  # evaluate cov mat for y
+  # evaluate covariance matrix for y
   e = tcrossprod(Z)*tau^2 + diag(n)*sigma^2
 
   b = coef(lm.fit(X, y))
@@ -118,10 +130,9 @@ llMixedMV = function(y, X, Z, theta){
 ```
 
 
-
 ### Results
 
-We'll use the optim function for estimation.  A slight change to tolerance is included to get a closer estimate to lme4.
+Now we're ready to use the <span style="color:#8b0000">optim</span> function for estimation.  A slight change to tolerance is included to get closer estimates to <span style="color:#1e90ff">lme4</span>, which we will compare shortly.
 
 
 ```r
@@ -142,7 +153,7 @@ rbind(c(exp(modelResults$par), negLogLik = modelResults$value, coef(lm(y~X-1))),
 ## [2,] 36.02  30.9    897.04       251.41 10.47
 ```
 
-As we can see, both formulations produce identical results. We can now compare those results to the lme4 output for the same model.
+As we can see, both formulations produce identical results. We can now compare those results to the <span style="color:#1e90ff">lme4</span> output for the same model, and see that we're getting what we should.
 
 
 ```r
@@ -167,7 +178,7 @@ lmeMod
 ##      251.41        10.47
 ```
 
-We can predict the random effects (Wood, 6.2.4), and after doing so again compare the results to the lme4 estimates.
+We can also predict the random effects (Wood, 6.2.4), and after doing so again compare the results to the <span style="color:#1e90ff">lme4</span> estimates.
 
 
 ```r
@@ -181,27 +192,47 @@ data.frame(ranefEstimated, lme4 = ranef(lmeMod)$Subject[[1]]) %>% round(2)
 ```
 
 ```
-##                               ranefEstimated   lme4
-## factor(sleepstudy$Subject)308          40.64  40.64
-## factor(sleepstudy$Subject)309         -77.57 -77.57
-## factor(sleepstudy$Subject)310         -62.88 -62.88
-## factor(sleepstudy$Subject)330           4.39   4.39
-## factor(sleepstudy$Subject)331          10.18  10.18
-## factor(sleepstudy$Subject)332           8.19   8.19
-## factor(sleepstudy$Subject)333          16.44  16.44
-## factor(sleepstudy$Subject)334          -2.99  -2.99
-## factor(sleepstudy$Subject)335         -45.12 -45.12
-## factor(sleepstudy$Subject)337          71.92  71.92
-## factor(sleepstudy$Subject)349         -21.12 -21.12
-## factor(sleepstudy$Subject)350          14.06  14.06
-## factor(sleepstudy$Subject)351          -7.83  -7.83
-## factor(sleepstudy$Subject)352          36.25  36.25
-## factor(sleepstudy$Subject)369           7.01   7.01
-## factor(sleepstudy$Subject)370          -6.34  -6.34
-## factor(sleepstudy$Subject)371          -3.28  -3.28
-## factor(sleepstudy$Subject)372          18.05  18.05
+##             ranefEstimated   lme4
+## Subject_308          40.64  40.64
+## Subject_309         -77.57 -77.57
+## Subject_310         -62.88 -62.88
+## Subject_330           4.39   4.39
+## Subject_331          10.18  10.18
+## Subject_332           8.19   8.19
+## Subject_333          16.44  16.44
+## Subject_334          -2.99  -2.99
+## Subject_335         -45.12 -45.12
+## Subject_337          71.92  71.92
+## Subject_349         -21.12 -21.12
+## Subject_350          14.06  14.06
+## Subject_351          -7.83  -7.83
+## Subject_352          36.25  36.25
+## Subject_369           7.01   7.01
+## Subject_370          -6.34  -6.34
+## Subject_371          -3.28  -3.28
+## Subject_372          18.05  18.05
 ```
 
+### Issues with ML estimation
+Situations arise in which using maximum likelihood for mixed models would result in notably biased estimates (e.g. small N, lots of fixed effects), and so it is typically not used.  Standard software usually defaults to *restricted* maximum likelihood.  However, our purpose here has been served, so we will not dwell further on mixed model estimation.
+
+
+### Link with penalized regression
+A link exists between mixed models and a penalized likelihood approach.  For a penalized approach with the SLiM, the objective function we want to minimize can be expressed as follows:
+
+$$ \lVert y- X\beta \rVert^2 + \color{gray}{\beta^\intercal\beta} $$
+
+The added component (gray) to the sum of the squared residuals is the penalty. By adding the sum of the squared coefficients, we end up keeping them from getting too big, and this helps to avoid <span title="in high dimensional cases it helps with underfitting" style="color:#dd4814">overfitting</span>.  Another interesting aspect of this approach is that it is comparable to using a <span title="normal with zero mean and some constant variance" style="color:#dd4814">specific prior</span> on the coefficients in a Bayesian framework.  
+
+We can now see mixed models as a penalized technique.  If we knew $\sigma$ and $\psi_\theta$, then the predicted random effects $g$ and estimates for the fixed effects $\beta$ are those that minimize the following objective function:
+
+$$ \frac{1}{\sigma^2}\lVert y - X\beta - Zg \rVert^2 + g^\intercal\psi_\theta^{-1}g $$
+
+We'll take this penalized approach explicitly with the generalized additive model below.
+
+
+<br>
+<br>
 
 ## Additive model as a mixed model 
 
@@ -220,7 +251,6 @@ x = size - min(size)
 x = x / max(x)
 d = data.frame(wear, x)
 ```
-
 
 ### Relevant functions
 We'll create functions for the cubic spline operation, the creation of a model matrix, the creation of the penalty matrix, and finally the fitting function.
@@ -270,6 +300,7 @@ prsFit <- function(y, x, knots, lambda) {
 }
 ```
 
+
 ### Fit a penalized model
 
 Now we can fit the model and visualize.
@@ -283,11 +314,12 @@ xp = 0:100/100  # values for prediction
 Xp = splineX(xp, xk)
 
 plot(x, wear, xlab='Scaled Engine size', ylab='Wear Index', pch=19,
-     col="#FF5503", cex=.75, col.axis='gray50', bty='n')
+     col="#dd4814", cex=.75, col.axis='gray50', bty='n')
 lines(xp,Xp%*%coef(mod), col='#2957FF') 
 ```
 
 ![](mixedModelML_files/figure-html/fitCSgam-1.png) 
+
 
 ### As a mixed model
 
@@ -329,7 +361,7 @@ $$\mathbf{X}_F\mathbf{\beta}_F + \mathbf{Zg}, \\
 To incorporate a gamm, i.e. a *generalized additive mixed model*, the X_F above would become part of the 'fixed' effect part of the model, while Z would be part of the random effects, and estimation would proceed normally as for a mixed model.  
 
 
-Initially we'll just duplicate a standard mixed model using the mgcv and associated gamm4 package.
+Initially we'll just duplicate a standard mixed model using the <span style="color:#1e90ff">mgcv</span> and associated <span style="color:#1e90ff">gamm4</span> package.
 
 
 ```r
@@ -408,8 +440,17 @@ plot(modGamS$gam)
 ![](mixedModelML_files/figure-html/gammSleepStudy-1.png) 
 
 
+<br>
+<br>
+
 ## Wrap Up
 So we've seen that GAMs can be seen as having a fixed and random effect as in mixed models, which means we can use them within the mixed model framework. Another way to look at this is that we have added the capacity to examine nonlinear relationships and other covariance structures to the standard mixed model framework, making a very flexible modeling approach even more so.
 
+
 ### It's full of STARs...
-However, this goes even further.  ***St****ructured* ***A****dditive* ***R****egression models* (STAR) build upon the notion just demonstrated. Not only we can combine mixed and additive models, but other model classes as well.  This includes interactions and varying coefficient models, spatial effects, gaussian processes/kriging, markov random fields and others.  Each model class has a particular design and penalty matrix, but otherwise can be added to the current model considered.  We can also use other techniques, like boosting (which itself can be seen as an additive modeling approach!) to estimate them. Standard regression, glm, gam, etc. are thus special cases of the STAR model. In short, we now have a highly flexible modeling environment within which to tackle the questions we seek to answer with our data.
+However, this goes even further.  ***St****ructured* ***A****dditive* ***R****egression models* (STAR) build upon the notion just demonstrated (nicely illustrated in [Fahrmeir][] et al.). Not only we can combine mixed and additive models, but other model classes as well.  This includes interactions and varying coefficient models, spatial effects, gaussian processes/kriging, markov random fields and others.  Each model class has a particular design and penalty matrix, but otherwise can be added to the current model considered.  We can also use other techniques, like boosting (which itself can be seen as an additive modeling approach!) to estimate them. Standard regression, glm, gam, etc. are thus special cases of the STAR model. In short, we now have a highly flexible modeling environment within which to tackle the questions we seek to answer with our data.
+
+
+
+[Wood]: https://www.crcpress.com/Generalized-Additive-Models-An-Introduction-with-R/Wood/9781584884743 "Wood, S. (2006). Generalized Additive Models."
+[Fahrmeir]: http://www.springer.com/us/book/9783642343322 "Fahrmeir, L., Kneib, Th., Lang, S., Marx, B. (2013). Regression."

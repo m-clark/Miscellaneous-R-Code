@@ -71,6 +71,8 @@ img {
 <li><a href="#data">Data</a></li>
 <li><a href="#ml-function">ML function</a></li>
 <li><a href="#results">Results</a></li>
+<li><a href="#issues-with-ml-estimation">Issues with ML estimation</a></li>
+<li><a href="#link-with-penalized-regression">Link with penalized regression</a></li>
 </ul></li>
 <li><a href="#additive-model-as-a-mixed-model">Additive model as a mixed model</a><ul>
 <li><a href="#data-set-up">Data set up</a></li>
@@ -86,14 +88,15 @@ img {
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>This following is based on Wood’s 2006 text on additive models, chapter 6 in particular. The goal is to express the tie between generalized additive models and mixed models, and open the door to further modeling expansion. It assumes familiarity with standard regression from a matrix perspective.</p>
+<p>The goal is to express the tie between generalized additive models and mixed models, and open the door to further modeling expansion. The following is based on <a href="https://www.crcpress.com/Generalized-Additive-Models-An-Introduction-with-R/Wood/9781584884743" title="Wood, S. (2006). Generalized Additive Models.">Wood</a>’s 2006 text on additive models, chapter 6 in particular. It assumes familiarity with standard regression from a matrix perspective and at least passing familiarity with mixed models.</p>
+<p><br> <br></p>
 </div>
 <div id="model-formulation" class="section level2">
 <h2>Model Formulation</h2>
-<p>We can start with a standard linear model expressed as follows:</p>
+<p>We can start with a standard linear model (SLiM) expressed as follows:</p>
 <p><span class="math">\[\mathbf{y} = \mathbf{Xb} + \mathbf{\epsilon} \]</span></p>
-<p>Here <span class="math">\(\mathbf{y}\)</span> is the target variable, <span class="math">\(\mathbf{X}\)</span> is a model matrix (first column representing the intercept, the rest are the covariates of interest), <span class="math">\(\mathbf{b}\)</span> are the coefficients, and error <span class="math">\(\mathbf{\epsilon}\)</span>. Note that beyond this point I’ll largely refrain from using bold to indicate vectors/matrices, or using subscripts for every <em>i</em><sup>th</sup> observation. Let’s just assume we are in a typical data situation involving multiple observations, a univariate vector target variable (y), a matrix of predictor variables (X) etc.</p>
-<p>For a mixed model with a single random effect for some grouping factor (e.g. students within schools), this extends to:</p>
+<p>Here <span class="math">\(\mathbf{y}\)</span> is the target variable, <span class="math">\(\mathbf{X}\)</span> is a <span title="first column representing the intercept, the rest are the covariates of interest" style="color:#dd4814">model matrix</span>, <span class="math">\(\mathbf{b}\)</span> are the coefficients, and error <span class="math">\(\mathbf{\epsilon}\)</span>. For cleaner presentation (and background coding on my part), note that beyond this point I’ll largely refrain from using bold to indicate vectors/matrices, or using subscripts for every <em>i</em><sup>th</sup> observation. Let’s just assume we are in a typical data situation involving multiple observations, a univariate vector target variable (<span class="math">\(y\)</span>), a (design) matrix of predictor variables (<span class="math">\(X\)</span>) etc. Hopefully the context and code will make things very clear.</p>
+<p>Now consider a data situation in which observations are clustered, and so non-independent. For example, we might have data regarding students within schools, and we wish to account for the fact that observations of students within a particular school are likely correlated. We can do this within a mixed model framework. For a mixed model with a single random effect for some grouping factor (e.g. school), the SLiM extends to:</p>
 <p><span class="math">\[y = Xb + Zg + \epsilon\]</span></p>
 <p>Where Z is an indicator matrix pertaining to the grouping structure (sometimes referred to as dummy coding or one-hot encoding). Consider a factor z representing group/cluster membership, this would convert z to the following:</p>
 <table>
@@ -150,38 +153,42 @@ img {
 </tr>
 </tbody>
 </table>
-<p>The coefficients <span class="math">\(g\)</span> are the random effects, assumed <span class="math">\(\mathcal{N}(0,\tau)\)</span>, and while we are often interested in them, they do not have to be estimated directly.</p>
+<p>The coefficients <span class="math">\(g\)</span> are the random effects, assumed <span class="math">\(\mathcal{N}(0,\tau^2)\)</span>, i.e. normally distributed with zero mean and <span class="math">\(\tau\)</span> standard deviation. While we are often interested in these specific effects, they do not have to be estimated directly for modeling purposes.</p>
 <p><span class="math">\[y = Xb + Zg + \epsilon \\
 g \sim \mathcal{N}(0, \psi_\theta) \\
 \epsilon \sim \mathcal{N}(0, \Lambda\sigma^2)\]</span></p>
-<p>In this depiction <span class="math">\(\psi_\theta\)</span> can reflect some more interesting dependencies, but in the simple case of a random intercepts model it can be a single variance estimate <span class="math">\(\tau^2\)</span>. <span class="math">\(\Lambda\)</span> can be used to model residual covariance but often is just the identity matrix, with the underlying assumption of constant variance <span class="math">\(\sigma^2\)</span> across observations.</p>
+<p>In this depiction, <span class="math">\(\psi_\theta\)</span> can reflect some more interesting dependencies, but in the simple case of a random intercepts model it can be a single variance estimate <span class="math">\(\tau^2\)</span>. <span class="math">\(\Lambda\)</span> can be used to model residual covariance but often is just the identity matrix, with the underlying assumption of constant variance <span class="math">\(\sigma^2\)</span> across observations.</p>
 <p>We can combine the random and residuals into a single construct reflecting the covariance structure of the observations:</p>
 <p><span class="math">\[ e = Zg + \epsilon \]</span></p>
-<p>This makes <span class="math">\(\mathbf{e}\)</span> a multivariate vector with mean 0 and covariance (<strong>I</strong> is the unit matrix):</p>
+<p>This makes <span class="math">\(\mathbf{e}\)</span> a multivariate normal vector with mean 0 and covariance (<strong><span class="math">\(I\)</span></strong> is the unit matrix):</p>
 <p><span class="math">\[Z\psi_{\theta}Z^\intercal + I\sigma^2\]</span></p>
 <p>This puts us back to a standard linear model:</p>
 <p><span class="math">\[ y = Xb + e, \\
 e \sim \mathcal{N}(0, \Sigma_\theta\sigma^2)\]</span></p>
+<p>where <span class="math">\(\Sigma_\theta\ = \frac{Z\psi_{\theta}Z^\intercal}{\sigma^2} + I\)</span>.</p>
+<p><br> <br></p>
 </div>
 <div id="maximum-likelihood-estimation" class="section level2">
 <h2>Maximum Likelihood Estimation</h2>
-<p>Given where we are now, we can proceed to estimate the mixed model. For this we’ll use the sleepstudy data from lme4. The data has reaction times for 18 individuals over 10 days each (see the help file for the sleepstudy object for more details).</p>
+<p>Given where we are now, we can proceed to estimate a mixed model via maximum likelihood. For this we’ll use the sleepstudy data from the <span style="color:#1e90ff">lme4</span> package. The data has reaction times for 18 individuals over 10 days each (see the help file for the sleepstudy object for more details).</p>
 <div id="data" class="section level3">
 <h3>Data</h3>
 <pre class="r"><code>data(sleepstudy, package='lme4')
 X = model.matrix(~Days, sleepstudy)
 Z = model.matrix(~factor(sleepstudy$Subject)-1)
+colnames(Z) =  paste0('Subject_', unique(sleepstudy$Subject))  # for cleaner presentation later
+rownames(Z) = paste0('Subject_', sleepstudy$Subject)
 y = sleepstudy$Reaction</code></pre>
 </div>
 <div id="ml-function" class="section level3">
 <h3>ML function</h3>
-<p>The following is based on the code in Wood (6.2.2), with a couple modifications for consistent nomenclature. <span class="math">\(\theta\)</span> represents the vector of parameters we wish to estimate. The (square root of the) variances will be estimated on the log scale. In Wood, he simply extracts the ‘fixed effects’ for the intercept and days effects using lm (6.2.3).</p>
+<p>The following is based on the code in Wood (6.2.2), with a couple modifications for consistent nomenclature and presentation. We use <span style="color:#8b0000">optim</span> and a minimizing function, in this case the negative log likelihood, to estimate the parameters of interest, collectively <span class="math">\(\theta\)</span>, in the code below. The (square root of the) variances will be estimated on the log scale. In Wood, he simply extracts the ‘fixed effects’ for the intercept and days effects using lm (6.2.3), and we’ll do the same.</p>
 <pre class="r"><code>llMixed = function(y, X, Z, theta){
   tau = exp(theta[1])
   sigma = exp(theta[2])
   n = length(y)
   
-  # evaluate cov mat for y
+  # evaluate covariance matrix for y
   e = tcrossprod(Z)*tau^2 + diag(n)*sigma^2
   L = chol(e)  # L'L = e
   
@@ -194,13 +201,13 @@ y = sleepstudy$Reaction</code></pre>
   ll = -n/2*log(2*pi) -sum(log(diag(L))) - crossprod(y-LP)/2
   -ll
 }</code></pre>
-<p>Here is an alternative function using a multivariate approach that doesn’t use the transformation to independent, and might provide additional perspective.</p>
+<p>Here is an alternative function using a multivariate normal approach that doesn’t use the transformation to independent, and might provide additional perspective.</p>
 <pre class="r"><code>llMixedMV = function(y, X, Z, theta){
   tau = exp(theta[1])
   sigma = exp(theta[2])
   n = length(y)
   
-  # evaluate cov mat for y
+  # evaluate covariance matrix for y
   e = tcrossprod(Z)*tau^2 + diag(n)*sigma^2
 
   b = coef(lm.fit(X, y))
@@ -211,7 +218,7 @@ y = sleepstudy$Reaction</code></pre>
 </div>
 <div id="results" class="section level3">
 <h3>Results</h3>
-<p>We’ll use the optim function for estimation. A slight change to tolerance is included to get a closer estimate to lme4.</p>
+<p>Now we’re ready to use the <span style="color:#8b0000">optim</span> function for estimation. A slight change to tolerance is included to get closer estimates to <span style="color:#1e90ff">lme4</span>, which we will compare shortly.</p>
 <pre class="r"><code>paramInit = c(0, 0)
 names(paramInit) = c('tau', 'sigma')
 
@@ -224,7 +231,7 @@ rbind(c(exp(modelResults$par), negLogLik = modelResults$value, coef(lm(y~X-1))),
 <pre><code>##        tau sigma negLogLik X(Intercept) XDays
 ## [1,] 36.02  30.9    897.04       251.41 10.47
 ## [2,] 36.02  30.9    897.04       251.41 10.47</code></pre>
-<p>As we can see, both formulations produce identical results. We can now compare those results to the lme4 output for the same model.</p>
+<p>As we can see, both formulations produce identical results. We can now compare those results to the <span style="color:#1e90ff">lme4</span> output for the same model, and see that we’re getting what we should.</p>
 <pre class="r"><code>library(lme4)
 lmeMod = lmer(Reaction ~ Days + (1|Subject), sleepstudy, REML=FALSE)
 lmeMod</code></pre>
@@ -241,7 +248,7 @@ lmeMod</code></pre>
 ## Fixed Effects:
 ## (Intercept)         Days  
 ##      251.41        10.47</code></pre>
-<p>We can predict the random effects (Wood, 6.2.4), and after doing so again compare the results to the lme4 estimates.</p>
+<p>We can also predict the random effects (Wood, 6.2.4), and after doing so again compare the results to the <span style="color:#1e90ff">lme4</span> estimates.</p>
 <pre class="r"><code>tau = exp(modelResults$par)[1]
 tausq = tau^2
 sigma = exp(modelResults$par)[2]
@@ -249,25 +256,39 @@ sigmasq = sigma^2
 Sigma = tcrossprod(Z)*tausq/sigmasq + diag(length(y))
 ranefEstimated = tausq*t(Z)%*%solve(Sigma) %*% resid(lm(y~X-1))/sigmasq
 data.frame(ranefEstimated, lme4 = ranef(lmeMod)$Subject[[1]]) %&gt;% round(2)</code></pre>
-<pre><code>##                               ranefEstimated   lme4
-## factor(sleepstudy$Subject)308          40.64  40.64
-## factor(sleepstudy$Subject)309         -77.57 -77.57
-## factor(sleepstudy$Subject)310         -62.88 -62.88
-## factor(sleepstudy$Subject)330           4.39   4.39
-## factor(sleepstudy$Subject)331          10.18  10.18
-## factor(sleepstudy$Subject)332           8.19   8.19
-## factor(sleepstudy$Subject)333          16.44  16.44
-## factor(sleepstudy$Subject)334          -2.99  -2.99
-## factor(sleepstudy$Subject)335         -45.12 -45.12
-## factor(sleepstudy$Subject)337          71.92  71.92
-## factor(sleepstudy$Subject)349         -21.12 -21.12
-## factor(sleepstudy$Subject)350          14.06  14.06
-## factor(sleepstudy$Subject)351          -7.83  -7.83
-## factor(sleepstudy$Subject)352          36.25  36.25
-## factor(sleepstudy$Subject)369           7.01   7.01
-## factor(sleepstudy$Subject)370          -6.34  -6.34
-## factor(sleepstudy$Subject)371          -3.28  -3.28
-## factor(sleepstudy$Subject)372          18.05  18.05</code></pre>
+<pre><code>##             ranefEstimated   lme4
+## Subject_308          40.64  40.64
+## Subject_309         -77.57 -77.57
+## Subject_310         -62.88 -62.88
+## Subject_330           4.39   4.39
+## Subject_331          10.18  10.18
+## Subject_332           8.19   8.19
+## Subject_333          16.44  16.44
+## Subject_334          -2.99  -2.99
+## Subject_335         -45.12 -45.12
+## Subject_337          71.92  71.92
+## Subject_349         -21.12 -21.12
+## Subject_350          14.06  14.06
+## Subject_351          -7.83  -7.83
+## Subject_352          36.25  36.25
+## Subject_369           7.01   7.01
+## Subject_370          -6.34  -6.34
+## Subject_371          -3.28  -3.28
+## Subject_372          18.05  18.05</code></pre>
+</div>
+<div id="issues-with-ml-estimation" class="section level3">
+<h3>Issues with ML estimation</h3>
+<p>Situations arise in which using maximum likelihood for mixed models would result in notably biased estimates (e.g. small N, lots of fixed effects), and so it is typically not used. Standard software usually defaults to <em>restricted</em> maximum likelihood. However, our purpose here has been served, so we will not dwell further on mixed model estimation.</p>
+</div>
+<div id="link-with-penalized-regression" class="section level3">
+<h3>Link with penalized regression</h3>
+<p>A link exists between mixed models and a penalized likelihood approach. For a penalized approach with the SLiM, the objective function we want to minimize can be expressed as follows:</p>
+<p><span class="math">\[ \lVert y- X\beta \rVert^2 + \color{gray}{\beta^\intercal\beta} \]</span></p>
+<p>The added component (gray) to the sum of the squared residuals is the penalty. By adding the sum of the squared coefficients, we end up keeping them from getting too big, and this helps to avoid <span title="in high dimensional cases it helps with underfitting" style="color:#dd4814">overfitting</span>. Another interesting aspect of this approach is that it is comparable to using a <span title="normal with zero mean and some constant variance" style="color:#dd4814">specific prior</span> on the coefficients in a Bayesian framework.</p>
+<p>We can now see mixed models as a penalized technique. If we knew <span class="math">\(\sigma\)</span> and <span class="math">\(\psi_\theta\)</span>, then the predicted random effects <span class="math">\(g\)</span> and estimates for the fixed effects <span class="math">\(\beta\)</span> are those that minimize the following objective function:</p>
+<p><span class="math">\[ \frac{1}{\sigma^2}\lVert y - X\beta - Zg \rVert^2 + g^\intercal\psi_\theta^{-1}g \]</span></p>
+<p>We’ll take this penalized approach explicitly with the generalized additive model below.</p>
+<p><br> <br></p>
 </div>
 </div>
 <div id="additive-model-as-a-mixed-model" class="section level2">
@@ -338,9 +359,9 @@ xp = 0:100/100  # values for prediction
 Xp = splineX(xp, xk)
 
 plot(x, wear, xlab='Scaled Engine size', ylab='Wear Index', pch=19,
-     col=&quot;#FF5503&quot;, cex=.75, col.axis='gray50', bty='n')
+     col=&quot;#dd4814&quot;, cex=.75, col.axis='gray50', bty='n')
 lines(xp,Xp%*%coef(mod), col='#2957FF') </code></pre>
-<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAHgCAMAAABNUi8GAAAAsVBMVEUAAAAAADoAAGYAOpAAZrYpV/86AAA6ADo6AGY6kNtmAABmADpmOpBmtrZmtttmtv9/f39/f5V/f6t/lZV/lcF/q9aQOgCQOmaQkGaQ2/+Vf3+Vf5WVf6uVlcGVweurf3+r1v+2ZgC2tma225C2///BlX/Bq3/B6//Wq3/W/9bW///bkDrb2//b///rwZXr6//r////VQP/tmb/1qv/25D/68H//7b//9b//9v//+v////dreykAAAACXBIWXMAAA7DAAAOwwHHb6hkAAASaklEQVR4nO3dC3fTyAGGYXNtYdtitkAL25LNlpR0XVxsE0L0/39YdbUlW5I11ozm08z7nNOyxFiS5RfdbDSLBBC28L0AQB8ChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQCVbHZbHwvgiICFbHZUGgbAhVBoO0IVASBtiNQFfTZikAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhzSTQ+6uP6f/vlsvlz7+7Wh6gwTjQ9Zuv2X/96myJgBrTQMs080wB50wDvfuQB7pjJ49JsAWFNLNA0/Oj5dukOl0CnDO8zJQ2+vpzeiJPn5gG10EhjUAh7cJA15zFYxJ2tqCLPSuTAyqWiyJQ2EWgkHZJUeWnSbYmB3Qzv1Bf6DhJIlDYZVRUeYGeLSgmY1bU/VX2GTyBYjKmRd2+/kygmI5xUevlRwLFZMyLuvvwVwLFVC4o6uFmSaCYCBfqIY1AIY1AIY1AIY1AIY1AIY1AIY1AIY1AIY1AIY1AIY1AIY1AIW2KQJ/ZnQdiMskW1LzQzWYzdlEQhGl28c8ME91sKBS5qY5BzQolUJQmO0kyKpRAUZruLN600LGLgiBMeJmJk3mYm/I6KIXC2KQX6ikUpqb9JIlCYWjijzopFGbMAn246b354oDJmV6yR+SMAl1X4yN1DpQ0YHIUCgMmgT7c7LPsGgpxyOQoFMOZ3WF5f0+mrsFkB02OQjGYhy0ohWI4w2PQchM65hg0Q6EYyPQW4MVZfOdg3EMnR6EYxtc/+aBQDDJBoO3fTKJQDGF5MNmWyXV9t5NL9hjA/WCy3V8+plCc5X4X3/PteArFOd6OQXMUijM8DyZLoejnezBZCkUv74PJUij6+B9MlkLRQ2AwWS6IopvEYLIUii4ag8myEUUHlcFkKRStZG5gS6FoIxMohaKNTqAUihZCgVIoTikFSqE4IRVo1IVyS9RWWoFGXCg3lW4nFmi8hRJoO7VAoy2UQNvJBRpzob4XQZFeoNEWijaCgVIoDhQDpVDsSQZKoahoBkqhKIkGSqEoqAZKocjti/rxX6uTG49CkdSK+v7yaf7rj799sjE5CygU9aK2i0fvk2S1eKwSKIWiUdSPd9n9E1/YmpwFFIp6UVmhr+xNzgIKjV6tqOvF4i/vFk++WJqcFRQau9pJUr533wodg2YoNHKHQP9UbDp7zuLvr7Kb2+1GDSZrjELjZnZ/0I/lGHO1QREvn9xAFBq1WlHpTv7Jl+ues/gs0DLNcUMhmqHQmNWugz56v3ry5fvL7kKzQMs7240aTNYQgcbs8FHnuxdJGmiy6j5J8rQFpdCY1c7iX+WBbvsCze5O/zapTpf6JmcVhcbrZAt63XshNG309efuwY4dBUqh8To+Bl2N+yzJUaAUGq3mWfwi/8KIncnZRaGRcj+YrB0EGin3g8laQqFxKorK9+4lrc/iDyg0SvUvLOdfFhl3EOowUAqNUu0yU/FPPlZnv2+3W2aXms5MzgUKjVDjQn2m50J9ktwulx/v/vl10i+L1FBofBoX6jN9F+pv33zNx0Kc+KPOPQKNT/0YNNuErnqOQfPt5t0vWaBTflmkhkKjc3yhvu8ItPgE/uF/ia8tKIXGx6io/eX5ib8sUkOhkTEral2cvu86B+t0Hmg8hT5r8r04vhyKKv5ZvO6F+koMb1VLkbFWeijqelSZJ5NzJ/i3qTvECCOtXQcdd0+Ro8k5FPRbdD7ByBo9uVBvaXIuBfsGDW0vpkZPPuq0NDmnwnx7jKqLJtHjC/XWJudUgO+OcXGRbEbrt76Zx1l8LrT3ZmBsR4N9xZCo7C3AzwjprRm8LTwdLjH8zSiB+maQWOt4noEnOtdAQynUKK+OAWeDTnQ+/+TjWAjvimlaXQPOBpzobLegIRRq8RUEm+iMA517oZabmvna6EKgntjf5IW5EZ1zoHMu1Mmih5jorAMVK7TrFKaFqwUPL9GTfzRnaXITUXo/Oi4CtXCZUWiJzvHbTDVK78bgQB0vdFiJ1r4sMpcvLDcIvRlDA3W/yCElOtMvixwIvRcqfSYhJTrvk6TMvN6KycoJJVECndSUCxvGN50ORVX7+Jnt4mdV6NSLGkCitX/V+eTL6mny7bnkPep7zeZd8LCgs0+08a86t9k4SaOGO/YS6EwKtdCKwUcBNmfrU+M66Lc/fsr/Z2Fy05rDe2BhGYd/FNCc8xxWT5fGJ0nff3rfH+jDzTI34WjHw+i/BTaW8MJAZ53ooahsDMTrF727+HU1gFfnSF4E2sHKAl4c6IxP6WtFXT/NzuR7TuIfbvZZ+rr9Yift1W+rjov7tLkQ0zIbL35/UztPN7Dtobz2VZZtjptRk6KUt6A6FZxSWrLZJdq8w/KTL9d9X7pbV/cFlTsGzaiuerHlmtlm9Hgw2f6b3BUDci+XHdtPAj2lmIPiMnU5GY57NbuPOvcUV7viMiVzutFo40J9Fui4r4V6DVSwBoMlGnWGfolhkU6+WEdOtqB94yQdTD7a8TBqhZr16SGFs4n6Waya42PQ1UU3YZxgtONBtAK1cVsb585sRoUCLb5vN24sWd9bUKlCzZbFYwl9jSoFKjg5czqFmi6J1xC6G9U4Bk03nsP37N5GOx5EpVCV5RhM9LS+cXe7s+dHnkc7HkRjPWsshRnJS0+1osqRvHo2pb5HOx5GYC0rvtOD6C34SVE943n5H+14GO8r2fsCjKC2GW0Ute3fgAqMdjyM51V82ex9n40cSCVa+8JyWueZ2zMJjHY8jNc1fHGfMoUqbUbLoq7P15kRGO14EJ+r98J5SwWa6GxGq7N4G7e2S2QC9VjopXNWC1RlM1oWle3f5zMU4gC+1u3l81XrMyOQaH0oRAuNygTqqVD/b6hl3hNtFPXt+YCL9cMn55ePNev73XTBc6Im10EvmZxH06/YEPtMPCd68knSuK8zKQU6+YoNtM/E6ytrfBY//jRJKtDxK9boxCXcPsf9XR939lcFOvJ7oM3J6RgXjdGln5D7TEYkOvL6WWjfBz02KhuTdRt4n4mvTyBCD3RUOBoDy8jw8hlu8IGOLdT5PGbksr+GNo5BrREMdIphX5zPQcX0rzSCQJ2v1Xj69PBaYwjU7VqN4vDzYOqXG0WgLtdqXHlmpn3FcQTqbq3am67it5naTboRjSVQR4Va7XM2hU65EY0mUBcr1eamZFaBTlhoPIHa3zNZnd68Ap1uNx9RoLb/3lt+i2bVZzLZRjSqQK2u1PhO349MswLiCtTeSo3s6merSVZBZIHaCos8M1P8LY0tUCttsfmsuF8R8QU6+r7xsrfS9MF5oWYjzWU3vNkpDiZrZPAGsO3ST/eTZ3ahyBLXhRoHmt82TPn+oEMMTPQ0ub4nxhmo6+Md00DLNLXvbjfAoLV6nJz4eAO+OC3UNNC7D3mg0vcHHWTQX/xGcUOGbBmzRPPlstBYt6CJ6b6JM/ceDteNWaDZOJ1vE/37gw40PDry7Odu/RgWlTb6+nP3YMczC3ToiiXP81ytogivgzadH7GSPAdxtJaCDdTkjOXZs65M5zMqsH9uVtSFRYkOJntwwTWfQ6XP9hwsWbicrC07RakMJntw6UVJshzBxYoLdRcf7VVzrxwUGmqg8V4198p+oWZFrZfLYgQa+WNQ+GG9UKOismGS7q+yK/UEina2j+BNinq4yYdCvHnzlUDRyW6hZh91Fl+yu33zlUDRyWqh5lvQ1O3bSAI1O9PivKxks1CzY9Ayy/urru/UhxWo2bUqrmztWTwQNT2LL3byDzcEOvJPB85aocFeB7WBQC9nq1AC7cMx6OUsFUqgcMROoQQKV6ycKhEo3LFQKIHCofGFEihcGl0ogcKpsQeiBArHxhVKoHBtVKEECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmlmRT3cLHPzHkwWM2J2b6ZqfKTOgZIIFHZddHe7MIZCxBxccn/QJITBZDEPbEEhzfAYtNyEcgyKiZgVVYx3vFx2bD8JFLZxHRTSCBTSQh1MFoEIdTBZBIKiII1AIc3yYLKAXZYHkwXssjyYLGCX5cFkAbssDyYL2GV5MFnALsuDyQJ2cR0U0ggU0ggU0ggU0ggU0ggU0ggU0ggU0ggU0ggU0ggU0ggU0ggU0ggU0ggU0ggUjm02mxHPJlC4tdmMKpRA4RaBQhqBQhvHoAgYgUIagUIagUIagUIagUIagUIagUIagULaFIEuELdR8diq0PM8wpoLL8bOk4XmEdZceDF2niw0j7Dmwoux82SheYQ1F16MnScLzSOsufBi7DxZaB5hzYUXY+fJQvMIay68GDtPFppHWHPhxdh5stA8wpoLL8bOkwHXCBTSCBTSCBTSCBTSCBTSCBTSCBTSCBTSCBTSCBTSCBTSCBTSHAa6Wy5ff279jau5PNwsl8uPrueSuX3z1fls7j4sl2+dz2WdrrJfXcwldfeP31vnacJdoLt0gXbVQjV+42ouDzfpf6xdvKnHi79bOgm0ucrSWdxfuX4x6+w3jgq9v/q5CvTy999ZoA832abs9u3pb5zN5e5DtqLX+7XiZi5JtuadBNqyyly/mIebt4mTNybJN5rV0o94/50F2qjFWTotE3awoT6ey/rNv10E2lxlvzg5Ijqai8NAd8uPu2qNjXj/3QWar+BdfW3vHAR6OuFb53NJf+vkGLQxm93P/7lyckDdfDEud/GNNZZc+P47C7TYkJWbs8ZvnM2l+ImDN7U5l2x/5STQxmzW2f6x2MA5nIvDs9ekVuSI9z+0QHeuzpEOc1mncU4Q6GtHO53mi8n2N3cfnFz5EA/Uzy7exfaz7bW438UXB2zFwZu7uTg7OchJ7+K9nCSt3VwFbcwlu3C4dHLxsDGb4t10cKrUnIurXVtO+iTJw2WmtB03R/uni+9kC9qYzf1V9loc7HRarsw5mEtuP13Fy0weLtQ7O5Y6XXw3nyQ1L6GnsyjeWJdzmeYYVPFCfb4vzBapOBNduzpZrM2l3Pm6mE/jtSTOPupszGbn6nPbxlxuXc0lKQMd+f7zZRFII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII9Czvr9cLBaPP7U+8uroJ9tH7/NfrxeFJ18GPMn0D0SFQM/ZLrJersvyGnoCbSkTlyDQc66fZv//493T04cI1D0CPaNR5irda2e/zfbgr8pAs5+9KB989PeTQL+//PPLRbERLh7PnnT44f7ZqW/P88lmf2CVHyC8aD4eJQI9Z7vYF7pK8/v+8kW+US3++1X+67fnaUPX6WHqdtESaPqj7A9VjxeBlj/cPzvJ+nyVH1BU2+VV+oT643Ei0LOyDVt+jpS1mfn+0/sipzSl4mfbx5/yvPaHqtVJ0oviSemD+8eLQIsf7p+dHH6pDhyKGdQejxOBDvHj3SLflB0OObflzrg46EwfKSo6PQbNc8v+YPV4EWj5w+rZxZ8sQiwC/fEunUTj8TgR6EDpHvrbH8oz+fTA8PG/ii3ottxUvlqdCXTVGmj17PyPpn8NqmPQ4hAiaT4eJQI9o9p8pWlV/5n/Wu7iqyKTEVvQuvIYoDzwPH08OgR6RnUWnwZWHYPmrW0X5TFouXUr6l11Brp/vB7o6XWq8of5Dp5r9gmBnrfNPw7a5td80vzSYIuNZ34CVJzF5+dG2X+0nsWX16OaZ/HlD/fPTsrNZbmJrUKvPx4nAj0r/6izaKS8Dppd8Xxf7YxX1Qehjeug5cFj+Wfy/0t/9vi3bDtcC/Tw7KQ44iwuXuVHo/mxZ/3xKBHopKK+YnQRAp1IfgxaHcViMAKdyjby60UXIlBII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BII1BI+z90JBTcRR2kCQAAAABJRU5ErkJggg==" /></p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAHgCAMAAABNUi8GAAAAsVBMVEUAAAAAADoAAGYAOpAAZrYpV/86AAA6ADo6AGY6kNtmAABmADpmOpBmtrZmtttmtv9/f39/f5V/f6t/lZV/lcF/q9aQOgCQOmaQkGaQ2/+Vf3+Vf5WVf6uVlcGVweurf3+r1v+2ZgC2tma225C2///BlX/Bq3/B6//Wq3/W/9bW///bkDrb2//b///dSBTrwZXr6//r////tmb/1qv/25D/68H//7b//9b//9v//+v///8QM15QAAAACXBIWXMAAA7DAAAOwwHHb6hkAAASaklEQVR4nO3dC3fTyAGGYXNtYdtitkAL25LNlpR0XexiE0L0/39YdbUlW5I11ozm08z7nNOyxFiS5RfdbDSLBBC28L0AQB8ChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQChTQCVbFer30vgiICFbFeU2gbAhVBoO0IVASBtiNQFfTZikAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhjUAhzSTQ+6uP6f/vlsvlz7+7Wh6gwTjQzZuv2X/96myJgBrTQMs080wB50wDvfuQB7pjJ49JsAWFNLNA0/Oj5dukOl0CnDO8zJQ2+vpzeiJPn5gG10EhjUAh7cJAN5zFYxJ2tqCLPSuTAyqWiyJQ2EWgkHZJUeWnSbYmB3Qzv1Bf6DhJIlDYZVRUeYGeLSgmY1bU/VX2GTyBYjKmRd2+/kygmI5xUZvlRwLFZMyLuvvwVwLFVC4o6uFmSaCYCBfqIY1AIY1AIY1AIY1AIY1AIY1AIY1AIY1AIY1AIY1AIY1AIY1AIW2KQJ/ZnQdiMskW1LzQ9Xo9dlEQhGl28c8M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" /></p>
 </div>
 <div id="as-a-mixed-model" class="section level3">
 <h3>As a mixed model</h3>
@@ -367,7 +388,7 @@ Z = X_R %*% sqrt(Dpos)</code></pre>
 <p><span class="math">\[\mathbf{X}_F\mathbf{\beta}_F + \mathbf{Zg}, \\
 \mathbf{g} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}/\lambda) \\\]</span></p>
 <p>To incorporate a gamm, i.e. a <em>generalized additive mixed model</em>, the X_F above would become part of the ‘fixed’ effect part of the model, while Z would be part of the random effects, and estimation would proceed normally as for a mixed model.</p>
-<p>Initially we’ll just duplicate a standard mixed model using the mgcv and associated gamm4 package.</p>
+<p>Initially we’ll just duplicate a standard mixed model using the <span style="color:#1e90ff">mgcv</span> and associated <span style="color:#1e90ff">gamm4</span> package.</p>
 <pre class="r"><code>library(mgcv); library(gamm4)</code></pre>
 <pre><code>## This is gamm4 0.2-3</code></pre>
 <pre class="r"><code>sleepstudy$Subject = factor(sleepstudy$Subject)
@@ -419,6 +440,7 @@ summary(modGamS$mer)    </code></pre>
 <pre class="r"><code># summary(modGamS$gam)
 plot(modGamS$gam)</code></pre>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAHgCAMAAABNUi8GAAAAXVBMVEUAAAAAADoAAGYAOjoAOpAAZrY6AAA6ADo6AGY6Ojo6OpA6kNtmAABmADpmAGZmtv+QOgCQZgCQ27aQ2/+2ZgC225C2/7a2///bkDrb////tmb/25D//7b//9v///+smBWqAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAQ70lEQVR4nO3dDVujygGGYfSo21b3bFrTbszX//+ZDRA0ugLzPe/MPPd1tWfbk4Amzw4wIdCdAWFd7h8AWEKgkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkEagkBY40A4wkivQsItDrQgU0iIFetqM4/P97yCLQ7PiBLrrnsc/7Kc/eC0O7YoS6GnznuXu4c17cWhYlECPL7+mP+5nNvIECiOMoJAWax/0OoSyDwo/kY7ijy/jUfzM+EmgMMQ8KKQlDtT+Eyy047soIgW6vRy8H5667u41yOLQgO8HrTiBDn3+eP004eSxODRgpohI86CXY/ftY/9HppngJdpE/XUulIl6eIm0ib+MnjtGUBhaqCFOoMeX+9/DELqfO0oiUEwWp3RiTTPtx8mkx0CLQ72WU2CiHnmtlECgkEagyGg9AwJFPgYVECiyMYmAQJGLUQMECmkECmkEihzCd0egCMbifHUCRXI2bz6BQhqBQhqBIinbr0sSKBKy/zYvgSIdh3edQCGNQJGI21tOoEjCZO8z4ZVFUi8O4kzyTHhlkeSLgzaDM+dTXlkk/eJQtvkdAAJFZKtv9eK1DgkUUa0eHK08gEARk2eeBIqcDOaeCBTZ8K1O5LR2URu+1YmM1g5+DAsgUESR/JpgBAoLYYbP1QW5PDDL4lAQq7OWCRShBRs91xfm8sDBaTNeYXnmFgoEWq/lAK2/8xEn0N10D1lu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VKDO63B9YvIV8kTbJxIoT5R+IoHyROknEihPlH4igfJE6ScSKE+UfiKB8kTpJxIoT5R+IoHyROknEihPlH5itkABI5kCzbaOvCtkjUWvlUBZo/RaCZQ1Sq+VQFmj9FoJlDVKr5VAWaP0WgmUNUqvlUBZo/RaCZQ1FrZWwBCBQhqBQhqBQhqBQhqBQhqBQhqBQhqBQhqBQhqBQhqBQhqBQlr0QPddd/caeyU3Tpuu654TrnCwfXhLubrDU9c9plzheXd5VX8lXeNV7ED3lzr3CQs9bS4r2yV+9y5/C5MGur+s7fiS8nfc9W9jlkIjB3ra9IPZNt1reXjqX8Xd/e9ka7w4viQNdHxRU/6Op03/DiZ8Gz9EDjRLL+ekY/bF7uHfKQM9/Ej6252rDnR4LfepA90mXeHll0y6D7q//99L4v3sajfx41CWeEC7vJQp371+i5s00F13+fs3DmrJpD7WfVdjoPu0x0i7S5xpA71LvlnqN0mHp+STI+cqN/Fpx8/xV0wb6PByjrv3aWQ6lOjVd5C0SzwLurteTzBdLuPf95SHSnn21Aa1TTNdesmxK590BD2+9L9iys3SOM4kP9bt1TZRn2dHKfEnSf1e7/hXP5Vq90GHLWDKLcN1g5t6Y5T4o8598o9ztzk+QO5xsgikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikESikEWhw29SXY6wagQY3Xkjs8JTjlgP1IdDgrle6y3K51/oQaHDXQK+3bhk39sMlfHePwy3i2PjbINDgpmuF9v/swxxu4TLcl+PXcKXiPLdzKRWBBjcFurv/ffz5Ol4/u79q9+HHa5aLaJeNQIO7CbT/x37axu8e3o4vFGqJQIO73cTvuu7+v8N2/f739vl6L2a28BYINLibg6Rhn3P4r+PP//y8HtVvOby3QKDB3UwzDfucw0HRafPP6T4L411kYIZAg5sm6p+n46Ph9hjD/cWGuVEmSG0QaHC3H3UON+EZtunXm0JmuEVO2Qg0kcO/kt5JqRoEmsguy22wykegSRye0t6Krh4ECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmkECmn/B2Oo4sMLurchAAAAAElFTkSuQmCC" /></p>
+<p><br> <br></p>
 </div>
 </div>
 <div id="wrap-up" class="section level2">
@@ -426,7 +448,7 @@ plot(modGamS$gam)</code></pre>
 <p>So we’ve seen that GAMs can be seen as having a fixed and random effect as in mixed models, which means we can use them within the mixed model framework. Another way to look at this is that we have added the capacity to examine nonlinear relationships and other covariance structures to the standard mixed model framework, making a very flexible modeling approach even more so.</p>
 <div id="its-full-of-stars" class="section level3">
 <h3>It’s full of STARs…</h3>
-<p>However, this goes even further. <strong><em>St</em></strong><em>ructured</em> <strong><em>A</em></strong><em>dditive</em> <strong><em>R</em></strong><em>egression models</em> (STAR) build upon the notion just demonstrated. Not only we can combine mixed and additive models, but other model classes as well. This includes interactions and varying coefficient models, spatial effects, gaussian processes/kriging, markov random fields and others. Each model class has a particular design and penalty matrix, but otherwise can be added to the current model considered. We can also use other techniques, like boosting (which itself can be seen as an additive modeling approach!) to estimate them. Standard regression, glm, gam, etc. are thus special cases of the STAR model. In short, we now have a highly flexible modeling environment within which to tackle the questions we seek to answer with our data.</p>
+<p>However, this goes even further. <strong><em>St</em></strong><em>ructured</em> <strong><em>A</em></strong><em>dditive</em> <strong><em>R</em></strong><em>egression models</em> (STAR) build upon the notion just demonstrated (nicely illustrated in <a href="http://www.springer.com/us/book/9783642343322" title="Fahrmeir, L., Kneib, Th., Lang, S., Marx, B. (2013). Regression.">Fahrmeir</a> et al.). Not only we can combine mixed and additive models, but other model classes as well. This includes interactions and varying coefficient models, spatial effects, gaussian processes/kriging, markov random fields and others. Each model class has a particular design and penalty matrix, but otherwise can be added to the current model considered. We can also use other techniques, like boosting (which itself can be seen as an additive modeling approach!) to estimate them. Standard regression, glm, gam, etc. are thus special cases of the STAR model. In short, we now have a highly flexible modeling environment within which to tackle the questions we seek to answer with our data.</p>
 </div>
 </div>
 
