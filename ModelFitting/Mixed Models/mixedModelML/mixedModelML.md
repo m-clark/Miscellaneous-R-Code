@@ -236,11 +236,11 @@ We'll take this penalized approach explicitly with the generalized additive mode
 
 ## Additive model as a mixed model 
 
-At this point I'd like to demonstrate some concepts from section 6.6 in Wood. Conceptually, the take home idea is that an additive model, or generalized additive model (GAM), can be seen as a mixed model, which is interesting in and of itself (at least to me), but it also means that GAMs meld nicely with mixed models generally.  For an intro on additive models, one can see my [document](https://sites.google.com/a/umich.edu/micl/miscfiles/GAMS.pdf), which is more or less an overview of Wood's text.
+At this point I'd like to demonstrate some concepts from section 6.6 in Wood. Conceptually, the take home idea is that an additive model, or generalized additive model (GAM), can be seen as a mixed model, which is interesting in and of itself (at least to me), but it also means that GAMs meld nicely with mixed models to form a more general modeling framework.  For an introduction to additive models, one can see my [document](https://sites.google.com/a/umich.edu/micl/miscfiles/GAMS.pdf), which is more or less an overview of Wood's text.
 
 ### Data set up
 
-See Wood 3.2.  The data regards motor engine size and wear in 19 Volvos, with the initial assumption that larger capacity engines will wear out less quickly.
+The <span title="See Wood 3.2." style="color:#dd4814">data</span> regards motor engine size and wear in 19 Volvos, with the initial assumption that larger capacity engines will wear out less quickly.
 
 
 ```r
@@ -253,11 +253,12 @@ d = data.frame(wear, x)
 ```
 
 ### Relevant functions
+
 We'll create functions for the cubic spline operation, the creation of a model matrix, the creation of the penalty matrix, and finally the fitting function.
 
 
 ```r
-# cubic spline function
+# function for cubic spline on [0,1]; requires data and points within domain for knots
 rk <- function(x, z) {
   ((z-0.5)^2 - 1/12) * ((x-0.5)^2 - 1/12) / 4 -
     ((abs(x-z)-0.5)^4 - (abs(x-z)-0.5)^2/2 + 7/240) / 24
@@ -265,19 +266,19 @@ rk <- function(x, z) {
 
 # create the model matrix
 splineX <- function(x, knots) {
-  q <- length(knots) + 2 # number of parameters
-  n <- length(x) # number of observations
-  X <- matrix(1, n, q) # initialized model matrix
-  X[, 2] <- x # set second column to x
-  X[, 3:q] <- outer(x, knots, FUN = rk) # remaining to cubic spline
+  q <- length(knots) + 2                    # number of parameters
+  n <- length(x)                            # number of observations
+  X <- matrix(1, n, q)                      # initialized model matrix
+  X[, 2] <- x                               # set second column to x
+  X[, 3:q] <- outer(x, knots, FUN = rk)     # remaining to cubic spline
   X
 }
 
-# set up the penalized regression spline penalty matrix, given knot sequence xk
-Sfunc = function(xk){
-  q = length(xk)+2
-  S = matrix(0, q, q) # initialize
-  S[3:q, 3:q] = outer(xk, xk, FUN=rk)
+# set up the regression spline penalty matrix, given knot sequence knots
+Sfunc = function(knots){
+  q = length(knots)+2
+  S = matrix(0, q, q)                       # initialize
+  S[3:q, 3:q] = outer(knots, knots, FUN=rk)
   S
 }
 
@@ -290,35 +291,37 @@ matSqrt = function(S){
   B
 }
 
-# the fitting function
+# the fitting function with lambda smoothing parameter
 prsFit <- function(y, x, knots, lambda) {
-  q = length(knots) + 2 # dimension of basis
-  n = length(x) # number of observations
-  Xa = rbind(splineX(x, knots), matSqrt(Sfunc(knots)) * sqrt(lambda)) # augmented model matrix
-  y[(n + 1):(n + q)] = 0 #augment the data vector
-  lm(y ~ Xa - 1) # fit and return penalized regression spline
+  q = length(knots) + 2                     # dimension of basis
+  n = length(x)                             # number of observations
+  Xa = rbind(splineX(x, knots), 
+             matSqrt(Sfunc(knots)) * sqrt(lambda))  # augmented model matrix
+  y[(n + 1):(n + q)] = 0                    # augment the data vector
+  lm(y ~ Xa - 1)                            # fit and return penalized regression spline
 }
 ```
 
 
 ### Fit a penalized model
 
-Now we can fit the model and visualize.
+Now we can fit the model and visualize. There does not seem to be a straightforward relationship between engine size and engine wear.
 
 
 ```r
-xk = 1:7/8  # choose some knots
-mod = prsFit(y=wear, x=x, knots=xk, lambda=.0001) # fit the penalized spline
+x_knots = 1:7/8                             # choose some knots
+mod = prsFit(y=wear, x=x, knots=x_knots, lambda=.0001) # fit the penalized spline
 
-xp = 0:100/100  # values for prediction
-Xp = splineX(xp, xk)
+x_pred = 0:100/100                          # values for prediction
+Xp = splineX(x_pred, x_knots)               # create design matrix
+predictions = Xp %*% coef(mod)
 
 plot(x, wear, xlab='Scaled Engine size', ylab='Wear Index', pch=19,
      col="#dd4814", cex=.75, col.axis='gray50', bty='n')
-lines(xp,Xp%*%coef(mod), col='#2957FF') 
+lines(x_pred, predictions, col='#1e90ff')
 ```
 
-![](mixedModelML_files/figure-html/fitCSgam-1.png) 
+<img src="mixedModelML_files/figure-html/fitCSgam-1.png" title="" alt="" width="50%" style="display: block; margin: auto;" />
 
 
 ### As a mixed model
@@ -350,30 +353,22 @@ Here $\lambda$ is a smoothing parameter, which controls the amount of smoothing.
 
 $$\lVert y - X\beta \rVert^2 + \lambda\beta^{\intercal}S\beta ,$$
 
-with the second part the added penalty. As $\lambda$ approaches infinity, we essentially get straight line fit, while a $\lambda$ of 0 would be the same as an unpenalized fit.
+with the second part the added penalty. As $\lambda \rightarrow \infty$, we essentially get straight line fit, while a $\lambda$ of 0 would be the same as an unpenalized fit.
 
 
-The Z in the code above represents part of the mixed model Z we had before in the standard mixed model. We can now represent our model as follows:
+The Z in the code above represents part of the mixed model Z we had before in the standard setting. We can now represent our model as follows:
 
 $$\mathbf{X}_F\mathbf{\beta}_F + \mathbf{Zg}, \\
 \mathbf{g} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}/\lambda) \\$$
 
-To incorporate a gamm, i.e. a *generalized additive mixed model*, the X_F above would become part of the 'fixed' effect part of the model, while Z would be part of the random effects, and estimation would proceed normally as for a mixed model.  
+To incorporate a gamm, i.e. a *generalized additive mixed model*, the X_F above would be appended to the 'fixed' effect design matrix, while Z would be added to the random effects component, and estimation would proceed normally as for a mixed model.  
 
 
-Initially we'll just duplicate a standard mixed model using the <span style="color:#1e90ff">mgcv</span> and associated <span style="color:#1e90ff">gamm4</span> package.
+The <span style="color:#1e90ff">mgcv</span> and associated packages allow us to see this explicitly. Initially we'll just duplicate a standard mixed model using <span style="color:#1e90ff">mgcv</span> and <span style="color:#1e90ff">gamm4</span> packages.  One can see that the gamm4 is using lme4 and produces the same output.
 
 
 ```r
 library(mgcv); library(gamm4)
-```
-
-```
-## This is gamm4 0.2-3
-```
-
-```r
-sleepstudy$Subject = factor(sleepstudy$Subject)
 modGam = gamm4(Reaction ~ Days, random=~(1|Subject), data=sleepstudy)
 summary(modGam$mer)
 ```
@@ -404,11 +399,14 @@ summary(modGam$mer)
 ```
 
 
-Now we'll add a cubic spline for the effect of Days.  We can see the smooth term listed as random effect.
+Now we'll add a cubic spline for the effect of Days, and we can see the smooth term listed as part of the random effects results.
+
 
 ```r
 modGamS = gamm4(Reaction ~ s(Days, bs='cs'), random=~(1|Subject), data=sleepstudy)
 summary(modGamS$mer)    
+# summary(modGamS$gam)
+plot(modGamS$gam)
 ```
 
 ```
@@ -432,12 +430,7 @@ summary(modGamS$mer)
 ## X   298.51       9.05   32.98
 ```
 
-```r
-# summary(modGamS$gam)
-plot(modGamS$gam)
-```
-
-![](mixedModelML_files/figure-html/gammSleepStudy-1.png) 
+<img src="mixedModelML_files/figure-html/gammSleepStudy-1.png" title="" alt="" width="50%" style="display: block; margin: auto;" />
 
 
 <br>
@@ -448,7 +441,11 @@ So we've seen that GAMs can be seen as having a fixed and random effect as in mi
 
 
 ### It's full of STARs...
-However, this goes even further.  ***St****ructured* ***A****dditive* ***R****egression models* (STAR) build upon the notion just demonstrated (nicely illustrated in [Fahrmeir][] et al.). Not only we can combine mixed and additive models, but other model classes as well.  This includes interactions and varying coefficient models, spatial effects, gaussian processes/kriging, markov random fields and others.  Each model class has a particular design and penalty matrix, but otherwise can be added to the current model considered.  We can also use other techniques, like boosting (which itself can be seen as an additive modeling approach!) to estimate them. Standard regression, glm, gam, etc. are thus special cases of the STAR model. In short, we now have a highly flexible modeling environment within which to tackle the questions we seek to answer with our data.
+However, this goes even further.  ***St****ructured* ***A****dditive* ***R****egression models* (STAR) build upon the notion just demonstrated (nicely illustrated in [Fahrmeir][] et al.). Not only we can combine mixed and additive models, but other model classes as well.  This includes interactions and varying coefficient models, spatial effects, gaussian processes/kriging, markov random fields and others.  Each model class has a particular design and penalty matrix as we saw in the examples previously, but otherwise can be added to the current model being considered.  We can also use other techniques, like <span title="which itself can be seen as an additive modeling approach!" style="color:#dd4814">boosting</span> to estimate them. Standard regression, glm, gam, etc. are thus special cases of the STAR model. In short, we now have a highly flexible modeling environment within which to tackle the questions we seek to answer with our data.
+
+
+<!--html_preserve--><div id="htmlwidget-3076" style="width:900px;height:480px;" class="grViz"></div>
+<script type="application/json" data-for="htmlwidget-3076">{"x":{"diagram":"\ndigraph boxes_and_circles {\n\n  # graph statement\n  graph [layout = dot,\n         rankdir = TB]\n\n  # node statements\n  node [fontname = Helvetica,\n        fontcolor = white,\n        width = .5,\n        style = filled]\n\n  node [shape = circle,\n        color = \"#ff5503\"] // sets as circles\n  STAR \n\n  node [shape = box,\n        color = \"#1f78b4\"]\n  Others\n\n  node [color = \"#e31a1c\"]\n  GAMM Mixed, GAM\n\n  node [color = \"#33a02c\"]\n  GLM, SLiM\n\n\n  subgraph {\n  rank = same; Mixed; GAM;\n  }\n\n  # edge statements\n  STAR -> GAMM           [arrowhead=dot, color=gray]\n  STAR -> Others         [arrowhead=dot, color=gray]\n  GAMM -> Mixed          [arrowhead=dot, color=gray]\n  GAMM -> GAM            [arrowhead=dot, color=gray]\n  GAM -> GLM             [arrowhead=dot, color=gray]\n  Mixed -> GLM           [arrowhead=dot, color=gray]\n  GLM -> SLiM            [arrowhead=dot, color=gray]\n\n  GAM -> Mixed           [arrowhead=none, color=gray]\n\n}\n","config":{"engine":"dot","options":null}},"evals":[]}</script><!--/html_preserve-->
 
 
 
