@@ -62,20 +62,34 @@ generated quantities {
     matrix[Ntest,N] K_transpose_div_Sigma;
     matrix[Ntest,Ntest] Tau;
 
-    # Sigma
-    for (i in 1:N)
-      for (j in 1:N)
-        Sigma[i,j] <- eta_sq * exp(-pow(x[i] - x[j], 2)/inv_rho_sq) + if_else(i==j, sigma_sq, 0.0);
-
-    # Omega
-    for (i in 1:Ntest)
-      for (j in 1:Ntest)
-        Omega[i,j] <- eta_sq * exp(-pow(xtest[i] - xtest[j], 2)/inv_rho_sq) + if_else(i==j, sigma_sq, 0.0);
-
-    # K
+    # K all elements
     for (i in 1:N)
       for (j in 1:Ntest)
         K[i,j] <- eta_sq * exp(-pow(x[i] - xtest[j], 2)/inv_rho_sq);
+
+    # Sigma off-diagonal elements
+    for (i in 1:(N-1)) {
+      for (j in (i+1):N) {
+        Sigma[i,j] <- eta_sq * exp(- pow(x[i] - x[j],2)/inv_rho_sq);
+        Sigma[j,i] <- Sigma[i,j];
+      }
+    }
+
+    #Omega off-diagonal elements
+    for (i in 1:(Ntest-1)) {
+      for (j in (i+1):Ntest) {
+        Omega[i,j] <- eta_sq * exp(- pow(xtest[i] - xtest[j],2)/inv_rho_sq);
+        Omega[j,i] <- Omega[i,j];
+      }
+    }
+
+    #Sigma diagonal elements
+    for (k in 1:N)
+      Sigma[k,k] <- eta_sq + sigma_sq;             # + jitter for pos def
+
+    #Omega diagonal elements
+    for (k in 1:Ntest)
+      Omega[k,k] <- eta_sq + sigma_sq;             # + jitter for pos def
 
     K_transpose_div_Sigma <- K' / Sigma;
     muTest <- K_transpose_div_Sigma * y;
