@@ -1,4 +1,4 @@
-ModelFitting/Mixed\ Models/mixedModelML/*.html linguist-vendored=false
+ModelFitting/Mixed\ Models/mixedModelML/*.html linguist-vendored
 *.stan linguist-language=Stan
 
 
