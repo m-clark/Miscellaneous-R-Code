@@ -1,0 +1,36 @@
+.emph {
+  color: #ff5503;
+  font-weight: 500;
+}
+
+.pack {
+  color: #1e90ff;  /*dodgerblue*/
+  font-weight: 500;
+}
+
+.func {
+  color: #C93312;  /*darkred*/
+  font-weight: 500;
+}
+
+.objclass {
+  color: #006400;  /*darkgreen*/
+  font-weight: 500;
+}
+
+a {
+  color: #ff5503;
+}
+
+pre {
+  box-sizing: border-box;
+  left: 0; /* This changes where the code chunk box actually starts */ 
+  /* padding: 10px 0 10px 60px; /* Change the last value here to move the text left or right */
+  position: relative;
+  width: 100%; /* This changes where the code chunk box ends on the right side */
+  font-size: 75%; /*changes output size; and comments*/
+  /*border: 10px solid #ff5500;*/  /*code block and results border*/
+  /*background-color:#ff5500;*/   /* results background*/
+  
+}
+
