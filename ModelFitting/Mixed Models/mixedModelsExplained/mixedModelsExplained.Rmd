@@ -21,7 +21,8 @@ knitr::opts_chunk$set(message=F, fig.align='center')
 
 # to do
 - fix penalized to be consistent with model 3
-- add missing links
+- where to put the simulation? as is vs. after model 2
+- add missing links to your docs
 - sd vs variance?
 - add references
 - final spell check
@@ -36,12 +37,12 @@ The motivation here is that one could open up different sources with content per
 
 ## Introduction
 
-Mixed models are an extremely useful modeling tool for clustered data situations. It is quite common to have data situations where we have repeated measurements for the units of observation, or in which the units of observation are otherwise clustered (e.g. within school or geographic region).  Mixed models can deal with such data in a variety of ways, but for the uninitiated the terminology, especially across disciplines, can be a bit daunting.
+Mixed models are an extremely useful modeling tool for clustered data situations. It is quite common to have data in which we have repeated measurements for the units of observation, or in which the units of observation are otherwise clustered (e.g. students within school,  cities within geographic region).  Mixed models can deal with such data in a variety of ways, but for the uninitiated, the terminology, especially across disciplines, can be a bit daunting.
 
 Some terms you might come across regarding mixed models:
 
 - Variance components
-- Random intercepts
+- Random intercepts and slopes
 - Random effects
 - Random coefficients
 - Varying coefficients
@@ -51,7 +52,7 @@ Some terms you might come across regarding mixed models:
 - Growth curve models (possibly Latent GCM)
 - Mixed effects models
 
-All describe types of mixed models.  Some might be more historical, others are more often seen in a specific discipline, others might refer to a certain data structure (e.g. multilevel clustering), and still others are special cases. <span class='emph'>Mixed effects</span>, or simply mixed, models generally refer to a mixture of fixed and random effects.  I prefer the term mixed models because it is the simplest and no specific structure is implied[^2].  <span class='emph'>Fixed effects</span>, as we will see later, is perhaps a poor but nonetheless stubborn term for the typical main effects one would see in a linear regression model, i.e. the non-random part of a mixed model.
+All describe types of mixed models.  Some might be more historical, others are more often seen in a specific discipline, others might refer to a certain data structure (e.g. multilevel clustering), and still others are special cases. <span class='emph'>Mixed effects</span>, or simply mixed, models generally refer to a mixture of fixed and random effects.  I prefer the term mixed models because it is simple and no specific structure is implied[^2].  <span class='emph'>Fixed effects</span>, as we will see later, is perhaps a poor but nonetheless stubborn term for the typical main effects one would see in a linear regression model, i.e. the non-random part of a mixed model.
 
 Alternative approaches used in clustered data situations include:
 
@@ -64,23 +65,23 @@ The first two are commonly used by those trained with an econometrics perspectiv
 
 
 ## Standard Linear Model
-First let's begin with the standard linear model to get used to the notation. To keep things as simple as possible while still being generalizable to common data situations, I will assume one continuous/numeric covariate.  
+First let's begin with the standard linear model to get used to the notation. To keep things as simple as possible while still being generalizable to common data situations, I will posit some variable of interest $y$ and one continuous/numeric covariate.  
 
-The following is a standard regression ignoring the clustered nature of the data.
+The following is a standard regression without any clustering.
 
 $$y_i = \alpha + \beta X_i + e_i$$
 $$e_i \sim \mathcal{N}(0, \sigma)$$
 
-With observations $i$, $\alpha$ is our intercept, $\beta$ is the effect of the covariate $X$. The error term is assumed normally distributed with some standard deviation $\sigma$.  
+We have observations $i$, $1....n$, the intercept $\alpha$, and $\beta$ is the effect of the covariate $X$. The error term is assumed normally distributed with some standard deviation $\sigma$.  
 
-Another way to write this, and which focuses on the data generating process rather than 'error':
+Another way to write this focuses on the data generating process rather than 'error':
 
 $$\mu_i = \alpha + \beta X_i$$
 $$y_i \sim \mathcal{N}(\mu_i, \sigma)$$
 
-Here $y$ is normally distributed with mean $\mu$ and standard deviation $\sigma$, but these two models are identical.  Also, even when we move to mixed models, this aspect of the model is retained, and the 'fixed effects' part of a mixed model is identical to the above.
+Here $y$ is normally distributed with mean $\mu$ and standard deviation $\sigma$, but these two models are identical.  Also, even when we move to mixed models, we may show either approach.
 
-A word about notation. In what follows I try to strike a balance between conceptual simplicity and consistency with what is typically seen elsewhere, which can often be confusing depending on the source.  Personally, I don't typically with n=1 or single rows of data at a time, nor do I model a single cluster separate from others, nor do I have separate data sets for cluster levels, so I personally find much of the notation out there cumbersome and/or not in keeping with how it would actually be coded.  For example, we can write the above regression model as $\mu = X\beta$, $y \sim \mathcal{N}(\mu, \sigma)$, or even more simply as $y \sim \mathcal{N}(X\beta, \sigma)$, both of which are cleaner and consistent with a vectorized or matrix programming approach, as opposed to looping over $n$ values or $n_c$ values within a cluster[^1].  In attempting the balance I suspect it will succeed and fail in varying degree, though hopefully more of the former.
+A word about notation. In what follows I try to strike a balance between conceptual simplicity and consistency with what is typically seen elsewhere, which can often be confusing depending on the source.  The notation can get cumbersome for more complex models, and/or not in keeping with how it would actually be coded if one was estimating the model on their own.  For example, we can write the above regression model as $\mu = X\beta$, $y \sim \mathcal{N}(\mu, \sigma)$, or even more simply as $y \sim \mathcal{N}(X\beta, \sigma)$, both of which are cleaner and consistent with a vectorized or matrix programming approach, as opposed to looping over $n$ total values or $n_c$ values within a cluster[^1].  In attempting the balance, I suspect the approach may succeed or fail in varying degree along the way, though hopefully more of the former.
 
 
 
@@ -89,67 +90,79 @@ Let's take a look at some data to get started thinking about mixed models.  I'll
 
 > The average reaction time per day for subjects in a sleep deprivation study. On day 0 the subjects had their normal amount of sleep. Starting that night they were restricted to 3 hours of sleep per night. The observations represent the average reaction time (in milliseconds) on a series of tests given each day to each subject.
 
+Let's use a standard linear model to explore the effect of continued sleep deprivation on reaction time. 
 ```{r loadSleepStudy}
 data(sleepstudy, package='lme4')
 slim = lm(Reaction ~ Days, data=sleepstudy)
 summary(slim)
 ```
 
-We see that more sleep deprivation results in increased reaction time.  But let's plot the data.
+With the positive coefficient for Days, we see that more sleep deprivation results in increased/slower reaction times.  But let's plot the data.
 
 ```{r sleepstudyPlot, fig.align='center', fig.width=4, fig.height=3, echo=FALSE}
 library(ggplot2)
 ggplot(aes(x=Days, y=Reaction), data=sleepstudy) +
   geom_smooth(method='lm', se=FALSE, color='gray25', lwd=.5) +
   geom_line(aes(group=Subject, color=Subject), alpha=.5) +
+  scale_x_continuous(breaks = 0:9) +
   theme_bw() +
-  theme(panel.grid=element_blank(), 
+  theme(panel.grid=element_blank(), panel.border=element_blank(),
         legend.position='none')
 ```
 
-What does this tell us? The black line is what our model is currently suggesting, i.e. it assumes a single starting point and trajectory for everyone. However, we see that subjects have starting points that might have as much as 100ms difference. In addition, while the slope is generally positive, a few show little to no change over time.  We'll come back to this data towards the end.
+What does this tell us? The black line is what our current model is suggesting, i.e. it assumes a single starting point and the same trajectory for everyone. However, we see that subjects have starting points that might have as much as 100ms difference. In addition, while the slope is generally positive, a few show little to no change over time.  We'll come back to this data towards the end.
 
 
 
 ## Many ways to write the same model
+So we want to take into account the clustered nature of the data. Instead of ignoring the clustering as in the SLiM above, we might think of running completely separate regressions for each individual.  However the models would be run on very little data and be overly contextualized.  As we'll see, mixed models will allow for random intercepts and slopes for each person, and take clustering into account while not being too individual-specific.
+
+How might this model be depicted? It turns out it can and is shown in a variety of ways, depending on the text or article you may be looking at.  The following reflects and extends [Gelman & Hill](http://www.stat.columbia.edu/~gelman/arm/) (2007), where they show five ways to write a mixed model.  For simplicity we will typically only concern ourselves with a random intercepts model, but may from time to time extend beyond.  The first couple formulations require no more than an understanding of standard regression models, but more knowledge is assumed with other model depictions.
 
 
 ### Mixed Model 1a: Allowing coefficients to vary across groups
-So we want to take into account the clustered nature of the data. How might this model be depicted? It turns out it might be shown in a variety of ways, depending on the text or article you may be looking at.  Much of the following reflects [Gelman & Hill](http://www.stat.columbia.edu/~gelman/arm/) (2007), and for simplicity we will typically only concern ourselves with a random intercepts model.  Here is a first step in which we have observations $i$ nested within clusters $c$.
+Here is a first step in which we have observations $i$ nested within clusters $c$.
 
-$$y_{ic} = \alpha_{c} + \beta_1X_{ic} + e_{ic}$$
+$$y_{ic} = \alpha_{c} + \beta X_{ic} + e_{ic}$$
 $$\alpha_c \sim \mathcal{N}(\mu_\alpha, \tau)$$
 $$e_{ic} \sim \mathcal{N}(0, \sigma)$$
 
 
-In the above, each observation $i$ within cluster $c$ has an intercept $\alpha$ depending on what cluster $c$ it belongs to. The $\alpha_c$ are assumed normally distributed with mean $\mu_\alpha$ and standard deviation $\tau$. $\mu_\alpha$ is the overall intercept we'd see in the 'fixed effects' portion of our model, i.e. the same intercept from the SLiM approach. The $e$ are mean zero normally distributed as depicted in the SLiM.
+In the above, each observation $i$ within cluster $c$ has an intercept $\alpha$ depending on what cluster $c$ it belongs to. The $\alpha_c$ are assumed normally distributed with mean $\mu_\alpha$ and standard deviation $\tau$. $\mu_\alpha$ is the overall intercept we'd see in the the SLiM approach. The $e$ are mean zero normally distributed as depicted in the SLiM.
 
 
 ### Mixed Model 1b: Multilevel depiction
-Instead we might write the second part as follows, which is common in the 'multilevel modeling' literature, as well as those familiar with Raudenbush's text *Hierarchical Linear Models* and the HLM software. 
+Instead we might write the second part as follows, which is a common way to do so in the 'multilevel modeling' literature. The level one model is before, and for the cluster level, or level two, model we show it a bit differently: 
 
-$$\alpha_c = \alpha + \gamma_c$$
+$$y_{ic} = \alpha_{c} + \beta X_{ic} + e_{ic}$$
+$$\alpha_c = \mu_\alpha + \gamma_c$$
 $$\gamma_c \sim \mathcal{N}(0, \tau)$$
 
-In this formulation, it looks like we are modeling the coefficients themselves.  Here, the random effects $\gamma_c$ are perhaps more clearly seen as cluster-specific deviations from the overall fixed effect $\alpha$. The *random intercepts* come from adding the random effects to the overall intercept.
+Here, the *random* effects $\gamma_c$ are perhaps more clearly seen as cluster-specific deviations from the overall (population) intercept $\mu_\alpha$. Likewise, $\beta$ also does not vary, and together $\beta$ and $\mu_\alpha$ are our *fixed* effects.
 
-If we plug $\alpha_c$ into the first line of model 1a, our model becomes:
+In this formulation, it looks like we are modeling the coefficients themselves, and this is where one might hear of 'intercepts and slopes as outcomes', though that seems less common these days. However, we can add cluster level covariates if desired.  For example, with repeated observations nested within people, a cluster level variable might represent the sex of the individual or even the cluster mean of the some level 1 covariate. 
 
-$$y_{ic} = \alpha + \beta_1X_{ic} + \gamma_{c} + e_{ic}$$
+If we plug $\alpha_c$ (without any cluster level predictor) into the first line of model 1a, our model becomes:
 
-Keep this in mind for later models. But for now, note that we can think of the $\gamma$ as standard (though cluster specific) regression coefficients by adding them to the intercept, resulting in a random intercepts model. Alternatively, we can think of them as another source of variation (error), and lump them in with the $e$.
+$$y_{ic} = (\mu_\alpha  + \gamma_{c}) + \beta X_{ic} + e_{ic}$$
+
+Above, we can think of the $\gamma$ as a cluster specific regression coefficient by adding them to the intercept, resulting in a *random intercepts* model. Alternatively, we can think of them as another *component* of variation (error), and lump them in with the $e$:
+
+$$y_{ic} = \mu_\alpha + \beta X_{ic} + (\gamma_{c} + e_{ic})$$
+
+We'll revisit these two ways of considering the model again again later.
 
 
 ### Mixed Model 2: Combining separate local regressions
 Within some cluster $c$, we could write the model this way.
 
-$$y_i \sim \mathcal{N}(\alpha_c + \beta_1X_i, \sigma)$$
+$$y_i \sim \mathcal{N}(\alpha_c + \beta X_i, \sigma)$$
 
-Where i = 1,..., $n_c$.  However, this ignores any cluster level predictors we might be interested in.  If we want to include those, we might add:
+Where i = 1,..., $n_c$.  However, this depiction ignores any cluster level predictors we might be interested in.  If we want to include those, we might add
 
-$$\alpha_c \sim \mathcal{N}(\theta_0 + \theta_1X_c, \tau)$$
+$$\alpha_c \sim \mathcal{N}(\mu_\alpha + \beta^\text{*}X^\text{*}_c, \tau)$$
 
-where $X_c$ is a cluster level predictor that does not vary within a cluster. For example, with repeated observations nested within people, $X_c$ might represent the sex of the individual.  We'll come back to the notion of the separate regressions approach later.
+as we did in [Model 1b](#mixed-model-1b-multilevel-depiction), where $X^\text{*}_c$ is a cluster level predictor that does not vary within a cluster.  The mixed model combines the separate regressions approach by keeping the fixed effects the same across clusters, and connecting the $\alpha_c$ through the above equation. In other words, the mixed model falls between an approach that ignores the clusters all together, and one that would run completely separate regressions for each cluster.  We'll revisit this notion later.
 
 
 ### Mixed Model 3a: Design matrix for random component
@@ -188,7 +201,7 @@ Here $y_c$ contains the values $1...n_c$ in cluster $c$, but within that cluster
 
 
 ### Mixed Model 4a: Regression with multiple error terms
-We could instead conceptually lump the random effects with the error rather than see them as coefficients used in the linear predictor.
+As mentioned in [Model 1b](#mixed-model-1b-multilevel-depiction), we could instead conceptually lump the random effects with the error rather than see them as coefficients used in the linear predictor.
 
 $$\mu_i = X_i\beta$$
 $$y_i = \mu_i + \textrm{error}$$
@@ -339,8 +352,9 @@ ggplot(aes(x=Days, y=Reaction), data=sleepstudy) +
   geom_blank() +
   geom_abline(intercept=fixef(sleepMod)[1], slope=fixef(sleepMod)[2], color='gray25') +
   geom_abline(aes(intercept=int, slope=slope, color=Subject), alpha=.5,data=subjectTrajectories) +
+  scale_x_continuous(breaks = 0:9) +
   theme_bw() +
-  theme(panel.grid=element_blank(), 
+  theme(panel.grid=element_blank(), panel.border=element_blank(),
         legend.position='none')
 ```
 
@@ -352,11 +366,18 @@ ggplot(aes(x=Days, y=Reaction), data=slice(sleepstudy, 1:30)) +
   geom_point(aes(color=Subject), alpha=.5) +
   geom_abline(intercept=fixef(sleepMod)[1], slope=fixef(sleepMod)[2], color='gray25') +
   geom_abline(aes(intercept=int, slope=slope, color=Subject), alpha=.5,data=slice(subjectTrajectories, 1:3)) +
+  scale_x_continuous(breaks = 0:9) +
   theme_bw() +
-  theme(panel.grid=element_blank(), 
+  theme(panel.grid=element_blank(), panel.border=element_blank(),
         legend.position='none')
 ```
 
+
+## Other topics
+To be mentioned not discussed
+
+- Crossed vs Nested
+- More levels
 
 ## Summary
 
