@@ -81,12 +81,14 @@ knitr::opts_chunk$set(message=F, fig.align='center')
 ```
 
 # to do
-- fix penalized to be consistent with model 3
-- add refs for each model
 - where to put the simulation? as is vs. after model 2
-- add missing links to your docs
-- add references
-- final spell check
+- review after going through Bates
+
+- final checks
+
+-- spell check
+-- link check
+-- reading check
 
 ## Preface
 
@@ -262,7 +264,7 @@ $$\mu_c = X_c\beta + X^S_c\Gamma_c$$
 $$y_c \sim \mathcal{N}(\mu_c, \sigma^2) $$
 $$\Gamma_c \sim \mathcal{N}(0, \psi)$$
 
-Here $y_c$ contains the values $1...n_c$ in cluster $c$, but within that cluster the model is exactly as that depicted in [model 1b](#mixed-model-1b-multilevel-depiction). $X^S_c$ is $X$ or some subset of the covariates.  The random effects are now the result of a multivariate normal process that allows the random intercepts and slopes to correlate via covariance matrix $\psi$. This depiction perhaps most clearly illustrates the random effects $\gamma$ as an added deviation to the the typical effects $\beta$. If we factor the $X$, the coefficients in the model are $\beta + \Gamma_c$ for each cluster $c$.
+Here $y_c$ contains the values $1...n_c$ in cluster $c$, but within that cluster the model is exactly as that depicted in [model 1b](#mixed-model-1b-multilevel). $X^S_c$ is $X$ or some subset of the covariates.  The random effects are now the result of a multivariate normal process that allows the random intercepts and slopes to correlate via covariance matrix $\psi$. This depiction perhaps most clearly illustrates the random effects $\gamma$ as an added deviation to the the typical effects $\beta$. If we factor the $X$, the coefficients in the model are $\beta + \Gamma_c$ for each cluster $c$.
 
 [@Fahrmeir, chapter 7]
 
@@ -302,7 +304,7 @@ $\Sigma$ is an n x n block diagonal covariance matrix with the following descrip
 
 For any unit $i$: $$\Sigma_{ii} = var(e_i^{\textrm{all}}) = \tau^2 + \sigma^2$$
 For any units *i,k* within the same cluster $c$: $$\Sigma_{ik} = cov(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = \tau^2$$
-For any units *i,k* in different cluster: $$\Sigma_{ik} = cov(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = 0$$
+For any units *i,k* in different clusters: $$\Sigma_{ik} = cov(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = 0$$
 
 We can construct $\Sigma$ as $Z\psi Z^\intercal + I\sigma^2$. Note that if $\Sigma$ is a correlation rather than covariance matrix, non-zero off-diagonals are the intraclass correlation.
 
@@ -314,7 +316,7 @@ A compact way to write model 5a:
 
 $$y \sim \mathcal{N}(X\beta, \Sigma)$$
 
-In the above, *y* is multivariate normal with mean vector $X\beta$ and covariance $\Sigma$.  An example of model 5a and 5b can be seen in my document comparing mixed models to additive models ([link]()), and this takes us to the next way to write these models.
+In the above, *y* is multivariate normal with mean vector $X\beta$ and covariance $\Sigma$.  This has actually been implied in many of the models above where, for example $\sigma^2$ actually could have been $I_n\sigma^2$, a diagonal matrix where $\sigma^2$ is constant.  I chose not to do so for a cleaner presentation.  An example of model 5a and 5b can be seen in my document comparing mixed models to additive models ([link](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC and TR/Mixed%20Models/mixedModelML/mixedModelML.md)), and this takes us to the next way to write these models.
 
 
 ### Mixed Model 6: Penalized regression
@@ -327,7 +329,7 @@ A *penalized* regression approach seeks to minimize:
 
 $$(y-X\beta)^2 + \lambda(\beta^\intercal\beta)$$
 
-The second term is the sum of the squared regression coefficients times a penalty coefficient.  If there is no penalty, i.e. $\lambda$ equals 0, then we have the SLiM, but otherwise, the larger the coefficients, the more the penalty added. This has the effect of shrinking the estimated $\beta$ toward zero, and so actually induces some bias, but with the bonus of reducing variance and less overfitting.
+The second term is the sum of the squared regression coefficients times a penalty coefficient.  If $\lambda$ equals 0, there is no penalty,  and we simply have the SLiM, but otherwise, the larger the coefficients, the more the penalty added. This has the effect of shrinking the estimated $\beta$ toward zero, and so actually induces some bias, but with the bonus of reducing variance and less overfitting.
 
 In the mixed model, we turn back to [model 3](#mixed-model-3a-design-matrix-for-random-component). 
 
@@ -340,7 +342,7 @@ $$\frac{1}{\sigma^2}(y-\mu)^2 + \lambda(\boldsymbol{\gamma}^\intercal\boldsymbol
 
 Thinking back to the separate regressions approach, if we actually ran separate regressions the results would be over-contextualized, such that the cluster specific effects would deviate too far from the overall (population) effect, e.g. the fixed effect intercept. In the case of repeated measurements within individuals, while we'd like to think of ourselves as unique snowflakes, we are not *that* different.  Taking a penalized approach reels in those unique effects a bit.  In this light, mixed models can be seen as a compromise between ignoring cluster effects and having separate models for each cluster.
 
-The best thing to come from the penalized model approach is that many other models, e.g. those including spatial or additive components, can also be depicted this way, with only slight variations on the theme.  This allows random effects to be combined with additive, spatial and other effects seamlessly, making for a very powerful modeling approach in general called ***structured additive models***.  See Fahrmeier et al. (2013) for details, and my document [link]() for the additive model connection specifically.
+The best thing to come from the penalized model approach is that many other models, e.g. those including spatial or additive components, can also be depicted this way, with only slight variations on the theme.  This allows random effects to be combined with additive, spatial and other effects seamlessly, making for a very powerful modeling approach in general called ***structured additive models***.  See Fahrmeier et al. (2013) for details, and my document [link](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC and TR/Mixed%20Models/mixedModelML/mixedModelML.md) for the additive model connection specifically.
 
 [@Wood] [@Fahrmeir] [@lme4]
 
@@ -455,22 +457,7 @@ To be mentioned not discussed
 
 
 
-## Notes
-[^1]: Here is the actual R code for a likelihood function to estimate $\beta$ and $\sigma$.
-    ```{r lllm, eval=FALSE, echo=-1}
-    # indent 2x to put code in footer, otherwise will float above.
-    ll = function(X, y, beta, sigma){
-      sum(dnorm(y, X %*% beta, sigma, log=TRUE))
-    }
-    ```
 
-
-[^2]: I have seen people with very little statistics training confuse the phrase 'mixed methods' with mixed models. They are in no way related.
-
-[^GH]:  See e.g. Gelman & Hill (2007) '5 ways to write the same model'.
-[^MLM]: See e.g. Bryk & Raudenbush (2001) Hierarchical Linear Modeling, Fitzmaurice, Laird & Ware (2004) Applied Longitudinal Analysis, as well as many texts with 'multilevel modeling' in the title.
-[^GAM]: Wood (2009) Generalized Additive Models chapter 6.
- 
 
 
 # Appendix
@@ -529,4 +516,21 @@ y2 = matfun()
 ```
 
 
-# References
+# References & Notes
+
+
+[^1]: Here is the actual R code for a likelihood function to estimate $\beta$ and $\sigma$.
+    ```{r lllm, eval=FALSE, echo=-1}
+    # indent 2x to put code in footer, otherwise will float above.
+    ll = function(X, y, beta, sigma){
+      sum(dnorm(y, X %*% beta, sigma, log=TRUE))
+    }
+    ```
+
+
+[^2]: I have seen people with very little statistics training confuse the phrase 'mixed methods' with mixed models. They are in no way related.
+
+[^GH]:  See e.g. Gelman & Hill (2007) '5 ways to write the same model'.
+[^MLM]: See e.g. Bryk & Raudenbush (2001) Hierarchical Linear Modeling, Fitzmaurice, Laird & Ware (2004) Applied Longitudinal Analysis, as well as many texts with 'multilevel modeling' in the title.
+[^GAM]: Wood (2009) Generalized Additive Models chapter 6.
+ 

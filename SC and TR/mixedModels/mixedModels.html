@@ -90,7 +90,6 @@ img {
 <li><a href="#applied-example-1">Applied Example</a></li>
 <li><a href="#other-topics">Other topics</a></li>
 <li><a href="#summary">Summary</a></li>
-<li><a href="#notes">Notes</a></li>
 </ul></li>
 <li><a href="#appendix">Appendix</a><ul>
 <li><a href="#simulation-with-random-intercepts-and-slopes">Simulation with random intercepts and slopes</a></li>
@@ -101,13 +100,11 @@ img {
 <div id="to-do" class="section level1">
 <h1>to do</h1>
 <ul>
-<li>fix penalized to be consistent with model 3</li>
-<li>add refs for each model</li>
 <li>where to put the simulation? as is vs. after model 2</li>
-<li>add missing links to your docs</li>
-<li>add references</li>
-<li>final spell check</li>
+<li><p>review after going through Bates</p></li>
+<li><p>final checks</p></li>
 </ul>
+<p>– spell check – link check – reading check</p>
 <div id="preface" class="section level2">
 <h2>Preface</h2>
 <p>This document is intended as a reference for those starting out with to what we’ll simply call <em>mixed models</em>. Some parts would be suitable to anyone in an applied discipline with no more knowledge than that of regression (e.g. beginning, models 1-2, end), while other parts assume familiarity with matrix notation and/or other more advanced knowledge. Hopefully folks of varying backgrounds can find it useful.</p>
@@ -283,7 +280,7 @@ summary(slim)</code></pre>
 <h3>Mixed Model 3b: Design matrix again</h3>
 <p>Let’s say we have multiple random effects, e.g. random intercepts and slopes. In other words, we now let all the regression coefficients be random. Now we have <span class="math">\(\Gamma_c\)</span>, a vector that contains the random effects pertaining to the covariate coefficients for a cluster <span class="math">\(c\)</span>. For a given cluster:</p>
 <p><span class="math">\[\mu_c = X_c\beta + X^S_c\Gamma_c\]</span> <span class="math">\[y_c \sim \mathcal{N}(\mu_c, \sigma^2) \]</span> <span class="math">\[\Gamma_c \sim \mathcal{N}(0, \psi)\]</span></p>
-<p>Here <span class="math">\(y_c\)</span> contains the values <span class="math">\(1...n_c\)</span> in cluster <span class="math">\(c\)</span>, but within that cluster the model is exactly as that depicted in <a href="#mixed-model-1b-multilevel-depiction">model 1b</a>. <span class="math">\(X^S_c\)</span> is <span class="math">\(X\)</span> or some subset of the covariates. The random effects are now the result of a multivariate normal process that allows the random intercepts and slopes to correlate via covariance matrix <span class="math">\(\psi\)</span>. This depiction perhaps most clearly illustrates the random effects <span class="math">\(\gamma\)</span> as an added deviation to the the typical effects <span class="math">\(\beta\)</span>. If we factor the <span class="math">\(X\)</span>, the coefficients in the model are <span class="math">\(\beta + \Gamma_c\)</span> for each cluster <span class="math">\(c\)</span>.</p>
+<p>Here <span class="math">\(y_c\)</span> contains the values <span class="math">\(1...n_c\)</span> in cluster <span class="math">\(c\)</span>, but within that cluster the model is exactly as that depicted in <a href="#mixed-model-1b-multilevel">model 1b</a>. <span class="math">\(X^S_c\)</span> is <span class="math">\(X\)</span> or some subset of the covariates. The random effects are now the result of a multivariate normal process that allows the random intercepts and slopes to correlate via covariance matrix <span class="math">\(\psi\)</span>. This depiction perhaps most clearly illustrates the random effects <span class="math">\(\gamma\)</span> as an added deviation to the the typical effects <span class="math">\(\beta\)</span>. If we factor the <span class="math">\(X\)</span>, the coefficients in the model are <span class="math">\(\beta + \Gamma_c\)</span> for each cluster <span class="math">\(c\)</span>.</p>
 <p><span class="citation">(Fahrmeir et al. 2013, chap. 7)</span></p>
 </div>
 <div id="mixed-model-4a-regression-with-multiple-error-terms" class="section level3">
@@ -307,7 +304,7 @@ summary(slim)</code></pre>
 <p>In keeping with the previous approach, we can write:</p>
 <p><span class="math">\[y_i = X_i\beta + e_i^{\textrm{all}}\]</span> <span class="math">\[e_i^{all} \sim \mathcal{N}(0, \Sigma)\]</span></p>
 <p><span class="math">\(\Sigma\)</span> is an n x n block diagonal covariance matrix with the following description.</p>
-<p>For any unit <span class="math">\(i\)</span>: <span class="math">\[\Sigma_{ii} = var(e_i^{\textrm{all}}) = \tau^2 + \sigma^2\]</span> For any units <em>i,k</em> within the same cluster <span class="math">\(c\)</span>: <span class="math">\[\Sigma_{ik} = cov(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = \tau^2\]</span> For any units <em>i,k</em> in different cluster: <span class="math">\[\Sigma_{ik} = cov(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = 0\]</span></p>
+<p>For any unit <span class="math">\(i\)</span>: <span class="math">\[\Sigma_{ii} = var(e_i^{\textrm{all}}) = \tau^2 + \sigma^2\]</span> For any units <em>i,k</em> within the same cluster <span class="math">\(c\)</span>: <span class="math">\[\Sigma_{ik} = cov(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = \tau^2\]</span> For any units <em>i,k</em> in different clusters: <span class="math">\[\Sigma_{ik} = cov(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = 0\]</span></p>
 <p>We can construct <span class="math">\(\Sigma\)</span> as <span class="math">\(Z\psi Z^\intercal + I\sigma^2\)</span>. Note that if <span class="math">\(\Sigma\)</span> is a correlation rather than covariance matrix, non-zero off-diagonals are the intraclass correlation.</p>
 <p><span class="citation">(Gelman and Hill 2007)</span> <span class="citation">(Wood 2009)</span></p>
 </div>
@@ -315,7 +312,7 @@ summary(slim)</code></pre>
 <h3>Mixed Model 5b: Multivariate normal model</h3>
 <p>A compact way to write model 5a:</p>
 <p><span class="math">\[y \sim \mathcal{N}(X\beta, \Sigma)\]</span></p>
-<p>In the above, <em>y</em> is multivariate normal with mean vector <span class="math">\(X\beta\)</span> and covariance <span class="math">\(\Sigma\)</span>. An example of model 5a and 5b can be seen in my document comparing mixed models to additive models (<a href>link</a>), and this takes us to the next way to write these models.</p>
+<p>In the above, <em>y</em> is multivariate normal with mean vector <span class="math">\(X\beta\)</span> and covariance <span class="math">\(\Sigma\)</span>. This has actually been implied in many of the models above where, for example <span class="math">\(\sigma^2\)</span> actually could have been <span class="math">\(I_n\sigma^2\)</span>, a diagonal matrix where <span class="math">\(\sigma^2\)</span> is constant. I chose not to do so for a cleaner presentation. An example of model 5a and 5b can be seen in my document comparing mixed models to additive models (<a href="https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/Mixed%20Models/mixedModelML/mixedModelML.md">link</a>), and this takes us to the next way to write these models.</p>
 </div>
 <div id="mixed-model-6-penalized-regression" class="section level3">
 <h3>Mixed Model 6: Penalized regression</h3>
@@ -323,13 +320,13 @@ summary(slim)</code></pre>
 <p><span class="math">\[(y-X\beta)^2\]</span></p>
 <p>A <em>penalized</em> regression approach seeks to minimize:</p>
 <p><span class="math">\[(y-X\beta)^2 + \lambda(\beta^\intercal\beta)\]</span></p>
-<p>The second term is the sum of the squared regression coefficients times a penalty coefficient. If there is no penalty, i.e. <span class="math">\(\lambda\)</span> equals 0, then we have the SLiM, but otherwise, the larger the coefficients, the more the penalty added. This has the effect of shrinking the estimated <span class="math">\(\beta\)</span> toward zero, and so actually induces some bias, but with the bonus of reducing variance and less overfitting.</p>
+<p>The second term is the sum of the squared regression coefficients times a penalty coefficient. If <span class="math">\(\lambda\)</span> equals 0, there is no penalty, and we simply have the SLiM, but otherwise, the larger the coefficients, the more the penalty added. This has the effect of shrinking the estimated <span class="math">\(\beta\)</span> toward zero, and so actually induces some bias, but with the bonus of reducing variance and less overfitting.</p>
 <p>In the mixed model, we turn back to <a href="#mixed-model-3a-design-matrix-for-random-component">model 3</a>.</p>
 <p><span class="math">\[\mu = X\beta + Z\gamma\]</span> <span class="math">\[y \sim \mathcal{N}(\mu, \sigma^2) \]</span></p>
 <p>Estimating <span class="math">\(\beta\)</span> by maximum likelihood results in the same estimates that minimize the following loss function for the simple random intercepts case:</p>
 <p><span class="math">\[\frac{1}{\sigma^2}(y-\mu)^2 + \lambda(\boldsymbol{\gamma}^\intercal\boldsymbol{\psi^{-1}}\boldsymbol{\gamma})\]</span></p>
 <p>Thinking back to the separate regressions approach, if we actually ran separate regressions the results would be over-contextualized, such that the cluster specific effects would deviate too far from the overall (population) effect, e.g. the fixed effect intercept. In the case of repeated measurements within individuals, while we’d like to think of ourselves as unique snowflakes, we are not <em>that</em> different. Taking a penalized approach reels in those unique effects a bit. In this light, mixed models can be seen as a compromise between ignoring cluster effects and having separate models for each cluster.</p>
-<p>The best thing to come from the penalized model approach is that many other models, e.g. those including spatial or additive components, can also be depicted this way, with only slight variations on the theme. This allows random effects to be combined with additive, spatial and other effects seamlessly, making for a very powerful modeling approach in general called <strong><em>structured additive models</em></strong>. See Fahrmeier et al. (2013) for details, and my document <a href>link</a> for the additive model connection specifically.</p>
+<p>The best thing to come from the penalized model approach is that many other models, e.g. those including spatial or additive components, can also be depicted this way, with only slight variations on the theme. This allows random effects to be combined with additive, spatial and other effects seamlessly, making for a very powerful modeling approach in general called <strong><em>structured additive models</em></strong>. See Fahrmeier et al. (2013) for details, and my document <a href="https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/Mixed%20Models/mixedModelML/mixedModelML.md">link</a> for the additive model connection specifically.</p>
 <p><span class="citation">(Wood 2009)</span> <span class="citation">(Fahrmeir et al. 2013)</span> <span class="citation">(Bates et al. 2015)</span></p>
 </div>
 <div id="mixed-model-7-bayesian-mixed-model" class="section level3">
@@ -474,9 +471,6 @@ summary(sleepMod)</code></pre>
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 </div>
-<div id="notes" class="section level2">
-<h2>Notes</h2>
-</div>
 </div>
 <div id="appendix" class="section level1">
 <h1>Appendix</h1>
@@ -552,7 +546,7 @@ matfun = function(){
 
 y2 = matfun()</code></pre>
 <div class="references">
-<h1>References</h1>
+<h1>References &amp; Notes</h1>
 <p>Bates, Douglas, Martin Machler, Benjamin Bolker, and Steven Walker. 2015. “Fitting Linear Mixed-Effects Models Using Lme4.”</p>
 <p>Fahrmeir, Ludwig, Thomas Kneib, Stefan Lang, and Brian Marx. 2013. “Regression.”</p>
 <p>Gelman, Andrew, and Jennifer Hill. 2007. “Data Analysis Using Regression and Multilvel/Hierarchical Models.”</p>
