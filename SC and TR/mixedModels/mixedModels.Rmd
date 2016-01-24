@@ -4,7 +4,7 @@ author: |
   | Michael Clark
   | Statistician Lead
   | CSCAR, ARC, U of Michigan
-date: "January 9, 2016"
+date: '`r Sys.Date()`'
 output:
   html_document:
     css: ../../otherCSS.css
@@ -13,28 +13,24 @@ output:
     toc: yes
   pdf_document:
     toc: yes
-always_allow_html: yes
-
 references:
-- id: Wood
-  title: Generalized Additive Models.
-  author:
+- author:
   - family: Wood
     given: Simon
+  id: Wood
   issued:
     year: 2009
-- id: GH
-  title: Data Analysis Using Regression and Multilevel/Hierarchical Models.
-  author:
+  title: Generalized Additive Models.
+- author:
   - family: Gelman
     given: Andrew
   - family: Hill
     given: Jennifer
+  id: GH
   issued:
     year: 2007
-- id: BDA
-  title: Bayesian Data Analysis.
-  author:
+  title: Data Analysis Using Regression and Multilevel/Hierarchical Models.
+- author:
   - family: Gelman
     given: Andrew
   - family: Carlin
@@ -47,11 +43,11 @@ references:
     given: Aki
   - family: Rubin
     given: Donald
+  id: BDA
   issued:
     year: 2013
-- id: lme4
-  title: Fitting Linear Mixed-Effects Models Using lme4.
-  author:
+  title: Bayesian Data Analysis.
+- author:
   - family: Bates
     given: Douglas
   - family: M&#228;chler
@@ -60,21 +56,24 @@ references:
     given: Benjamin
   - family: Walker
     given: Steven
+  id: lme4
   issued:
     year: 2015
-- id: Fahrmeir
-  title: Regression.
-  author:
+  title: Fitting Linear Mixed-Effects Models Using lme4.
+- author:
   - family: Fahrmeir
     given: Ludwig
-  - family:  Kneib
+  - family: Kneib
     given: Thomas
   - family: Lang
     given: Stefan
   - family: Marx
     given: Brian
+  id: Fahrmeir
   issued:
     year: 2013
+  title: Regression.
+always_allow_html: yes
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message=F, fig.align='center')
@@ -170,9 +169,8 @@ ggplot(aes(x=Days, y=Reaction), data=sleepstudy) +
   geom_smooth(method='lm', se=FALSE, color='gray25', lwd=.5) +
   geom_line(aes(group=Subject, color=Subject), alpha=.5) +
   scale_x_continuous(breaks = 0:9) +
-  theme_bw() +
-  theme(panel.grid=element_blank(), panel.border=element_blank(),
-        legend.position='none')
+  lazerhawk::theme_trueMinimal() +
+  theme(legend.position='none')
 ```
 
 What does this tell us? The black line is what our current model is suggesting, i.e. it assumes a single starting point and the same trajectory for everyone. However, we see that subjects have starting points that might have as much as 100ms difference. In addition, while the slope is generally positive, a few show little to no change over time.  We'll come back to this data towards the end.
@@ -537,7 +535,7 @@ for (i in 1:nclus){
   Z[idx,cols] = X[idx,]
 }
 
-G = matrix(as.vector(t(gamma_)), ncol=1)
+G = c(t(gamma_))
 y3 = X%*%B  + Z%*%G + e                     # as in model 3c
 head(data.frame(y, y2, y3))
 
