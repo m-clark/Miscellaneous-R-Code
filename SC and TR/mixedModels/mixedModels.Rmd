@@ -24,7 +24,7 @@ references:
   issued:
     year: 2009
 - id: GH
-  title: Data Analysis Using Regression and Multilvel/Hierarchical Models.
+  title: Data Analysis Using Regression and Multilevel/Hierarchical Models.
   author:
   - family: Gelman
     given: Andrew
@@ -54,7 +54,7 @@ references:
   author:
   - family: Bates
     given: Douglas
-  - family: Machler
+  - family: M&#228;chler
     given: Martin
   - family: Bolker
     given: Benjamin
@@ -81,13 +81,10 @@ knitr::opts_chunk$set(message=F, fig.align='center')
 ```
 
 # to do
-- review after going through Bates
-
+- review after going through Bates more thoroughly to see if more can be added.
 
 - final checks
-  -- spell check
-  -- link check
-  -- reading check
+    - reading check
 
 # Preface
 
@@ -493,7 +490,7 @@ Some other topics I'll just briefly mention, but which do not change the general
 
 - You probably noticed the lack of p-values in the lme4 output. <span class="emph">Statistical significance</span> is not straightforward with mixed models (unless you're in the Bayesian framework). Just because other statistical programs give them to you doesn't mean they are correct. See @lme4 and **`?pvalues`** within the lme4 package for additional details.
 
-- <span class="emph">Fixed effects models</span>.  Are you interested in... Cluster level effects? Correlations among your random effects? Incoporating nested or other structures? Dealing with non-normal responses (e.g. binary)? Dealing with residual correlations? If so, so-called fixed effects models are not for you.  The main beef econometricians have had in the past with random effects models (by which they mean, in this context, random intercepts only models, because fixed effects models have no random slope and various other extensions employed in mixed models), is easily overcome by 'hybrid' models which utilize cluster-level covariates that are averages of the level one covariates.  Furthermore, we already know that the p-values are problematic and can take steps to deal with it, but also it's not clear to me how the FE argument fits with the Bayesian interpretation of random effects.  My bias is that model choice should not be based on standard errors, and in these situations fixed effects models simply have no means to answer questions I'd have of the data.
+- <span class="emph">Fixed effects models</span>.  Are you interested in... Cluster level effects? Correlations among your random effects? Incorporating nested or other structures? Dealing with non-normal responses (e.g. binary)? Dealing with residual correlations? If so, so-called fixed effects models are not for you.  The main beef econometricians have had in the past with random effects models (by which they mean, in this context, random intercepts only models, because fixed effects models have no random slope and various other extensions employed in mixed models), is easily overcome by 'hybrid' models which utilize cluster-level covariates that are averages of the level one covariates.  Furthermore, we already know that the p-values are problematic and can take steps to deal with it, but also it's not clear to me how the FE argument fits with the Bayesian interpretation of random effects.  My bias is that model choice should not be based on standard errors, and in these situations fixed effects models simply have no means to answer questions I'd have of the data.
 
 
 # Summary
@@ -576,6 +573,18 @@ summary(lmeMod)
 ```
 
 
+
+
+ 
+Do you think this feeling can last forever?
+
+You mean like forever-ever? forever-ever? forever-ever? forever-ever? ...Sure!
+
+God, I hope so!
+
+Me too!
+
+
 # References & Notes
 
 [^2]: I have seen people with very little statistics training confuse the phrase 'mixed methods' with mixed models. The concepts are in no way related.
@@ -583,4 +592,9 @@ summary(lmeMod)
 [^GH]:  See e.g. Gelman & Hill (2007) '5 ways to write the same model'.
 [^MLM]: See e.g. Bryk & Raudenbush (2001) Hierarchical Linear Modeling, Fitzmaurice, Laird & Ware (2004) Applied Longitudinal Analysis, as well as many texts with 'multilevel modeling' in the title.
 [^GAM]: Wood (2009) Generalized Additive Models chapter 6.
+ 
+ 
+ 
+ 
+ 
  

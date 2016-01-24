@@ -103,8 +103,11 @@ CSCAR, ARC, U of Michigan</p></em></h4>
 <div id="to-do" class="section level1">
 <h1>to do</h1>
 <ul>
-<li><p>review after going through Bates</p></li>
-<li><p>final checks – spell check – link check – reading check</p></li>
+<li><p>review after going through Bates more thoroughly to see if more can be added.</p></li>
+<li>final checks
+<ul>
+<li>reading check</li>
+</ul></li>
 </ul>
 </div>
 <div id="preface" class="section level1">
@@ -493,7 +496,7 @@ summary(sleepMod)</code></pre>
 <li><p><span class="emph">Cluster level covariates</span> may be added, and indeed often are in multilevel settings. The only thing that ends up changing is the design matrix for X.</p></li>
 <li><p>Additional sources of random effects may be used as well, and can be the result of other grouping factors which may be hierarchical in nature, e.g. blocks within districts, in which the levels of one clustering factor are <span class="emph">nested</span> within another, otherwise they are <span class="emph">crossed</span>. While your interpretation of the results may change somewhat, the process is the same. In addition, one may have <span>interactions</span> among the factors as yet another source of random effects.</p></li>
 <li><p>You probably noticed the lack of p-values in the lme4 output. <span class="emph">Statistical significance</span> is not straightforward with mixed models (unless you’re in the Bayesian framework). Just because other statistical programs give them to you doesn’t mean they are correct. See <span class="citation">Bates et al. (2015)</span> and <strong><code>?pvalues</code></strong> within the lme4 package for additional details.</p></li>
-<li><p><span class="emph">Fixed effects models</span>. Are you interested in… Cluster level effects? Correlations among your random effects? Incoporating nested or other structures? Dealing with non-normal responses (e.g. binary)? Dealing with residual correlations? If so, so-called fixed effects models are not for you. The main beef econometricians have had in the past with random effects models (by which they mean, in this context, random intercepts only models, because fixed effects models have no random slope and various other extensions employed in mixed models), is easily overcome by ‘hybrid’ models which utilize cluster-level covariates that are averages of the level one covariates. Furthermore, we already know that the p-values are problematic and can take steps to deal with it, but also it’s not clear to me how the FE argument fits with the Bayesian interpretation of random effects. My bias is that model choice should not be based on standard errors, and in these situations fixed effects models simply have no means to answer questions I’d have of the data.</p></li>
+<li><p><span class="emph">Fixed effects models</span>. Are you interested in… Cluster level effects? Correlations among your random effects? Incorporating nested or other structures? Dealing with non-normal responses (e.g. binary)? Dealing with residual correlations? If so, so-called fixed effects models are not for you. The main beef econometricians have had in the past with random effects models (by which they mean, in this context, random intercepts only models, because fixed effects models have no random slope and various other extensions employed in mixed models), is easily overcome by ‘hybrid’ models which utilize cluster-level covariates that are averages of the level one covariates. Furthermore, we already know that the p-values are problematic and can take steps to deal with it, but also it’s not clear to me how the FE argument fits with the Bayesian interpretation of random effects. My bias is that model choice should not be based on standard errors, and in these situations fixed effects models simply have no means to answer questions I’d have of the data.</p></li>
 </ul>
 </div>
 <div id="summary" class="section level1">
@@ -648,19 +651,23 @@ summary(lmeMod)</code></pre>
 ## Correlation of Fixed Effects:
 ##   (Intr)
 ## x 0.214</code></pre>
+<p>Do you think this feeling can last forever?</p>
+<p>You mean like forever-ever? forever-ever? forever-ever? forever-ever? …Sure!</p>
+<p>God, I hope so!</p>
+<p>Me too!</p>
 </div>
 </div>
 <div id="references-notes" class="section level1 unnumbered">
 <h1>References &amp; Notes</h1>
 <div id="refs" class="references">
 <div id="ref-lme4">
-<p>Bates, Douglas, Martin Machler, Benjamin Bolker, and Steven Walker. 2015. “Fitting Linear Mixed-Effects Models Using Lme4.”</p>
+<p>Bates, Douglas, Martin Mächler, Benjamin Bolker, and Steven Walker. 2015. “Fitting Linear Mixed-Effects Models Using Lme4.”</p>
 </div>
 <div id="ref-Fahrmeir">
 <p>Fahrmeir, Ludwig, Thomas Kneib, Stefan Lang, and Brian Marx. 2013. “Regression.”</p>
 </div>
 <div id="ref-GH">
-<p>Gelman, Andrew, and Jennifer Hill. 2007. “Data Analysis Using Regression and Multilvel/Hierarchical Models.”</p>
+<p>Gelman, Andrew, and Jennifer Hill. 2007. “Data Analysis Using Regression and Multilevel/Hierarchical Models.”</p>
 </div>
 <div id="ref-BDA">
 <p>Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. “Bayesian Data Analysis.”</p>
