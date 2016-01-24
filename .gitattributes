@@ -1,4 +1,5 @@
 ModelFitting/Mixed\ Models/mixedModelML/*.html linguist-vendored
+SC\ and\ TR/Mixed\ Models/mixedModelML/*.html linguist-vendored
 *.stan linguist-language=Stan
 
 
