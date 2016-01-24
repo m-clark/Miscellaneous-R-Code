@@ -283,7 +283,7 @@ summary(slim)</code></pre>
 <p>Note that unlike traditional dummy coding, we have an indicator for all groups. Z is actually a per cluster design matrix, which in this case has only an intercept. We’ll see that more clearly soon enough. With Z the model becomes:</p>
 <p><span class="math display">\[\mu = X\beta + Z\gamma\]</span> <span class="math display">\[y \sim \mathcal{N}(\mu, \sigma^2) \]</span> <span class="math display">\[\gamma \sim \mathcal{N}(0, \tau^2)\]</span></p>
 <p>And the <span class="math inline">\(\gamma\)</span> are the random effects pertaining to each cluster <span class="math inline">\(c\)</span> from the previous models.</p>
-<p><span class="citation">(Wood 2009, chap. 6)</span></p>
+<p><span class="citation">(Wood 2006, chap. 6)</span></p>
 </div>
 <div id="mixed-model-3b-design-matrix-again" class="section level2">
 <h2>Mixed Model 3b: Design matrix again</h2>
@@ -336,7 +336,7 @@ summary(slim)</code></pre>
 <p><span class="math inline">\(\Sigma\)</span> is an n x n block diagonal covariance matrix with the following description.</p>
 <p>For any unit <span class="math inline">\(i\)</span>: <span class="math display">\[\Sigma_{ii} = var(e_i^{\textrm{all}}) = \tau^2 + \sigma^2\]</span> For any units <em>i,k</em> within the same cluster <span class="math inline">\(c\)</span>: <span class="math display">\[\Sigma_{ik} = cov(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = \tau^2\]</span> For any units <em>i,k</em> in different clusters: <span class="math display">\[\Sigma_{ik} = cov(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = 0\]</span></p>
 <p>We can construct <span class="math inline">\(\Sigma\)</span> as <span class="math inline">\(Z\psi Z^\intercal + I\sigma^2\)</span>. Note that if <span class="math inline">\(\Sigma\)</span> is a correlation rather than covariance matrix, non-zero off-diagonals are the intraclass correlation.</p>
-<p><span class="citation">(Gelman and Hill 2007)</span> <span class="citation">(Wood 2009)</span></p>
+<p><span class="citation">(Gelman and Hill 2007)</span> <span class="citation">(Wood 2006)</span></p>
 </div>
 <div id="mixed-model-5b-multivariate-normal-model" class="section level2">
 <h2>Mixed Model 5b: Multivariate normal model</h2>
@@ -357,7 +357,7 @@ summary(slim)</code></pre>
 <p><span class="math display">\[\frac{1}{\sigma^2}(y-\mu)^2 + \lambda(\boldsymbol{\gamma}^\intercal\boldsymbol{\psi^{-1}}\boldsymbol{\gamma})\]</span></p>
 <p>Thinking back to the separate regressions approach, if we actually ran separate regressions the results would be over-contextualized, such that the cluster specific effects would deviate too far from the overall (population) effect, e.g. the fixed effect intercept. In the case of repeated measurements within individuals, while we’d like to think of ourselves as unique snowflakes, we are not <em>that</em> different. Taking a penalized approach reels in those unique effects a bit. In this light, mixed models can be seen as a compromise between ignoring cluster effects and having separate models for each cluster.</p>
 <p>The best thing to come from the penalized model approach is that many other models, e.g. those including spatial or additive components, can also be depicted this way, with only slight variations on the theme. This allows random effects to be combined with additive, spatial and other effects seamlessly, making for a very powerful modeling approach in general called <strong><em>structured additive models</em></strong>. See Fahrmeier et al. (2013) for details, and my document <a href="https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/Mixed%20Models/mixedModelML/mixedModelML.md">link</a> for the additive model connection specifically.</p>
-<p><span class="citation">(Wood 2009)</span> <span class="citation">(Fahrmeir et al. 2013)</span> <span class="citation">(Bates et al. 2015)</span></p>
+<p><span class="citation">(Wood 2006)</span> <span class="citation">(Fahrmeir et al. 2013)</span> <span class="citation">(Bates et al. 2015)</span></p>
 </div>
 <div id="mixed-model-7-bayesian-mixed-model" class="section level2">
 <h2>Mixed Model 7: Bayesian mixed model</h2>
@@ -652,10 +652,6 @@ summary(lmeMod)</code></pre>
 ## Correlation of Fixed Effects:
 ##   (Intr)
 ## x 0.214</code></pre>
-<p>Do you think this feeling can last forever?</p>
-<p>You mean like forever-ever? forever-ever? forever-ever? forever-ever? …Sure!</p>
-<p>God, I hope so!</p>
-<p>Me too!</p>
 </div>
 </div>
 <div id="references-notes" class="section level1 unnumbered">
@@ -674,7 +670,7 @@ summary(lmeMod)</code></pre>
 <p>Gelman, Andrew, John Carlin, Hal Stern, David Dunson, Aki Vehtari, and Donald Rubin. 2013. “Bayesian Data Analysis.”</p>
 </div>
 <div id="ref-Wood">
-<p>Wood, Simon. 2009. “Generalized Additive Models.”</p>
+<p>Wood, Simon. 2006. “Generalized Additive Models.”</p>
 </div>
 </div>
 </div>

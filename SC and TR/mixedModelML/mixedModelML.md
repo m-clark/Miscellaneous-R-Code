@@ -4,8 +4,7 @@
 
 
 ## Introduction
-The goal is to express the tie between generalized additive models and mixed models, and open the door to further modeling expansion. The following is based on [Wood][]'s 2006 text on additive models, chapter 6 in particular. It assumes familiarity with standard regression from a matrix perspective and at least passing familiarity with mixed models. 
-
+The goal is to express the tie between generalized additive models and mixed models, and open the door to further modeling expansion. The following is based on the @Wood text on additive models, chapter 6 in particular. It assumes familiarity with standard regression from a matrix perspective and at least passing familiarity with mixed models. 
 
 <br>
 <br>
@@ -22,7 +21,7 @@ Now consider a data situation in which observations are clustered, and so non-in
 
 $$y = Xb + Zg + \epsilon$$
 
-Where Z is an indicator matrix pertaining to the grouping structure (sometimes referred to as dummy coding or one-hot encoding). Consider a factor z representing group/cluster membership, this would convert z to the following:
+Where Z is a design matrix pertaining to the grouping structure. Consider a factor z representing group/cluster membership, this would convert z to the following:
 
 
 ------------------
@@ -43,13 +42,13 @@ Where Z is an indicator matrix pertaining to the grouping structure (sometimes r
 
 The coefficients $g$ are the random effects, assumed $\mathcal{N}(0,\tau^2)$, i.e. normally distributed with zero mean and $\tau$ standard deviation. While we are often interested in these specific effects, they do not have to be estimated directly for modeling purposes.
 
-$$y = Xb + Zg + \epsilon \\
-g \sim \mathcal{N}(0, \psi_\theta) \\
-\epsilon \sim \mathcal{N}(0, \Lambda\sigma^2)$$
+$$y = Xb + Zg + \epsilon$$
+$$g \sim \mathcal{N}(0, \psi_\theta)$$
+$$\epsilon \sim \mathcal{N}(0, \Lambda\sigma^2)$$
 
 In this depiction, $\psi_\theta$ can reflect some more interesting dependencies, but in the simple case of a random intercepts model it can be a single variance estimate $\tau^2$. $\Lambda$ can be used to model residual covariance but often is just the identity matrix, with the underlying assumption of constant variance $\sigma^2$ across observations.  
 
-We can combine the random and residuals into a single construct reflecting the covariance structure of the observations:
+We can combine the random effects and residuals into a single construct reflecting the covariance structure of the observations:
 
 $$ e = Zg + \epsilon $$
 
@@ -59,8 +58,8 @@ $$Z\psi_{\theta}Z^\intercal + I\sigma^2$$
 
 This puts us back to a standard linear model:
 
-$$ y = Xb + e, \\
-e \sim \mathcal{N}(0, \Sigma_\theta\sigma^2)$$
+$$ y = Xb + e$$
+$$e \sim \mathcal{N}(0, \Sigma_\theta\sigma^2)$$
 
 where $\Sigma_\theta\ = \frac{Z\psi_{\theta}Z^\intercal}{\sigma^2} + I$.
 
@@ -220,9 +219,9 @@ Situations arise in which using maximum likelihood for mixed models would result
 ### Link with penalized regression
 A link exists between mixed models and a penalized likelihood approach.  For a penalized approach with the SLiM, the objective function we want to minimize can be expressed as follows:
 
-$$ \lVert y- X\beta \rVert^2 + \color{gray}{\beta^\intercal\beta} $$
+$$ \lVert y- X\beta \rVert^2 + \beta^\intercal\beta $$
 
-The added component (gray) to the sum of the squared residuals is the penalty. By adding the sum of the squared coefficients, we end up keeping them from getting too big, and this helps to avoid <span title="in high dimensional cases it helps with underfitting" style="color:#dd4814">overfitting</span>.  Another interesting aspect of this approach is that it is comparable to using a <span title="normal with zero mean and some constant variance" style="color:#dd4814">specific prior</span> on the coefficients in a Bayesian framework.  
+The added component to the sum of the squared residuals is the penalty. By adding the sum of the squared coefficients, we end up keeping them from getting too big, and this helps to avoid <span title="in high dimensional cases it helps with underfitting" style="color:#dd4814">overfitting</span>.  Another interesting aspect of this approach is that it is comparable to using a <span title="normal with zero mean and some constant variance" style="color:#dd4814">specific prior</span> on the coefficients in a Bayesian framework.  
 
 We can now see mixed models as a penalized technique.  If we knew $\sigma$ and $\psi_\theta$, then the predicted random effects $g$ and estimates for the fixed effects $\beta$ are those that minimize the following objective function:
 
@@ -321,7 +320,7 @@ plot(x, wear, xlab='Scaled Engine size', ylab='Wear Index', pch=19,
 lines(x_pred, predictions, col='#1e90ff')
 ```
 
-<img src="mixedModelML_files/figure-html/fitCSgam-1.png" title="" alt="" width="50%" style="display: block; margin: auto;" />
+<img src="mixedModelML_files/figure-html/fitCSgam-1.png" title="" alt="" style="display: block; margin: auto;" />
 
 
 ### As a mixed model
@@ -330,13 +329,13 @@ One can use the result of eigen decomposition on the penalty matrix to ultimatel
 
 
 ```r
-S = Sfunc(xk)
+S = Sfunc(x_knots)
 init = eigen(S)
 U = init$vectors
 D = diag(init$values)
 poseigen = which(diag(D) > 0)  
 Dpos = D[poseigen, poseigen]           # smallest submatrix containing all positive values
-Xf = splineX(x, knots = xk)            # spline model matrix
+Xf = splineX(x, knots = x_knots)       # spline model matrix
 U_F = U[, (ncol(U)-1):ncol(U)]         # partition eigenvector matrix
 U_R = U[, 1:(ncol(U)-ncol(U_F))]
 X_F = Xf %*% U_F                       # fixed part  with B_F coef to be estimated (not penalized)
@@ -346,8 +345,8 @@ Z = X_R %*% sqrt(Dpos)
 
 The above operations have effectively split the GAM into fixed and random parts:
 
-$$\mathbf{X}_F\mathbf{\beta}_F + \mathbf{X}_R\mathbf{b}_R, \\
-\mathbf{b}_R\sim \mathcal{N}(\mathbf{0}, \mathbf{D_+^{-1}}/\lambda) \\$$
+$$\mathbf{X}_F\mathbf{\beta}_F + \mathbf{X}_R\mathbf{b}_R$$
+$$\mathbf{b}_R\sim \mathcal{N}(\mathbf{0}, \mathbf{D_+^{-1}}/\lambda)$$
 
 Here $\lambda$ is a smoothing parameter, which controls the amount of smoothing. For a penalized spline, the loss function is:
 
@@ -358,8 +357,8 @@ with the second part the added penalty. As $\lambda \rightarrow \infty$, we esse
 
 The Z in the code above represents part of the mixed model Z we had before in the standard setting. We can now represent our model as follows:
 
-$$\mathbf{X}_F\mathbf{\beta}_F + \mathbf{Zg}, \\
-\mathbf{g} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}/\lambda) \\$$
+$$\mathbf{X}_F\mathbf{\beta}_F + \mathbf{Zg}$$
+$$\mathbf{g} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}/\lambda) $$
 
 To incorporate a gamm, i.e. a *generalized additive mixed model*, the X_F above would be appended to the 'fixed' effect design matrix, while Z would be added to the random effects component, and estimation would proceed normally as for a mixed model.  
 
@@ -430,7 +429,7 @@ plot(modGamS$gam)
 ## X   298.51       9.05   32.98
 ```
 
-<img src="mixedModelML_files/figure-html/gammSleepStudy-1.png" title="" alt="" width="50%" style="display: block; margin: auto;" />
+<img src="mixedModelML_files/figure-html/gammSleepStudy-1.png" title="" alt="" style="display: block; margin: auto;" />
 
 
 <br>
@@ -441,13 +440,11 @@ So we've seen that GAMs can be seen as having a fixed and random effect as in mi
 
 
 ### It's full of STARs...
-However, this goes even further.  ***St****ructured* ***A****dditive* ***R****egression models* (STAR) build upon the notion just demonstrated (nicely illustrated in [Fahrmeir][] et al.). Not only we can combine mixed and additive models, but other model classes as well.  This includes interactions and varying coefficient models, spatial effects, gaussian processes/kriging, markov random fields and others.  Each model class has a particular design and penalty matrix as we saw in the examples previously, but otherwise can be added to the current model being considered.  We can also use other techniques, like <span title="which itself can be seen as an additive modeling approach!" style="color:#dd4814">boosting</span> to estimate them. Standard regression, glm, gam, etc. are thus special cases of the STAR model. In short, we now have a highly flexible modeling environment within which to tackle the questions we seek to answer with our data.
+However, this goes even further.  ***St****ructured* ***A****dditive* ***R****egression models* (STAR) build upon the notion just demonstrated (nicely illustrated in @Fahrmeir). Not only we can combine mixed and additive models, but other model classes as well.  This includes interactions and varying coefficient models, spatial effects, gaussian processes/kriging, markov random fields and others.  Each model class has a particular design and penalty matrix as we saw in the examples previously, but otherwise can be added to the current model being considered.  We can also use other techniques, like <span title="which itself can be seen as an additive modeling approach!" style="color:#dd4814">boosting</span> to estimate them. Standard regression, glm, gam, etc. are thus special cases of the STAR model. In short, we now have a highly flexible modeling environment within which to tackle the questions we seek to answer with our data.
 
 
 <!--html_preserve--><div id="htmlwidget-3076" style="width:900px;height:480px;" class="grViz"></div>
 <script type="application/json" data-for="htmlwidget-3076">{"x":{"diagram":"\ndigraph boxes_and_circles {\n\n  # graph statement\n  graph [layout = dot,\n         rankdir = TB]\n\n  # node statements\n  node [fontname = Helvetica,\n        fontcolor = white,\n        width = .5,\n        style = filled]\n\n  node [shape = circle,\n        color = \"#ff5503\"] // sets as circles\n  STAR \n\n  node [shape = box,\n        color = \"#1f78b4\"]\n  Others\n\n  node [color = \"#e31a1c\"]\n  GAMM Mixed, GAM\n\n  node [color = \"#33a02c\"]\n  GLM, SLiM\n\n\n  subgraph {\n  rank = same; Mixed; GAM;\n  }\n\n  # edge statements\n  STAR -> GAMM           [arrowhead=dot, color=gray]\n  STAR -> Others         [arrowhead=dot, color=gray]\n  GAMM -> Mixed          [arrowhead=dot, color=gray]\n  GAMM -> GAM            [arrowhead=dot, color=gray]\n  GAM -> GLM             [arrowhead=dot, color=gray]\n  Mixed -> GLM           [arrowhead=dot, color=gray]\n  GLM -> SLiM            [arrowhead=dot, color=gray]\n\n  GAM -> Mixed           [arrowhead=none, color=gray]\n\n}\n","config":{"engine":"dot","options":null}},"evals":[]}</script><!--/html_preserve-->
 
 
-
-[Wood]: https://www.crcpress.com/Generalized-Additive-Models-An-Introduction-with-R/Wood/9781584884743 "Wood, S. (2006). Generalized Additive Models."
-[Fahrmeir]: http://www.springer.com/us/book/9783642343322 "Fahrmeir, L., Kneib, Th., Lang, S., Marx, B. (2013). Regression."
+# References

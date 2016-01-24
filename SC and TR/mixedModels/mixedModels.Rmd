@@ -6,12 +6,12 @@ author: |
   | CSCAR, ARC, U of Michigan
 date: '`r Sys.Date()`'
 output:
+  pdf_document:
+    toc: yes
   html_document:
     css: ../../otherCSS.css
     highlight: default
     theme: united
-    toc: yes
-  pdf_document:
     toc: yes
 references:
 - author:
@@ -19,7 +19,7 @@ references:
     given: Simon
   id: Wood
   issued:
-    year: 2009
+    year: 2006
   title: Generalized Additive Models.
 - author:
   - family: Gelman
@@ -110,7 +110,7 @@ Some terms you might come across regarding mixed models:
 - Growth curve models (possibly Latent GCM)
 - Mixed effects models
 
-All describe types of mixed models.  Some might be more historical, others are more often seen in a specific discipline, others might refer to a certain data structure (e.g. multilevel clustering), and still others are special cases. <span class='emph'>Mixed effects</span>, or simply mixed, models generally refer to a mixture of fixed and random effects.  I prefer the term mixed models because it is simple and no specific structure is implied[^2].  <span class='emph'>Fixed effects</span>, as we will see later, is perhaps a poor but nonetheless stubborn term for the typical main effects one would see in a linear regression model, i.e. the non-random part of a mixed model, and in some contexts are referred to as the *population average* effect.
+All describe types of mixed models.  Some might be more historical, others are more often seen in a specific discipline, others might refer to a certain data structure (e.g. multilevel clustering), and still others are special cases. <span class='emph'>Mixed effects</span>, or simply mixed, models generally refer to a mixture of fixed and random effects.  I prefer the term mixed models because it is simple and no specific structure is implied[^mixmeth].  <span class='emph'>Fixed effects</span>, as we will see later, is perhaps a poor but nonetheless stubborn term for the typical main effects one would see in a linear regression model, i.e. the non-random part of a mixed model, and in some contexts are referred to as the *population average* effect.
 
 Alternative approaches used in clustered data situations include:
 
@@ -572,27 +572,6 @@ summary(lmeMod)
 
 
 
-
- 
-Do you think this feeling can last forever?
-
-You mean like forever-ever? forever-ever? forever-ever? forever-ever? ...Sure!
-
-God, I hope so!
-
-Me too!
-
-
 # References & Notes
 
-[^2]: I have seen people with very little statistics training confuse the phrase 'mixed methods' with mixed models. The concepts are in no way related.
-
-[^GH]:  See e.g. Gelman & Hill (2007) '5 ways to write the same model'.
-[^MLM]: See e.g. Bryk & Raudenbush (2001) Hierarchical Linear Modeling, Fitzmaurice, Laird & Ware (2004) Applied Longitudinal Analysis, as well as many texts with 'multilevel modeling' in the title.
-[^GAM]: Wood (2009) Generalized Additive Models chapter 6.
- 
- 
- 
- 
- 
- 
+[^mixmeth]: I have seen people with very little statistics training confuse the phrase 'mixed methods' with mixed models. The concepts are in no way related.
