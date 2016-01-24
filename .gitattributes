@@ -1,7 +1,4 @@
 *.html linguist-vendored
-
-
-
 *.stan linguist-language=Stan
 
 
