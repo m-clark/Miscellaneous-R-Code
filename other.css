@@ -4,12 +4,12 @@
 }
 
 .pack {
-  color: #1e90ff;  /*dodgerblue*/
+  color: #C93312;  /*darkred*/
   font-weight: 500;
 }
 
-.func {
-  color: #C93312;  /*darkred*/
+.func {            /*Not needed, just use ``*/
+  color: #C93312;
   font-weight: 500;
 }
 
@@ -19,7 +19,7 @@
 }
 
 a {
-  color: #ff5503;
+  color: #1e90ff;  /*dodgerblue*/
 }
 
 pre {
