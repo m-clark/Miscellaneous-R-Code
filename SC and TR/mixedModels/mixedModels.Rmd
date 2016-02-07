@@ -6,12 +6,12 @@ author: |
   | CSCAR, ARC, U of Michigan
 date: '`r Sys.Date()`'
 output:
-  pdf_document:
-    toc: yes
   html_document:
-    css: ../../otherCSS.css
+    css: ../../other.css
     highlight: default
     theme: united
+    toc: yes
+  pdf_document:
     toc: yes
 references:
 - author:
@@ -76,18 +76,13 @@ references:
 always_allow_html: yes
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(message=F, fig.align='center')
+knitr::opts_chunk$set(message=F, fig.align='center', cache = TRUE)
 ```
 
-# to do
-- review after going through Bates more thoroughly to see if more can be added.
-
-- final checks
-    - reading check
 
 # Preface
 
-This document is intended as a reference for those starting out with to what we'll simply call *mixed models*.  Some parts would be suitable to anyone in an applied discipline with no more knowledge than that of regression (e.g. beginning, models 1-2, end), while other parts assume familiarity with matrix notation and/or other more advanced knowledge. Hopefully folks of varying backgrounds can find it useful.
+This document is intended as a reference for those starting out with what we'll simply call *mixed models*.  Some parts would be suitable to anyone in an applied discipline with no more knowledge than that of standard regression (e.g. the beginning, models 1-2, end), while other parts assume familiarity with matrix notation and/or other relatively advanced knowledge. Hopefully folks of varying backgrounds can find it useful.
 
 The motivation here is that one could open up different sources with content pertaining to mixed models, and feel like none of them are talking about the same thing. They'll use different terminology and different model depictions, and where one might be feeling ok after reading some of it, find their knowledge loosen upon perusing the next description.  This is an attempt to help with that situation, and one that I hope will not simply add to the confusion.
 
@@ -110,7 +105,7 @@ Some terms you might come across regarding mixed models:
 - Growth curve models (possibly Latent GCM)
 - Mixed effects models
 
-All describe types of mixed models.  Some might be more historical, others are more often seen in a specific discipline, others might refer to a certain data structure (e.g. multilevel clustering), and still others are special cases. <span class='emph'>Mixed effects</span>, or simply mixed, models generally refer to a mixture of fixed and random effects.  I prefer the term mixed models because it is simple and no specific structure is implied[^mixmeth].  <span class='emph'>Fixed effects</span>, as we will see later, is perhaps a poor but nonetheless stubborn term for the typical main effects one would see in a linear regression model, i.e. the non-random part of a mixed model, and in some contexts are referred to as the *population average* effect.
+All describe types of mixed models.  Some might be more historical, others are more often seen in a specific discipline, others might refer to a certain data structure (e.g. multilevel clustering), and still others are special cases. <span class='emph'>Mixed effects</span>, or simply mixed, models generally refer to a mixture of fixed and random effects.  I prefer the term mixed models because it is simple and no specific structure is implied[^mixmeth].  <span class='emph'>Fixed effects</span>, as we will see later, is perhaps a poor but nonetheless stubborn term for the typical main effects one would see in a linear regression model, i.e. the non-random part of a mixed model, and in some contexts they are referred to as the *population average* effect.
 
 Alternative approaches used in clustered data situations include:
 
@@ -130,7 +125,7 @@ The following is a standard regression without any clustering.
 $$y_i = \alpha + \beta X_i + e_i$$
 $$e_i \sim \mathcal{N}(0, \sigma^2)$$
 
-We have observations $i = 1....n$, the intercept $\alpha$, and $\beta$ is the effect of the covariate $X$. The error term is assumed normally distributed with variance $\sigma^2$.  
+We have observations $i = 1....n$, the intercept $\alpha$, and $\beta$ is the effect of the covariate $X$. The error term is assumed normally distributed with a mean of 0 and variance $\sigma^2$.  
 
 Another way to write this focuses on the data generating process rather than 'error':
 
@@ -173,14 +168,14 @@ ggplot(aes(x=Days, y=Reaction), data=sleepstudy) +
   theme(legend.position='none')
 ```
 
-What does this tell us? The black line is what our current model is suggesting, i.e. it assumes a single starting point and the same trajectory for everyone. However, we see that subjects have starting points that might have as much as 100ms difference. In addition, while the slope is generally positive, a few show little to no change over time.  We'll come back to this data towards the end.
+What does this tell us? The black line is what our current model is suggesting, i.e. it assumes a single starting point and the same trajectory for everyone. However, we see that subjects have starting points that might have as much as 100ms difference. In addition, while the slope is generally positive, a few show little to no change over time.  In other words, there is notable variability with both individuals' intercepts and slopes.  We'll come back to this data towards the end.
 
 
 
 # Many ways to write the same model
 So we want to take into account the clustered nature of the data. Instead of ignoring the clustering as in the SLiM above, we might think of running completely separate regressions for each individual.  However the models would typically be run on very little data and be overly contextualized.  As we'll see, mixed models will allow for random intercepts and slopes for each person, and take clustering into account while not being too individual-specific.
 
-How might this model be depicted? It turns out it can and is shown in a variety of ways, depending on the text or article you may be looking at.  The following is inspired by [Gelman & Hill](http://www.stat.columbia.edu/~gelman/arm/) (2007), where they show five ways to write a mixed model.  For simplicity we will typically only concern ourselves with a random intercepts model, but will from time to time extend beyond.  The first couple formulations require no more than an understanding of standard regression models, but more knowledge is assumed with other model depictions.
+How might this model be depicted? It turns out it can and is shown in a variety of ways, depending on the text or article you may be looking at.  The following is inspired by [Gelman & Hill](http://www.stat.columbia.edu/~gelman/arm/) (2007), where they show five ways to write a mixed model.  For simplicity we will typically only concern ourselves with a random intercepts model, but will from time to time extend beyond that setting.  The first couple formulations require no more than an understanding of standard regression models, but more knowledge is assumed with other model depictions.
 
 
 ## Mixed Model 1a: Allowing coefficients to vary across groups
@@ -191,11 +186,14 @@ $$\alpha_c \sim \mathcal{N}(\mu_\alpha, \tau^2)$$
 $$e_{ic} \sim \mathcal{N}(0, \sigma^2)$$
 
 
-In the above, each observation $i$ within cluster $c$ has an intercept $\alpha$ depending on what cluster $c$ it belongs to. The $\alpha_c$ are assumed normally distributed with mean $\mu_\alpha$ and variance $\tau^2$. $\mu_\alpha$ is the overall intercept we'd see in the the SLiM approach. The $e$ are mean zero normally distributed as depicted in the SLiM.
+In the above, each observation $i$ within cluster $c$ has an intercept $\alpha$ depending on what cluster $c$ it belongs to. The $\alpha_c$ are assumed normally distributed with mean $\mu_\alpha$ and variance $\tau^2$. $\mu_\alpha$ is the overall intercept we'd see in the SLiM approach. The $e$ are mean zero normally distributed as depicted in the SLiM.
+
+
+For each model depiction I'll note one of the primary references where one can see it in near identical form that particular text or article. It will not be the only reference that does, but at least it should be one that will provide some additional perspective.
 
 [@GH]
 
-## Mixed Model 1b: Multilevel Model
+## Mixed Model 1b: Multilevel model
 Instead we might write the second part as follows, which is a common way to do so in the 'multilevel modeling' literature. The level one model is as before, and for the cluster level, or level two, model we show it a bit differently: 
 
 $$y_{ic} = \alpha_{c} + \beta X_{ic} + e_{ic}$$
@@ -216,7 +214,7 @@ Alternatively, we can think of them as another *component* of variation (error),
 
 $$y_{ic} = \mu_\alpha + \beta X_{ic} + (\gamma_{c} + e_{ic})$$
 
-We'll revisit these two ways of considering the model again again later.
+We'll revisit these two ways of considering the model again later.
 
 [@GH]
 
@@ -234,7 +232,7 @@ as we did in [Model 1b](#mixed-model-1b-multilevel-depiction), where $X^\text{*}
 [@GH]
 
 ## Mixed Model 3a: Design matrix for random component
-If we switch to matrix notation, we can see the model in yet another way. To get our bearings, I'll first show the SLiM.
+If we switch to matrix notation, we can see the model in still other ways. To get our bearings, I'll first show the SLiM again.
 
 $$\mu = X\beta$$
 $$y \sim \mathcal{N}(\mu, \sigma^2) $$
@@ -243,11 +241,13 @@ X is a design matrix with a column of 1s representing the intercept and the othe
 
 Let's start with a random intercepts model.  Now let Z be an indicator matrix representing the $1 \dots m$ clusters in some variable z. For example, if there were 3 clusters of A, B, and C, Z looks like the following:
 
-```{r Zdesign, echo=FALSE}
+
+```{r Zdesign, echo=FALSE, fig.align='center'}
 z = Z = factor(c('A','A','B','B','C','C'))
 Z =  model.matrix(~ Z-1)
-pander::pander(data.frame(z, Z))
+pander::pander(data.frame(z, Z), justify='center')
 ```
+
 
 Note that unlike traditional dummy coding, we have an indicator for all groups. Z is actually a per cluster design matrix, which in this case has only an intercept.  We'll see that more clearly soon enough. With Z the model becomes:
 
@@ -257,7 +257,7 @@ $$\gamma \sim \mathcal{N}(0, \tau^2)$$
 
 And the $\gamma$ are the random effects pertaining to each cluster $c$ from the previous models.
 
-[@Wood, chapter 6]
+[@Wood, chapter 6] [@lme4]
 
 ## Mixed Model 3b: Design matrix again
 Let's now say we have multiple random effects, e.g. random intercepts and slopes. In other words, we now let any of the regression coefficients be random. For a given cluster $c$:
@@ -266,10 +266,10 @@ $$\mu_c = X_c\beta + X^S_c\gamma_c$$
 $$y_c \sim \mathcal{N}(\mu_c, \sigma^2) $$
 $$\gamma_c \sim \mathcal{N}(0, \psi)$$
 
-Here $y_c$ contains the values $1...n_c$ in cluster $c$, but within that cluster the model is exactly as that depicted in [model 1b](#mixed-model-1b-multilevel). Here $X$ is the $n\textrm{ x }p$ model matrix with $\beta$ a vector of $p$ regression coefficients. $X^S_c$ is $X$ or some $n\textrm{ x }q$ subset of the covariates, with $\gamma$ representing the $q$ random effects.  The random effects are the result of a multivariate normal process that allows the random intercepts and slopes to correlate via covariance matrix $\psi$. This depiction perhaps most clearly illustrates the random effects $\gamma$ as an added deviation to the the typical effects $\beta$. If we factor the $X$, the coefficients in the model are $\beta + \gamma_c$ for each cluster $c$.
+Here $y_c$ contains the values $1...n_c$ in cluster $c$, but within that cluster the model is exactly as that depicted in [model 1b](#mixed-model-1b-multilevel). Here $X$ is the $n\textrm{ x }p$ model matrix with $\beta$ a vector of $p$ regression coefficients. $X^S_c$ is $X$ or some $n\textrm{ x }q$ subset of the covariates, with $\gamma$ representing the $q$ random effects.  The random effects are the result of a multivariate normal process that allows the random intercepts and slopes to correlate via covariance matrix $\psi$. This depiction perhaps most clearly illustrates the random effects $\gamma$ as an added deviation to the typical effects $\beta$. If we factor the $X$, the coefficients in the model are $\beta + \gamma_c$ for each cluster $c$.
 
 ## Mixed Model 3c: General notation
-We can take the above two more generally to encompass more levels and other extensions to mixed models. For clusters $1\dots c \dots m$, we can write:
+We can take the above two to a more general situation that encompasses more levels and other extensions to mixed models. For clusters $1\dots c \dots m$, we can write:
 
 $$y = X\beta + Z\gamma + \epsilon$$
 
@@ -292,7 +292,7 @@ $$\left(
 \end{smallmatrix}
 \right)$$
 
-and $\beta$ is are the $p \textrm{ x } 1$ dimension fixed effects as before.
+and $\beta$ is the $p \textrm{ x } 1$ dimension fixed effects as before.
 
 [@Fahrmeir, chapter 7]
 
@@ -315,7 +315,7 @@ The ratio of  $\frac{\tau^2}{\tau^2 + \sigma^2}$ gives us a statistic called the
 [@GH]
 
 ## Mixed Model 4b: Conditional vs. marginal model
-Some will show mixed models as conditional on the random effects, where they are treated as additional regression coefficients, or as marginal models with as in 4a.
+Some will show mixed models as *conditional* on the random effects, where they are treated as additional regression coefficients, or as marginal models as in 4a.
 
 Conditional Model:
 $$y|\gamma \sim \mathcal{N}(X\beta + Z\gamma, \sigma^2)$$
@@ -340,6 +340,8 @@ For any units *i,k* within the same cluster $c$: $$\Sigma_{ik} = cov(e_i^{\textr
 For any units *i,k* in different clusters: $$\Sigma_{ik} = cov(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = 0$$
 
 We can construct $\Sigma$ as $Z\psi Z^\intercal + I\sigma^2$. Note that if $\Sigma$ is a correlation rather than covariance matrix, non-zero off-diagonals are the intraclass correlation.
+
+$$\Sigma_{ik} = cor(e_i^{\textrm{all}}, e_k^{\textrm{all}}) = \frac{\tau^2}{\tau^2 + \sigma^2}$$
 
 [@GH] [@Wood] 
 
@@ -369,20 +371,20 @@ In the mixed model, we turn back to [model 3](#mixed-model-3a-design-matrix-for-
 $$\mu = X\beta + Z\gamma$$
 $$y \sim \mathcal{N}(\mu, \sigma^2) $$
 
-Estimating $\beta$ by maximum likelihood results in the same estimates that minimize the following loss function for the simple random intercepts case:
+Estimating $\beta$ by maximum likelihood results in the same estimates that minimize the following loss function:
 
 $$\frac{1}{\sigma^2}(y-\mu)^2 + \lambda(\boldsymbol{\gamma}^\intercal\boldsymbol{\psi^{-1}}\boldsymbol{\gamma})$$
 
 Thinking back to the separate regressions approach, if we actually ran separate regressions the results would be over-contextualized, such that the cluster specific effects would deviate too far from the overall (population) effect, e.g. the fixed effect intercept. In the case of repeated measurements within individuals, while we'd like to think of ourselves as unique snowflakes, we are not *that* different.  Taking a penalized approach reels in those unique effects a bit.  In this light, mixed models can be seen as a compromise between ignoring cluster effects and having separate models for each cluster.
 
-The best thing to come from the penalized model approach is that many other models, e.g. those including spatial or additive components, can also be depicted this way, with only slight variations on the theme.  This allows random effects to be combined with additive, spatial and other effects seamlessly, making for a very powerful modeling approach in general called ***structured additive models***.  See Fahrmeier et al. (2013) for details, and my document [link](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC and TR/Mixed%20Models/mixedModelML/mixedModelML.md) for the additive model connection specifically.
+The best thing to come from the penalized model approach is that many other models, e.g. those including spatial or additive components, can also be depicted as mixed models, with only slight variations on the theme.  This allows random effects to be combined with additive, spatial and other effects seamlessly, making for a very powerful modeling approach in general called ***structured additive models***.  See Fahrmeier et al. (2013) for details, and my document [link](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC and TR/Mixed%20Models/mixedModelML/mixedModelML.md) for the additive model connection specifically.
 
 [@Wood] [@Fahrmeir] [@lme4]
 
 ## Mixed Model 7: Bayesian mixed model
 Penalized regression turns out to have an additional Bayesian interpretation.  Furthermore, in thinking about random effects, we are practically halfway to Bayesian thinking anyway, where every effect is seen as random.
 
-The penalized regression approach above is equivalent to a standard Bayesian linear regression model, with a zero mean normal prior on the regression coefficients.  Here is one way to do it, the priors are specified on the first line.
+The penalized regression approach above is equivalent to a standard Bayesian linear regression model, with a zero mean normal prior on the regression coefficients.  Here is one way to do it, where the  priors are specified on the first line.
 $$\beta \sim \mathcal{N}(0, v), \sigma \sim \mathcal{\textrm{Half-Cauchy}}(0,r)$$
 $$y \sim \mathcal{N}(X\beta, \sigma^2)$$
 
@@ -391,11 +393,11 @@ Mixed models can be utilized in the Bayesian context as well, where now the term
 $$\beta \sim \mathcal{N}(0, v), \sigma \sim \mathcal{\textrm{Half-Cauchy}}(0, r), \gamma ~  \sim \mathcal{N}(0,\tau^2)$$
 $$y \sim \mathcal{N}(X\beta + Z\gamma, \sigma^2)$$
 
-[@BDA]
+[@BDA] [@Fahrmeir]
 
 # Simulate a mixed model
 
-To demonstrate our understanding of mixed models, we can simulate one from scratch.  For the most part (except to avoid masking basic R functions like `gamma`) I have named objects as they have been used above, and I include the matrix approach as an alternative. After some initial setup, we set the parameters of interest, and then create a <span class='objclass'>data.frame</span> object that's ready be used for analysis.
+To demonstrate our understanding of mixed models, we can simulate one from scratch.  For the most part (except to avoid masking basic R functions like `gamma`) I have named objects as they have been used above, and I include the matrix approach as an alternative. After some initial setup, we set the parameters of interest, and then create a <span class='objclass'>data.frame</span> object that's ready to be used for analysis.
 
 ```{r mixedModelSim}
 # setup
@@ -429,12 +431,12 @@ lmeMod = lmer(y ~ x + (1|clus), data=d)
 summary(lmeMod)
 ```
 
-In the above results, the value of `r round(attr(VarCorr(lmeMod)$clus, 'stddev'), 4)` for the standard deviation of the random intercepts is close to the true value of <span class='code'>tau</span>, and the residual standard deviation is close to a value of `r sigma`.  Feel free to play with the settings to see how things change.
+In the above results, the value of `r round(attr(lme4::VarCorr(lmeMod)$clus, 'stddev'), 4)` for the standard deviation of the random intercepts is close to the true value of <span class='code'>tau</span>, and the residual standard deviation is close to a value of `r sigma`.  Feel free to play with the settings to see how things change.
 
 
 
 # Applied Example
-Let's go back to our sleepstudy data.  This time we'll fit a model with random intercepts and slopes. In the longitudinal setting like this, the mixed model is sometimes referred to as a *growth curve* model. However, 'growth curve models' is a term that also refers to (primarily) nonlinear population growth models, a popular one being the logistic growth curve, as would be fit with the base R function <span class='func'>nls</span>. Such models can also be fit within the mixed model framework too however, and the <span class="pack">nlme</span> package has some functions that make it quite straightforward.
+Let's go back to our sleepstudy data.  This time we'll fit a model with random intercepts and slopes. In the longitudinal setting like this, the mixed model is sometimes referred to as a *growth curve* model[^growthCurve], although that usually implies a latent variable modeling approach.
 
 ```{r sleepMod}
 sleepMod = lmer(Reaction ~ Days + (Days|Subject), data=sleepstudy)
@@ -446,8 +448,7 @@ Let's plot the results of the fits using the subject specific random effects.  N
 ```{r sleepModRanefs, echo=-c(1:6)}
 library(ggplot2)
 ranefs = ranef(sleepMod)$Subject
-subjectTrajectories = apply(ranefs, 1, `+`, fixef(sleepMod))
-subjectTrajectories = data.frame(t(subjectTrajectories), Subject=factor(unique(sleepstudy$Subject)))
+subjectTrajectories = data.frame(coef(sleepMod)$Subject, Subject=factor(unique(sleepstudy$Subject)))
 colnames(subjectTrajectories) = c('int', 'slope', 'Subject')
 
 ranef(sleepMod)
@@ -484,7 +485,7 @@ Some other topics I'll just briefly mention, but which do not change the general
 
 - <span class="emph">Cluster level covariates</span> may be added, and indeed often are in multilevel settings.  The only thing that ends up changing is the design matrix for X.  
 
-- Additional sources of random effects may be used as well, and can be the result of other grouping factors which may be hierarchical in nature, e.g. blocks within districts, in which the levels of one clustering factor are <span class="emph">nested</span> within another, otherwise they are <span class="emph">crossed</span>.  While your interpretation of the results may change somewhat, the process is the same.  In addition, one may have <span class="">interactions</span> among the factors as yet another source of random effects. 
+- Additional sources of random effects may be used as well, which may result from other grouping factors that are hierarchical in nature, where the levels of one clustering factor are <span class="emph">nested</span> within another (e.g. cities within counties), otherwise they are <span class="emph">crossed</span>.  While your interpretation of the results may change somewhat, the process is the same.  In addition, one may have <span class="">interactions</span> among the factors as yet another source of random effects. 
 
 - You probably noticed the lack of p-values in the lme4 output. <span class="emph">Statistical significance</span> is not straightforward with mixed models (unless you're in the Bayesian framework). Just because other statistical programs give them to you doesn't mean they are correct. See @lme4 and **`?pvalues`** within the lme4 package for additional details.
 
@@ -575,3 +576,5 @@ summary(lmeMod)
 # References & Notes
 
 [^mixmeth]: I have seen people with very little statistics training confuse the phrase 'mixed methods' with mixed models. The concepts are in no way related.
+
+[^growthCurve]: <span class="emph">Growth curve models</span> is a term that also refers to nonlinear (population primarily) growth models, a popular one being the [logistic growth curve](https://en.wikipedia.org/wiki/Logistic_function#In_ecology:_modeling_population_growth), as would be fit with the base R function `nls`. Such models can also be fit within the mixed model framework too however, and the <span class="pack">nlme</span> package has some functions that make it quite straightforward.
