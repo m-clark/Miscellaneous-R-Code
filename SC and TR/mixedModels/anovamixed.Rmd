@@ -1,5 +1,5 @@
 ---
-title: "Simple Demo of Repeated Measures ANOVA/Mixed Model Equivalence"
+title: "Repeated Measures and Mixed Models"
 output:
   pdf_document:
     toc: yes
@@ -12,9 +12,11 @@ output:
 knitr::opts_chunk$set(message=F, cache=FALSE)
 ```
 
-## Intro
+## Introduction
 
-Some are still trained statistically with a heavy focus on analysis of variance (ANOVA) techniques, but  without delving too much into their role as special cases of regression, and mixed models more generally. This is despite the fact that data collected is typically richer than a couple of tightly controlled treatment conditions with a normally distributed target variable, rendering these techniques too restrictive for many common situations. The following uses a very small dataset to demonstrate the connections to standard linear and mixed models, with a hope that some will consider using the more general approaches after realizing they are only gaining in flexibility while maintaining the same analyses of interest they are already using.
+Some are still trained in statistics with a heavy focus on so-called analysis of variance (ANOVA) techniques, but  without delving too much (or at least, enough) into their role as special cases of regression, and mixed models more generally. This is despite the fact that data collected is typically richer than a couple of tightly controlled treatment conditions with a continuous target variable, rendering these techniques too restrictive for many common situations. The following uses a very small dataset to demonstrate the connections to standard linear and mixed models, with a hope that some will consider using the more general approaches after realizing they are only gaining in flexibility while maintaining the same analyses of interest they are already using.
+
+
 
 ## Data Setup
 
@@ -35,7 +37,7 @@ head(dflong)
 ```
 
 
-When I meant the effect is eyeballable, everyone in the treatment group improves from pre to post, while controls are mixed at best, and this effect is visually obvious.
+When I meant the effect is eyeballable, everyone in the treatment group improves from pre to post, while controls are mixed at best, and this effect is visually obvious.  I should note that when patterns are this obvious, the compulsion to do statistical tests should be stifled.  We only do so here for expository reasons.
 
 ```{r vizEffect, echo=FALSE}
 library(ggplot2)
@@ -50,7 +52,7 @@ ggplot(aes(x=time, y=score, group=id, color=treat), data=dflong) +
 ## Between Groups Approach
 
 ### t-test
-Ignoring the correlated nature of the data, for now we will show the simple regression of post score on treatment to show how the different approaches can produce identical results.
+Ignoring the correlated nature of the data for now, we will show the simple regression of post score on treatment to show how the different approaches can produce identical results.
 
 ```{r ttest}
 ttestModel = t.test(post ~ treat, data=df, var.equal=T)
@@ -78,7 +80,7 @@ summary(lmModelPostOnly)
 coef(lmModelPostOnly)
 ```
 
-The t for the coefficient here (and associated p-value) is identical to the t from the t-test (sign is arbitrary depending on how the labels are used), while the overall model F in the regression is the same in the ANOVA and linear regression model. This equivalence is explicit in R, as the `aov` function actually calls the `lm` function, and the class of an aov object is both 'aov' and 'lm'. I guess I should point out that SAS and SPSS ANOVA tables default to a sums of squares approach that is not equivalent to a SLiM in the presence of interactions (and which some would say doesn't make much sense).  See the help file for `Anova` in the car package for details.  The point here is simply that we have run the same model three different ways, but produced identical results in each case.
+The intercept is the mean for the reference group, while the coefficient for group is the difference between their respective means. The t for the coefficient (and associated p-value) is identical to the t from the t-test (sign is arbitrary depending on how the labels are used), while the overall model F in the regression is the same as in the ANOVA. This equivalence is explicit in R, as the `aov` function actually calls the `lm` function, and the class of an aov object is both 'aov' and 'lm'. I guess I should point out that SAS and SPSS ANOVA tables default to a sums of squares approach that is not equivalent to a SLiM in the presence of interactions (and which some would say doesn't make much sense).  See the help file for `Anova` in the car package for details.  The point here is simply that we have run the same model three different ways, but produced identical results in each case.
 
 
 
@@ -140,22 +142,22 @@ c(tF*A, ancovaF)
 ```
 
 
-Since [Lord's Paradox]() was introduced, there has been some back and forth among various papers ever since debating whether one should use ANCOVA vs. t-test on change scores.  Aside from it not really being a paradox (both statisticians are correct), it's unclear to me that the debate is very useful for applied researchers for various reasons.  For one, I've never seen a study in which I'd be interested in the results of a 2x2 design.  It's overly simplistic and doesn't generalize to different types of outcomes that are inherently non-normal (e.g. binary variables), which are standard fare in the scientific world.  As such, a t-test on gain scores is never going to be an option outside of a perhaps misguided use as a descriptive statistic. Some are concerned about statistical power, but basing your assessment of treatment viability based solely on an arbitrary p-value cutoff is borderline unethical for some lines of research (in my opinion), so that shouldn't be the overriding concern either. In addition, whether observational or experimental, a statistical result will not tell you about causal relations, so concerns about experimental vs. observational design are perhaps off-base in many data scenarios.  You can, however, specify those causal effects that you think exist and run a model appropriate to the situation, focusing on the specific effect of interest.  In this case the t-test and ANCOVA can be seen as different effects, *total* and *direct* respectively, from the same causal model (see [Pearl, 2014](http://ftp.cs.ucla.edu/pub/stat_ser/r436.pdf))
+Since [Lord's Paradox]() was introduced, there has been some back and forth among various papers ever since debating whether one should use ANCOVA vs. t-test on change scores.  Aside from it not really being a paradox (both statisticians are correct), it's unclear to me that the debate is very useful for applied researchers for various reasons.  For one, I've never seen a study in which I'd be interested in the results of a t-test.  At best it tells an overly simplistic story, and we have far better, and as easily implemented, tools to help us understand the complexities of nature.  As such, a t-test on gain scores is never going to be an option outside of a perhaps misguided use as a descriptive statistic. Some are concerned about statistical power, but basing your assessment of treatment viability based solely on an arbitrary p-value cutoff is borderline unethical for some lines of research (in my opinion), so that shouldn't be the overriding concern either. In addition, whether observational or experimental, a statistical result will not tell you about causal relations.  You can, however, specify those causal effects that you think exist and run a model appropriate to the situation, focusing on the specific effect of interest.  In this case the t-test and ANCOVA can be seen as different effects, *total* and *direct* respectively, from the same causal model (see [Pearl, 2014](http://ftp.cs.ucla.edu/pub/stat_ser/r436.pdf)).
 
 Statistically speaking, as we will see, both approaches are special cases of more flexible models that can better handle the nuances of the typical, more complex data situation in which there are multiple predictors, interactions of interest, nonlinear relationships, or more than two time points, etc., such that neither would be appropriate. But statistically, ANCOVA is no different than the SLiM, so it only has the issues that the SLiM has. A t-test on change scores is part of a repeated measures ANOVA result that is a special case of mixed models, which themselves generalize the SLiM.
 
-In addition, there is actually a way to convert the t-test on change scores to the ANCOVA result, such that, *if there is a strong correlation between pre and post*, one can find an equivalence (using the squared t vs. the ANCOVA F) with increasing sample size.  The code in the [Appendix](#t-test-ancova-equivalence) demonstrates this.
+Finally, there is actually a way to convert the t-test on change scores to the ANCOVA result, such that, *if there is a strong correlation between pre and post*, one can find an equivalence (using the squared t vs. the ANCOVA F) with increasing sample size.  The code in the [Appendix](#t-test-ancova-equivalence) demonstrates this.
 
 ### Repeated Measures Anova
 
-Now that we've gone through that, let's do a repeated measures ANOVA.
+Now that we've gone through that, let's do a repeated measures ANOVA with treatment as the between subjects effect and score as the repeated measure (pre-post).
 
 ```{r rma}
 anovaModelRM = aov(score ~ treat*time + Error(id), dflong)
 summary(anovaModelRM)
 ```
 
-Note that the interaction F-value here is the squared value of the t-test on the change scores (`r round(ttestChange0$statistic^2, 2)`).  In other words, a t-test on the change score is the interaction term from the repeated measures ANOVA on the same data.
+Note that the interaction F-value here is the squared value of the t-test on the change scores (`r round(ttestChange0$statistic, 2)`<sup>2</sup>).  In other words, a t-test on the change score is the interaction term from the repeated measures ANOVA on the same data.
 
 ### Mixed Model
 
