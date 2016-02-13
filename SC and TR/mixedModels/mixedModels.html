@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2016-02-07" />
+<meta name="date" content="2016-02-12" />
 
 <title>Thinking About Mixed Models</title>
 
@@ -66,7 +66,7 @@ img {
 <h4 class="author"><em><p>Michael Clark<br />
 Statistician Lead<br />
 CSCAR, ARC, U of Michigan</p></em></h4>
-<h4 class="date"><em>2016-02-07</em></h4>
+<h4 class="date"><em>2016-02-12</em></h4>
 </div>
 
 <div id="TOC">
@@ -139,9 +139,12 @@ CSCAR, ARC, U of Michigan</p></em></h4>
 <p>Another way to write this focuses on the data generating process rather than ‘error’:</p>
 <p><span class="math display">\[\mu_i = \alpha + \beta X_i\]</span> <span class="math display">\[y_i \sim \mathcal{N}(\mu_i, \sigma^2)\]</span></p>
 <p>and in matrix form:</p>
-<p><span class="math display">\[\mu =  X\beta\]</span> <span class="math display">\[y \sim \mathcal{N}(\mu, \sigma^2)\]</span></p>
-<p>For the matrix depiction, <span class="math inline">\(X\)</span> is an <span class="math inline">\(n\textrm{ x } p\)</span> model matrix that includes a column of ones for the intercept and columns for each covariate, while <span class="math inline">\(\beta\)</span> is a vector of <span class="math inline">\(p\)</span> regression coefficients. <span class="math inline">\(y\)</span> is normally distributed with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. When we move to mixed models, we will display the models similarly.</p>
-<p>A word about notation. In what follows I try to strike a balance between conceptual simplicity and consistency with what is typically seen elsewhere, which can often be confusing depending on the source. The notation can get cumbersome for more complex models, and/or not in keeping with how it would actually be coded if one was estimating the model on their own. In attempting the balance, I suspect the approach may succeed or fail in varying degree along the way, but between the notation and the code (something sorely lacking in many textbook presentations), I think things will be fairly clear.</p>
+<p><span class="math display">\[\boldsymbol{\mu =  X\beta}\]</span> <span class="math display">\[\boldsymbol{y} \sim \mathcal{N}(\boldsymbol{\mu}, \sigma^2)\]</span></p>
+<p>For the matrix depiction, <span class="math inline">\(X\)</span> is an <span class="math inline">\(n\textrm{ x } p\)</span> model matrix that includes a column of ones for the intercept and columns for each covariate, while <span class="math inline">\(\beta\)</span> is a vector of <span class="math inline">\(p\)</span> regression coefficients. <span class="math inline">\(y\)</span> is normally distributed with mean <span class="math inline">\(\mu\)</span> and constant variance <span class="math inline">\(\sigma^2\)</span> for all <span class="math inline">\(y_i\)</span>. When we move to mixed models, we will display the models similarly.</p>
+<p>A word about notation. In what follows I try to strike a balance between conceptual simplicity and consistency with what is typically seen elsewhere, which can often be confusing depending on the source. The notation can get cumbersome for more complex models, and/or not in keeping with how it would actually be coded if one was estimating the model on their own. As an example, in the last line I suppress the subscript <span class="math inline">\(i\)</span>s (<span class="math inline">\(y_i \sim \mathcal{N}(\mu_i, \sigma^2)\)</span>), or the <span class="math inline">\(\boldsymbol{I_n}\sigma^2\)</span> (<span class="math inline">\(\boldsymbol{y} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{I_n}\sigma^2)\)</span>), because I think more from a vectorized programming approach, which I think provides a means for a more succinct notation than usual without loss of clarity. As an example, in code, the above is:</p>
+<pre class="r"><code>µ = X %*% ß
+y = rnorm(n, µ, s²)</code></pre>
+<p>In attempting the balance, I suspect the approach may succeed or fail in varying degree along the way, but between the notation and the code (something sorely lacking in many textbook presentations), I hope things will be fairly clear.</p>
 </div>
 <div id="applied-example" class="section level1">
 <h1>Applied Example</h1>
@@ -213,7 +216,7 @@ summary(slim)</code></pre>
 <div id="mixed-model-3a-design-matrix-for-random-component" class="section level2">
 <h2>Mixed Model 3a: Design matrix for random component</h2>
 <p>If we switch to matrix notation, we can see the model in still other ways. To get our bearings, I’ll first show the SLiM again.</p>
-<p><span class="math display">\[\mu = X\beta\]</span> <span class="math display">\[y \sim \mathcal{N}(\mu, \sigma^2) \]</span></p>
+<p><span class="math display">\[\boldsymbol{\mu = X\beta}\]</span> <span class="math display">\[\boldsymbol{y} \sim \mathcal{N}(\boldsymbol{\mu}, \sigma^2) \]</span></p>
 <p>X is a design matrix with a column of 1s representing the intercept and the other columns are the covariates of interest. <span class="math inline">\(\beta\)</span> is the vector of regression coefficients. Here <span class="math inline">\(\mu\)</span> represents the linear predictor.</p>
 <p>Let’s start with a random intercepts model. Now let Z be an indicator matrix representing the <span class="math inline">\(1 \dots m\)</span> clusters in some variable z. For example, if there were 3 clusters of A, B, and C, Z looks like the following:</p>
 <table style="width:26%;">
@@ -271,22 +274,23 @@ summary(slim)</code></pre>
 </tbody>
 </table>
 <p>Note that unlike traditional dummy coding, we have an indicator for all groups. Z is actually a per cluster design matrix, which in this case has only an intercept. We’ll see that more clearly soon enough. With Z the model becomes:</p>
-<p><span class="math display">\[\mu = X\beta + Z\gamma\]</span> <span class="math display">\[y \sim \mathcal{N}(\mu, \sigma^2) \]</span> <span class="math display">\[\gamma \sim \mathcal{N}(0, \tau^2)\]</span></p>
+<p><span class="math display">\[\boldsymbol{\mu} = \boldsymbol{X\beta + Z\gamma}\]</span> <span class="math display">\[\boldsymbol{y} \sim \mathcal{N}(\boldsymbol{\mu}, \sigma^2) \]</span> <span class="math display">\[\boldsymbol{\gamma} \sim \mathcal{N}(\boldsymbol{0}, \tau^2)\]</span></p>
 <p>And the <span class="math inline">\(\gamma\)</span> are the random effects pertaining to each cluster <span class="math inline">\(c\)</span> from the previous models.</p>
 <p><span class="citation">(Wood 2006, chap. 6)</span> <span class="citation">(Bates et al. 2015)</span></p>
 </div>
 <div id="mixed-model-3b-design-matrix-again" class="section level2">
 <h2>Mixed Model 3b: Design matrix again</h2>
 <p>Let’s now say we have multiple random effects, e.g. random intercepts and slopes. In other words, we now let any of the regression coefficients be random. For a given cluster <span class="math inline">\(c\)</span>:</p>
-<p><span class="math display">\[\mu_c = X_c\beta + X^S_c\gamma_c\]</span> <span class="math display">\[y_c \sim \mathcal{N}(\mu_c, \sigma^2) \]</span> <span class="math display">\[\gamma_c \sim \mathcal{N}(0, \psi)\]</span></p>
-<p>Here <span class="math inline">\(y_c\)</span> contains the values <span class="math inline">\(1...n_c\)</span> in cluster <span class="math inline">\(c\)</span>, but within that cluster the model is exactly as that depicted in <a href="#mixed-model-1b-multilevel">model 1b</a>. Here <span class="math inline">\(X\)</span> is the <span class="math inline">\(n\textrm{ x }p\)</span> model matrix with <span class="math inline">\(\beta\)</span> a vector of <span class="math inline">\(p\)</span> regression coefficients. <span class="math inline">\(X^S_c\)</span> is <span class="math inline">\(X\)</span> or some <span class="math inline">\(n\textrm{ x }q\)</span> subset of the covariates, with <span class="math inline">\(\gamma\)</span> representing the <span class="math inline">\(q\)</span> random effects. The random effects are the result of a multivariate normal process that allows the random intercepts and slopes to correlate via covariance matrix <span class="math inline">\(\psi\)</span>. This depiction perhaps most clearly illustrates the random effects <span class="math inline">\(\gamma\)</span> as an added deviation to the typical effects <span class="math inline">\(\beta\)</span>. If we factor the <span class="math inline">\(X\)</span>, the coefficients in the model are <span class="math inline">\(\beta + \gamma_c\)</span> for each cluster <span class="math inline">\(c\)</span>.</p>
+<p><span class="math display">\[\boldsymbol{\mu_c = X_c\beta + X^S_c\gamma_c}\]</span> <span class="math display">\[\boldsymbol{y_c} \sim \mathcal{N}(\boldsymbol{\mu_c}, \sigma^2) \]</span> <span class="math display">\[\boldsymbol{\gamma_c} \sim \mathcal{N}(\boldsymbol{0}, \boldsymbol{\psi})\]</span></p>
+<p>Here <span class="math inline">\(y_c\)</span> contains the values <span class="math inline">\(1...n_c\)</span> in cluster <span class="math inline">\(c\)</span>, but within that cluster the model is exactly as that depicted in <a href="#mixed-model-1b-multilevel-model">model 1b</a>. Here <span class="math inline">\(X\)</span> is the <span class="math inline">\(n\textrm{ x }p\)</span> model matrix with <span class="math inline">\(\beta\)</span> a vector of <span class="math inline">\(p\)</span> regression coefficients. <span class="math inline">\(X^S_c\)</span> is <span class="math inline">\(X\)</span> or some <span class="math inline">\(n\textrm{ x }q\)</span> subset of <span class="math inline">\(X\)</span>, with <span class="math inline">\(\gamma\)</span> representing the <span class="math inline">\(q\)</span> random effects. The random effects are the result of a multivariate normal process that allows the random intercepts and slopes to correlate via covariance matrix <span class="math inline">\(\psi\)</span>. This depiction perhaps most clearly illustrates the random effects <span class="math inline">\(\gamma\)</span> as an added deviation to the typical effects <span class="math inline">\(\beta\)</span>. If we factor the <span class="math inline">\(X\)</span>, the coefficients in the model are <span class="math inline">\(\beta + \gamma_c\)</span> for each cluster <span class="math inline">\(c\)</span>.</p>
+<p><span class="citation">(Fahrmeir et al. 2013, chap. 7)</span></p>
 </div>
 <div id="mixed-model-3c-general-notation" class="section level2">
 <h2>Mixed Model 3c: General notation</h2>
 <p>We can take the above two to a more general situation that encompasses more levels and other extensions to mixed models. For clusters <span class="math inline">\(1\dots c \dots m\)</span>, we can write:</p>
-<p><span class="math display">\[y = X\beta + Z\gamma + \epsilon\]</span></p>
-<p><span class="math display">\[y = \left(\begin{smallmatrix}\boldsymbol{y_1} \\ \vdots \\ \boldsymbol{y_c} \\ \vdots \\ \boldsymbol{y_m}\end{smallmatrix}\right)\]</span> <span class="math display">\[\epsilon = \left(\begin{smallmatrix}\boldsymbol{\epsilon_1} \\ \vdots \\ \boldsymbol{\epsilon_c} \\ \vdots \\ \boldsymbol{\epsilon_m}\end{smallmatrix}\right)\]</span> <span class="math display">\[\gamma = \left(\begin{smallmatrix}\boldsymbol{\gamma_1} \\ \vdots \\ \boldsymbol{\gamma_c} \\ \vdots \\ \boldsymbol{\gamma_m}\end{smallmatrix}\right)\]</span></p>
-<p>With design matrices <span class="math inline">\(\boldsymbol{X}\)</span>: <span class="math display">\[X = \left(\begin{smallmatrix}\boldsymbol{X_1} \\ \vdots \\ \boldsymbol{X_c} \\ \vdots \\ \boldsymbol{X_m}\end{smallmatrix}\right)\]</span></p>
+<p><span class="math display">\[\boldsymbol{y = X\beta + Z\gamma + \epsilon}\]</span></p>
+<p><span class="math display">\[\boldsymbol{y} = \left(\begin{smallmatrix}\boldsymbol{y_1} \\ \vdots \\ \boldsymbol{y_c} \\ \vdots \\ \boldsymbol{y_m}\end{smallmatrix}\right)\]</span> <span class="math display">\[\epsilon = \left(\begin{smallmatrix}\boldsymbol{\epsilon_1} \\ \vdots \\ \boldsymbol{\epsilon_c} \\ \vdots \\ \boldsymbol{\epsilon_m}\end{smallmatrix}\right)\]</span> <span class="math display">\[\gamma = \left(\begin{smallmatrix}\boldsymbol{\gamma_1} \\ \vdots \\ \boldsymbol{\gamma_c} \\ \vdots \\ \boldsymbol{\gamma_m}\end{smallmatrix}\right)\]</span></p>
+<p>With design matrices <span class="math inline">\(\boldsymbol{X}\)</span>: <span class="math display">\[\boldsymbol{X} = \left(\begin{smallmatrix}\boldsymbol{X_1} \\ \vdots \\ \boldsymbol{X_c} \\ \vdots \\ \boldsymbol{X_m}\end{smallmatrix}\right)\]</span></p>
 <p><span class="math inline">\(\boldsymbol{Z}\)</span> is the block diagonal matrix:</p>
 <p><span class="math display">\[\left(
 \begin{smallmatrix}
@@ -314,9 +318,9 @@ summary(slim)</code></pre>
 <div id="mixed-model-4b-conditional-vs.marginal-model" class="section level2">
 <h2>Mixed Model 4b: Conditional vs. marginal model</h2>
 <p>Some will show mixed models as <em>conditional</em> on the random effects, where they are treated as additional regression coefficients, or as marginal models as in 4a.</p>
-<p>Conditional Model: <span class="math display">\[y|\gamma \sim \mathcal{N}(X\beta + Z\gamma, \sigma^2)\]</span></p>
-<p>Marginal Model: <span class="math display">\[y \sim \mathcal{N}(X\beta, \sigma^2\text{*})\]</span></p>
-<p>Where <span class="math inline">\(\sigma^2\text{*}\)</span> is as described in the following section.</p>
+<p>Conditional Model for a given cluster: <span class="math display">\[\boldsymbol{y|\gamma} \sim \mathcal{N}(\boldsymbol{X\beta + Z\gamma}, \sigma^2)\]</span></p>
+<p>Marginal Model: <span class="math display">\[\boldsymbol{y} \sim \mathcal{N}(\boldsymbol{X\beta}, \sigma^2\text{*})\]</span></p>
+<p>Where <span class="math inline">\(\sigma^2\text{*}\)</span> is the <span class="math inline">\(\Sigma\)</span> described in the following section.</p>
 <p><span class="citation">(Fahrmeir et al. 2013)</span></p>
 </div>
 <div id="mixed-model-5a-regression-with-correlated-errors" class="section level2">
@@ -332,20 +336,20 @@ summary(slim)</code></pre>
 <div id="mixed-model-5b-multivariate-normal-model" class="section level2">
 <h2>Mixed Model 5b: Multivariate normal model</h2>
 <p>A compact way to write model 5a:</p>
-<p><span class="math display">\[y \sim \mathcal{N}(X\beta, \Sigma)\]</span></p>
-<p>In the above, <em>y</em> is multivariate normal with mean vector <span class="math inline">\(X\beta\)</span> and covariance <span class="math inline">\(\Sigma\)</span>. This has actually been implied in many of the models above where, for example <span class="math inline">\(\sigma^2\)</span> actually could have been <span class="math inline">\(I_n\sigma^2\)</span>, a diagonal matrix where <span class="math inline">\(\sigma^2\)</span> is constant. I chose not to do so for a cleaner presentation. An example of model 5a and 5b can be seen in my document comparing mixed models to additive models (<a href="https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/Mixed%20Models/mixedModelML/mixedModelML.md">link</a>), and this takes us to the next way to write these models.</p>
+<p><span class="math display">\[\boldsymbol{y} \sim \mathcal{N}(\boldsymbol{X\beta}, \boldsymbol{\Sigma})\]</span></p>
+<p>In the above, <em>y</em> is multivariate normal with mean vector <span class="math inline">\(X\beta\)</span> and covariance <span class="math inline">\(\Sigma\)</span>. As mentioned previously, this has been implied in many of the models above where, for example, <span class="math inline">\(\sigma^2\)</span> represented <span class="math inline">\(\boldsymbol{I_n}\sigma^2\)</span>, a diagonal matrix where <span class="math inline">\(\sigma^2\)</span> is constant along the diagonal. An example of model 5a and 5b can be seen in my document comparing mixed models to additive models (<a href="https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/Mixed%20Models/mixedModelML/mixedModelML.md">link</a>), and this takes us to the next way to write these models.</p>
 </div>
 <div id="mixed-model-6-penalized-regression" class="section level2">
 <h2>Mixed Model 6: Penalized regression</h2>
 <p>The SLiM can be seen as an estimation procedure that looks for the <span class="math inline">\(\beta\)</span> that minimize the following loss function:</p>
-<p><span class="math display">\[(y-X\beta)^2\]</span></p>
+<p><span class="math display">\[(\boldsymbol{y-X\beta})^2\]</span></p>
 <p>A <span class="emph">penalized</span> regression approach seeks to minimize:</p>
-<p><span class="math display">\[(y-X\beta)^2 + \lambda(\beta^\intercal\beta)\]</span></p>
+<p><span class="math display">\[(\boldsymbol{y-X\beta})^2 + \lambda(\boldsymbol{\beta^\intercal\beta})\]</span></p>
 <p>The second term is the sum of the squared regression coefficients times a penalty coefficient. If <span class="math inline">\(\lambda\)</span> equals 0, there is no penalty, and we simply have the SLiM, but otherwise, the larger the coefficients, the more the penalty added. This has the effect of shrinking the estimated <span class="math inline">\(\beta\)</span> toward zero, and so actually induces some bias, but with the bonus of reducing variance and less overfitting.</p>
 <p>In the mixed model, we turn back to <a href="#mixed-model-3a-design-matrix-for-random-component">model 3</a>.</p>
-<p><span class="math display">\[\mu = X\beta + Z\gamma\]</span> <span class="math display">\[y \sim \mathcal{N}(\mu, \sigma^2) \]</span></p>
+<p><span class="math display">\[\boldsymbol{\mu} = \boldsymbol{X\beta + Z\gamma}\]</span> <span class="math display">\[\boldsymbol{y} \sim \mathcal{N}(\boldsymbol{\mu}, \sigma^2) \]</span></p>
 <p>Estimating <span class="math inline">\(\beta\)</span> by maximum likelihood results in the same estimates that minimize the following loss function:</p>
-<p><span class="math display">\[\frac{1}{\sigma^2}(y-\mu)^2 + \lambda(\boldsymbol{\gamma}^\intercal\boldsymbol{\psi^{-1}}\boldsymbol{\gamma})\]</span></p>
+<p><span class="math display">\[\frac{1}{\sigma^2}(\boldsymbol{y-\mu})^2 + \lambda(\boldsymbol{\gamma}^\intercal\boldsymbol{\psi^{-1}}\boldsymbol{\gamma})\]</span></p>
 <p>Thinking back to the separate regressions approach, if we actually ran separate regressions the results would be over-contextualized, such that the cluster specific effects would deviate too far from the overall (population) effect, e.g. the fixed effect intercept. In the case of repeated measurements within individuals, while we’d like to think of ourselves as unique snowflakes, we are not <em>that</em> different. Taking a penalized approach reels in those unique effects a bit. In this light, mixed models can be seen as a compromise between ignoring cluster effects and having separate models for each cluster.</p>
 <p>The best thing to come from the penalized model approach is that many other models, e.g. those including spatial or additive components, can also be depicted as mixed models, with only slight variations on the theme. This allows random effects to be combined with additive, spatial and other effects seamlessly, making for a very powerful modeling approach in general called <strong><em>structured additive models</em></strong>. See Fahrmeier et al. (2013) for details, and my document <a href="https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/Mixed%20Models/mixedModelML/mixedModelML.md">link</a> for the additive model connection specifically.</p>
 <p><span class="citation">(Wood 2006)</span> <span class="citation">(Fahrmeir et al. 2013)</span> <span class="citation">(Bates et al. 2015)</span></p>
@@ -353,9 +357,9 @@ summary(slim)</code></pre>
 <div id="mixed-model-7-bayesian-mixed-model" class="section level2">
 <h2>Mixed Model 7: Bayesian mixed model</h2>
 <p>Penalized regression turns out to have an additional Bayesian interpretation. Furthermore, in thinking about random effects, we are practically halfway to Bayesian thinking anyway, where every effect is seen as random.</p>
-<p>The penalized regression approach above is equivalent to a standard Bayesian linear regression model, with a zero mean normal prior on the regression coefficients. Here is one way to do it, where the priors are specified on the first line. <span class="math display">\[\beta \sim \mathcal{N}(0, v), \sigma \sim \mathcal{\textrm{Half-Cauchy}}(0,r)\]</span> <span class="math display">\[y \sim \mathcal{N}(X\beta, \sigma^2)\]</span></p>
+<p>The penalized regression approach above is equivalent to a standard Bayesian linear regression model, with a zero mean normal prior on the regression coefficients. Here is one way to do it, where the priors are specified on the first line. <span class="math display">\[\boldsymbol{\beta} \sim \mathcal{N}(\boldsymbol{0}, v), \sigma \sim \mathcal{\textrm{Half-Cauchy}}(0,r)\]</span> <span class="math display">\[\boldsymbol{y} \sim \mathcal{N}(\boldsymbol{X\beta}, \sigma^2)\]</span></p>
 <p>Mixed models can be utilized in the Bayesian context as well, where now the term ‘fixed’ effects makes no sense at all, because all effects are random. The main distinction for Bayesian mixed models are the specified priors for all parameters of interest, but otherwise, relative to the models above <em>there is no difference at all</em>. Our random effects are estimated as before, where the distribution of the random effects serves as the prior distribution for those coefficients in the Bayesian context.</p>
-<p><span class="math display">\[\beta \sim \mathcal{N}(0, v), \sigma \sim \mathcal{\textrm{Half-Cauchy}}(0, r), \gamma ~  \sim \mathcal{N}(0,\tau^2)\]</span> <span class="math display">\[y \sim \mathcal{N}(X\beta + Z\gamma, \sigma^2)\]</span></p>
+<p><span class="math display">\[\boldsymbol{\beta} \sim \mathcal{N}(\boldsymbol{0}, v), \sigma \sim \mathcal{\textrm{Half-Cauchy}}(0, r), \gamma ~  \sim \mathcal{N}(\boldsymbol{0},\tau^2)\]</span> <span class="math display">\[\boldsymbol{y} \sim \mathcal{N}(\boldsymbol{X\beta + Z\gamma}, \sigma^2)\]</span></p>
 <p><span class="citation">(Gelman et al. 2013)</span> <span class="citation">(Fahrmeir et al. 2013)</span></p>
 </div>
 </div>
