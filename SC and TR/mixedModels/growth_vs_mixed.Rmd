@@ -19,9 +19,9 @@ knitr::opts_chunk$set(message=F, fig.align='center', cache=T)
 
 # Introduction
 
-The following compares a structural equation modeling (SEM) approach with wide format data vs. a mixed model, long-form data approach.  In a traditional mixed model we have observations clustered within some group structure, for example, test scores collected over time within students, or survey samples of individuals from each state.  
+The following compares a <span class="emph">structural equation modeling</span> (SEM) approach with wide format data vs. a <span class="emph">mixed model</span>, long-form data approach.  In a traditional mixed model we have observations clustered within some group structure, for example, test scores collected over time within students, or survey samples of individuals from each state.  
 
-In what follows we can see a traditional mixed model as a form of a constrained latent variable model, where the random effects in the mixed model are represented as a latent variable in the SEM context.  This is more explicitly laid out in the area of *growth curve* models, which take a standard setting of a mixed model with longitudinal data in which observations occur over time. However, in the SEM approach we instead take a wide form approach to the data and explicitly model latent variables that reflect the random intercepts and slopes. Growth curve models are highly constrained compared to the usual SEM setting, as most loadings are fixed rather than estimated.
+In what follows we can see a traditional mixed model as a form of a constrained latent variable model, where the random effects in the mixed model are represented as a latent variable in the SEM context.  This is more explicitly laid out in the area of <span class="emph">*growth curve*</span> models, which take a standard setting of a mixed model with longitudinal data in which observations occur over time. However, in the SEM approach we instead take a wide form approach to the data and explicitly model latent variables that reflect the random intercepts and slopes. Growth curve models are highly constrained compared to the usual SEM setting, as most loadings are fixed rather than estimated.
 
 We'll start by generating some data with the SEM context in mind, then melt it to long form and run a standard mixed model. Following that we'll compare the two, and eventually add in random slopes.
 
@@ -71,18 +71,18 @@ sapply(y, var)
 ```
 
 ## SEM
-In the following we'll set up the SEM in lavaan with appropriate constraints, plus one additional constraint to make direct comparisons to the mixed model with nlme.  We will hold off on results for now, but go ahead and display the graph pertaining to the conceptual model.  At this point we're simply estimating the variances of the latent variable and the residual variances of the observed data.
+In the following we'll set up the SEM in <span class="pack">lavaan</span> with appropriate constraints.  We will hold off on results for now, but go ahead and display the graph pertaining to the conceptual model[^semPlots].  At this point we're simply estimating the variances of the latent variable and the residual variances of the observed data.
 
-In this setting the means for the *y* are zero and will be fixed as such.
+To make results comparable to later, we'll use the settings pertaining to lavaan's `growth` function.
 
-```{r lavaanmod, fig.align='center'}
+```{r lavaanmod, fig.align='center', echo=-5}
 library(lavaan)
 LVmodel1 = '
-I =~ 1*y1 + 1*y2 + 1*y3
-y1 + y2 + y3 ~ 0*1             # fix y intercepts to zero
+  I =~ 1*y1 + 1*y2 + 1*y3
 '  
 
-semres1 = sem(LVmodel1, y)
+semres1 = growth(LVmodel1, y)
+semPlot::semPaths(semres1)
 ```
 
 ## Mixed Model
@@ -131,10 +131,10 @@ cor(comparisonDat)
 
 # Random intercepts and slopes
 
-Now we will investigate random intercepts and slopes as in a standard 'growth curve model'.  For this data the *y* is a repeated measurement over time, otherwise the data is much the same as before. However, we will add a slight positive correlation between intercepts and slopes, and scale time to start at zero so the intercept represents the average baseline value.
+Now we will investigate random intercepts and slopes as in a standard 'growth curve model'.  For this data the *y* is a repeated measurement over time, otherwise the data is much the same as before. However, we will add a slight positive correlation between intercepts and slopes, and scale time to start at zero so the intercept represents the average baseline value. We'll also add an additional time point.
 
 ## Data
-The main difference here is adding a covariate for time and a second latent variable. For this demo, the 'fixed' effects in the mixed model sense will be zero.  The variances of the latent variables are set to one.  In addition the sample size is notably increased, which is mostly done to help the nlme estimates get closer to the mark.  I would also mention that lavaan takes a split second to estimate the model while nlme takes probably half a minute on my computer. This would be interesting to investigate further, as a large sample size is necessary for any SEM to be worthwhile, but perhaps after
+The main difference here is adding a covariate for time and a second latent variable. For this demo, the 'fixed' effects in the mixed model sense will be set to .5 and .2 for the intercept and slope for time respectively.  The variances of the latent variables are set to one.  We add increasing residual variance over time.
 
 ```{r dataprep2, message=FALSE}
 set.seed(8675309)
@@ -174,13 +174,12 @@ ggplot(aes(x=time, y=y, group=subject), data=ylong) +
 
 
 ## Models
-For the SEM we now have two latent structures, one representing the random intercepts, another the random slopes for time.  For the mixed model we specify both random intercepts and slopes, and bump up the iterations, otherwise it will stop before converging on its own.  The graphical model for the SEM is shown.
+For the SEM we now have two latent structures, one representing the random intercepts, another the random slopes for time.  For the mixed model we specify both random intercepts and slopes.  The graphical model for the SEM is shown.
 
 ```{r randomIntsSlopesMods, fig.align='center'}
 LVmodel2 = '
-I =~ 1*y1 + 1*y2 + 1*y3 + 1*y4
-S =~ 0*y1 + 1*y2 + 2*y3 + 3*y4
-y1 + y2 + y3 +y4 ~ 0*1
+  I =~ 1*y1 + 1*y2 + 1*y3 + 1*y4
+  S =~ 0*y1 + 1*y2 + 2*y3 + 3*y4
 '
 semres2 = growth(LVmodel2, y)
 
@@ -227,22 +226,23 @@ cor(comparisonDat[,c(2,4)])
 ```
 
 # Which to use?
-It really depends on the model specifics as to which might be best for your situation but I would suggest defaulting to mixed models for a variety of reasons.
+It really depends on the model specifics as to which might be best for your situation, but I would suggest defaulting to mixed models for a variety of reasons.
 
-- Ease of implementation: Only very little of special syntax is needed for a mixed model approach relative to standard linear model code. Whereas all SEM programs or packages require special syntax.
-- Ease of interpretation/communication: Mixed models are far more commonly used across disciplines, and allow the less familiar to use their standard regression knowledge to interpret them in a straightforward fashion.  I've often seen people that would have no trouble interpreting the mixed model (at least the fixed effects portion), but get hung up on growth models with additional covariates.
-- Time-varying covariates:  With time-varying covariates, I don't think people are usually interested in the multivariate approach where each time point of the dependent variable must be predicted by each time point of the covariate, and the model gets unwieldy very quickly with only handful of time-varying covariates. With many time points, the coding and output is also messy with the SEM approach.
-- Nonlinear relationships: While one can incorporate nonlinear relationships very easily in the standard setting due to the close ties between mixed and additive models, it becomes cumbersome (adding a quadratic slope factor) or unusual to interpret (allowing the slope loadings to be estimated, rather than fixed) in the SEM setting.
-- Correlated residuals: In growth model settings it's common to specify autocorrelated residuals based on time. The syntax to do so in the SEM framework is very tedious.
-- Parallel Processes: Within the Bayesian framework one can incorporate [parallel processes] (multivariate mixed models) via a multivariate outcome fairly easily with the [brms package](https://github.com/paul-buerkner/brms) ([example](https://github.com/mclark--/MultivariateMultiLevelModeling/blob/master/multivariate.knit.md) with Stan).
-- Indirect Effects: Indirect effects can also be incorporated in the standard mixed model framework ([example with Stan](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_multilevelMediation.R), see also the [mediation](https://cran.r-project.org/package=mediation) package for using lme4 for multilevel mediation). 
-- Sample sizes: SEM is an inherently large sample technique, and growth curve models can quite complicated in terms of the number of parameters to be estimated. Obviously large samples are always desirable for either approach, but e.g. where mixed models can be run on clustered data with 30 clusters, it would be a bit odd to use SEM for 30 observations.  
-- Balanced data: Growth curve modeling requires balanced data across all time points, and so missing data necessarily has to be estimated or one will potentially lose too much of it. Mixed models do not, but whether one should still estimate the missing values is a matter of debate.
+- <span class="emph">Ease of implementation</span>: Only very little of special syntax is needed for a mixed model approach relative to standard linear model code. Whereas all SEM programs or packages require special syntax.
+- <span class="emph">Ease of interpretation/communication</span>: Mixed models are far more commonly used across disciplines, and allow the less familiar to use their standard regression knowledge to interpret them in a straightforward fashion.  I've often seen people that would have no trouble interpreting the mixed model (at least the fixed effects portion), but get hung up on growth models with additional covariates.
+- <span class="emph">Time-varying covariates</span>:  With time-varying covariates, the multivariate approach has each time point of the dependent variable predicted by each time point of the covariate (akin to nonlinear relationship or interaction with time), and the model gets unwieldy very quickly with only handful of time-varying covariates even if there are few time points, or few covariates with many time points.  
+- <span class="emph">Nonlinear relationships</span>: While one can incorporate nonlinear relationships very easily in the standard setting due to the close ties between mixed and additive models, in the SEM setting it becomes cumbersome (e.g. adding a quadratic slope factor as if one knew the functional form) or unusual to interpret (allowing the slope loadings to be estimated, rather than fixed). 
+- <span class="emph">Correlated residuals</span>: In growth model settings it's common to specify autocorrelated residuals based on time. The syntax to do so in the SEM framework is very tedious.
+- <span class="emph">Parallel Processes</span>: Within the Bayesian framework one can incorporate [parallel processes] (multivariate mixed models) via a multivariate outcome fairly easily with the [brms package](https://github.com/paul-buerkner/brms) ([example](https://github.com/mclark--/MultivariateMultiLevelModeling/blob/master/multivariate.knit.md) with Stan).
+- <span class="emph">Indirect Effects</span>: Indirect effects can also be incorporated in the standard mixed model framework ([example with Stan](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_multilevelMediation.R), see also the [mediation](https://cran.r-project.org/package=mediation) package for using lme4 for multilevel mediation). 
+- <span class="emph">Sample sizes</span>: SEM is an inherently large sample technique, and growth curve models can become quite complicated in terms of the number of parameters to be estimated. Obviously large samples are always desirable for either approach, but e.g. where mixed models can be run on clustered data with 30 clusters, it would be a bit odd to use SEM for 30 observations. I have some simulation results [here]().  One would need at least 50 clusters with many data points within each for the growth curve model to approach the performance of the mixed model, in which setting even a few clusters with few time points is okay.
+- <span class="emph">Balanced data</span>: Growth curve modeling requires balanced data across all time points, and so missing data necessarily has to be estimated or one will potentially lose too much of it. Mixed models do not, but whether one should still estimate the missing values is a matter of debate.
+- <span class="emph">Other</span>: Mixed models have natural ties to spatial and additive models, as well as a straightforward Bayesian interpretation regarding a prior distribution for the random effects.
 
-In short, my opinion is that growth curve models would only be preferred in settings where the model is notably complicated, but the level of complexity would start at the point where the interpretation of such a model would already be very difficult. SEM has its place, but the standard mixed model approach should be preferred, even in fairly complicated settings, both for ease of implementation and ease of interpretation.
+In short, my opinion is that growth curve models would probably only be preferred in settings where the model is notably complicated, but the level of complexity would start at the point where the interpretation of such a model would already be very difficult, and theoretical justification hard to come by. SEM has its place, but the standard mixed model approach is very flexible, even in fairly complicated settings, both for ease of implementation and interpretation.
 
 # Summary
 As has been demonstrated, we can think of random effects in mixed models as latent variables, and conversely, we can specify most growth models as standard mixed models. Noting the connection may provide additional insight into how to think about random effects ways in which to incorporate their use in modeling.
 
-[^varIdent]: lme actually works by setting the reference group variance to 1, and the coefficients represent the ratios of the other variances to that group. So in this case, it doesn't actually estimate the y1 variance, but as it 
-See `?varIdent`.
+[^varIdent]: lme actually works by setting the reference group variance to 1, and the coefficients represent the ratios of the other variances to that group. See `?varIdent`.
+[^semPlots]: Graph made with the <span class="pack">semPlots</span> package.
