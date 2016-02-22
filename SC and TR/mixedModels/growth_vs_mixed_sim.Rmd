@@ -31,7 +31,7 @@ Thus sample sizes range from the ridiculously small (10\*5 = 50 total observatio
 Growth curve models were estimated with the R package <span class="pack">lavaan</span>, the mixed models were estimated with <span class="pack">nlme</span> with `varIdent` weights argument.
 
 # Results
-I'm showing and summarizing the results here, but I've not checked them to closely yet.
+I'm showing and summarizing the results here, but I've not checked them too closely yet.
 
 
 ## Parameter estimates
