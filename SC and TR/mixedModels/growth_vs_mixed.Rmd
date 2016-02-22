@@ -14,7 +14,7 @@ output:
     toc: yes
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(message=F, fig.align='center', cache=T)
+knitr::opts_chunk$set(message=F, fig.align='center', cache=T, comment=NA)
 ```
 
 # Introduction
@@ -235,7 +235,7 @@ It really depends on the model specifics as to which might be best for your situ
 - <span class="emph">Correlated residuals</span>: In growth model settings it's common to specify autocorrelated residuals based on time. The syntax to do so in the SEM framework is very tedious.
 - <span class="emph">Parallel Processes</span>: Within the Bayesian framework one can incorporate [parallel processes] (multivariate mixed models) via a multivariate outcome fairly easily with the [brms package](https://github.com/paul-buerkner/brms) ([example](https://github.com/mclark--/MultivariateMultiLevelModeling/blob/master/multivariate.knit.md) with Stan).
 - <span class="emph">Indirect Effects</span>: Indirect effects can also be incorporated in the standard mixed model framework ([example with Stan](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_multilevelMediation.R), see also the [mediation](https://cran.r-project.org/package=mediation) package for using lme4 for multilevel mediation). 
-- <span class="emph">Sample sizes</span>: SEM is an inherently large sample technique, and growth curve models can become quite complicated in terms of the number of parameters to be estimated. Obviously large samples are always desirable for either approach, but e.g. where mixed models can be run on clustered data with 30 clusters, it would be a bit odd to use SEM for 30 observations. I have some simulation results [here]().  One would need at least 50 clusters with many data points within each for the growth curve model to approach the performance of the mixed model, in which setting even a few clusters with few time points is okay.
+- <span class="emph">Sample sizes</span>: SEM is an inherently large sample technique, and growth curve models can become quite complicated in terms of the number of parameters to be estimated. Obviously large samples are always desirable for either approach, but e.g. where mixed models can be run on clustered data with 30 clusters, it would be a bit odd to use SEM for 30 observations. I have some simulation results [here](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/growth_vs_mixed_sim.md).  It may be that one would need at least 50 clusters with many data points within each for the growth curve model to approach the performance of the mixed model, where setting even a few clusters with few time points is okay.
 - <span class="emph">Balanced data</span>: Growth curve modeling requires balanced data across all time points, and so missing data necessarily has to be estimated or one will potentially lose too much of it. Mixed models do not, but whether one should still estimate the missing values is a matter of debate.
 - <span class="emph">Other</span>: Mixed models have natural ties to spatial and additive models, as well as a straightforward Bayesian interpretation regarding a prior distribution for the random effects.
 

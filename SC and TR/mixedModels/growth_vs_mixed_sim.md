@@ -447,7 +447,7 @@ The actual interval estimates for LGC were not confined to [-1,1], and results a
 ```
 
 # Summary
-LGC probably should not be run with very few time points, at least for these cluster sizes.  Both approaches underestimate the random effects variance at these cluster sizes. Where there are differences, mixed models tend to have the preferable results.
+LGC probably should not be run with very few time points, at least for these cluster sizes.  Both approaches underestimate the random effects variance at these cluster sizes. Where there are differences which aren't in many of the tested situations, mixed models tend to have the preferable results.
 
 # Future
 

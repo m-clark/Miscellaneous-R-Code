@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2016-02-14" />
+<meta name="date" content="2016-02-21" />
 
 <title>SEM vs. Mixed</title>
 
@@ -66,7 +66,7 @@ img {
 <h4 class="author"><em><p>Michael Clark<br />
 Statistician Lead<br />
 CSCAR, ARC, U of Michigan</p></em></h4>
-<h4 class="date"><em>2016-02-14</em></h4>
+<h4 class="date"><em>2016-02-21</em></h4>
 </div>
 
 <div id="TOC">
@@ -120,13 +120,13 @@ y3 = mu + 1*lvI + rnorm(n, sd=sqrt(3))
 
 y = data.frame(y1, y2, y3)
 head(y)</code></pre>
-<pre><code>##           y1        y2         y3
-## 1 -1.9605780 0.1515718 -0.1737814
-## 2  0.4804558 3.8265794  2.8545217
-## 3 -2.1044920 0.7679583 -2.6376176
-## 4  5.0600987 1.5849592  2.4593212
-## 5  4.0626543 3.5548814  5.7934398
-## 6  2.0400965 0.8187298  5.8198780</code></pre>
+<pre><code>          y1        y2         y3
+1 -1.9605780 0.1515718 -0.1737814
+2  0.4804558 3.8265794  2.8545217
+3 -2.1044920 0.7679583 -2.6376176
+4  5.0600987 1.5849592  2.4593212
+5  4.0626543 3.5548814  5.7934398
+6  2.0400965 0.8187298  5.8198780</code></pre>
 <pre class="r"><code># reshape to long for later use with nlme
 library(magrittr); library(dplyr); library(tidyr)
 ylong = y
@@ -142,8 +142,8 @@ ylong %&lt;&gt;%
 ## # head(ylong)</code></pre>
 <p>As we can see and would expect, the variances of the observed variables are equal to the variance of the latent variable (the <span class="math inline">\(u\)</span> random effect in the mixed model) plus the residual variance. In this case 2<sup>2</sup> + c(1, 2, 3).</p>
 <pre class="r"><code>sapply(y, var)</code></pre>
-<pre><code>##       y1       y2       y3 
-## 5.349871 6.221397 7.282551</code></pre>
+<pre><code>      y1       y2       y3 
+5.349871 6.221397 7.282551 </code></pre>
 </div>
 <div id="sem" class="section level2">
 <h2>SEM</h2>
@@ -169,103 +169,103 @@ nlmemod1 = lme(y ~ 1, random= ~ 1|group, data=ylong, weights=varIdent(form = ~1|
 <h3>SEM</h3>
 <p>For the SEM approach we get the results we’d expect, and given the data set size the estimates are right near the true values.</p>
 <pre class="r"><code>summary(semres1)</code></pre>
-<pre><code>## lavaan (0.5-20) converged normally after  22 iterations
-## 
-##   Number of observations                          1000
-## 
-##   Estimator                                         ML
-##   Minimum Function Test Statistic                0.990
-##   Degrees of freedom                                 4
-##   P-value (Chi-square)                           0.911
-## 
-## Parameter Estimates:
-## 
-##   Information                                 Expected
-##   Standard Errors                             Standard
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  Z-value  P(&gt;|z|)
-##   I =~                                                
-##     y1                1.000                           
-##     y2                1.000                           
-##     y3                1.000                           
-## 
-## Intercepts:
-##                    Estimate  Std.Err  Z-value  P(&gt;|z|)
-##     y1                0.000                           
-##     y2                0.000                           
-##     y3                0.000                           
-##     I                 0.247    0.069    3.560    0.000
-## 
-## Variances:
-##                    Estimate  Std.Err  Z-value  P(&gt;|z|)
-##     y1                1.116    0.098   11.405    0.000
-##     y2                2.004    0.126   15.947    0.000
-##     y3                3.072    0.167   18.371    0.000
-##     I                 4.219    0.216   19.517    0.000</code></pre>
+<pre><code>lavaan (0.5-20) converged normally after  22 iterations
+
+  Number of observations                          1000
+
+  Estimator                                         ML
+  Minimum Function Test Statistic                0.990
+  Degrees of freedom                                 4
+  P-value (Chi-square)                           0.911
+
+Parameter Estimates:
+
+  Information                                 Expected
+  Standard Errors                             Standard
+
+Latent Variables:
+                   Estimate  Std.Err  Z-value  P(&gt;|z|)
+  I =~                                                
+    y1                1.000                           
+    y2                1.000                           
+    y3                1.000                           
+
+Intercepts:
+                   Estimate  Std.Err  Z-value  P(&gt;|z|)
+    y1                0.000                           
+    y2                0.000                           
+    y3                0.000                           
+    I                 0.247    0.069    3.560    0.000
+
+Variances:
+                   Estimate  Std.Err  Z-value  P(&gt;|z|)
+    y1                1.116    0.098   11.405    0.000
+    y2                2.004    0.126   15.947    0.000
+    y3                3.072    0.167   18.371    0.000
+    I                 4.219    0.216   19.517    0.000</code></pre>
 </div>
 <div id="mixed-model-1" class="section level3">
 <h3>Mixed Model</h3>
 <p>With the mixed model we see the random intercept sd/variance is akin to the latent variable variance, and residual variance is what we’d expect also.</p>
 <pre class="r"><code>summary(nlmemod1)</code></pre>
-<pre><code>## Linear mixed-effects model fit by maximum likelihood
-##  Data: ylong 
-##        AIC      BIC    logLik
-##   12562.33 12592.36 -6276.164
-## 
-## Random effects:
-##  Formula: ~1 | group
-##         (Intercept) Residual
-## StdDev:    2.054055 1.056471
-## 
-## Variance function:
-##  Structure: Different standard deviations per stratum
-##  Formula: ~1 | variable 
-##  Parameter estimates:
-##       y1       y2       y3 
-## 1.000000 1.340076 1.658953 
-## Fixed effects: y ~ 1 
-##                 Value  Std.Error   DF  t-value p-value
-## (Intercept) 0.2466467 0.06929644 2000 3.559299   4e-04
-## 
-## Standardized Within-Group Residuals:
-##          Min           Q1          Med           Q3          Max 
-## -2.582310510 -0.575948827 -0.001671765  0.577319764  2.865939066 
-## 
-## Number of Observations: 3000
-## Number of Groups: 1000</code></pre>
+<pre><code>Linear mixed-effects model fit by maximum likelihood
+ Data: ylong 
+       AIC      BIC    logLik
+  12562.33 12592.36 -6276.164
+
+Random effects:
+ Formula: ~1 | group
+        (Intercept) Residual
+StdDev:    2.054055 1.056471
+
+Variance function:
+ Structure: Different standard deviations per stratum
+ Formula: ~1 | variable 
+ Parameter estimates:
+      y1       y2       y3 
+1.000000 1.340076 1.658953 
+Fixed effects: y ~ 1 
+                Value  Std.Error   DF  t-value p-value
+(Intercept) 0.2466467 0.06929644 2000 3.559299   4e-04
+
+Standardized Within-Group Residuals:
+         Min           Q1          Med           Q3          Max 
+-2.582310510 -0.575948827 -0.001671765  0.577319764  2.865939066 
+
+Number of Observations: 3000
+Number of Groups: 1000 </code></pre>
 <div id="comparison-of-latent-variable-and-random-effects" class="section level4">
 <h4>Comparison of latent variable and random effects</h4>
 <p>It’s a little messy to extract the specific individual variance estimates due to the way nlme estimates them<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>, but the estimates of the mixed model and the SEM are the same.</p>
 <pre class="r"><code>coef(nlmemod1$modelStruct$varStruct, unconstrained =FALSE,allCoef=T)*nlmemod1$sigma</code></pre>
-<pre><code>##       y1       y2       y3 
-## 1.056471 1.415752 1.752636</code></pre>
+<pre><code>      y1       y2       y3 
+1.056471 1.415752 1.752636 </code></pre>
 <pre class="r"><code>sqrt(diag(inspect(semres1, 'est')$theta))</code></pre>
-<pre><code>##       y1       y2       y3 
-## 1.056469 1.415752 1.752635</code></pre>
+<pre><code>      y1       y2       y3 
+1.056469 1.415752 1.752635 </code></pre>
 <p>Comparing the latent variable scores to the random effects, we are dealing with almost identical estimates.</p>
 <pre class="r"><code>comparisonDat = data.frame(LV=lavPredict(semres1)[,1], RE=ranef(nlmemod1)[,1] + fixef(nlmemod1))
 
 head(round(comparisonDat,2), 10)   
 psych::describe(comparisonDat)
 cor(comparisonDat)</code></pre>
-<pre><code>##       LV    RE
-## 1  -0.86 -0.86
-## 2   1.70  1.70
-## 3  -1.18 -1.18
-## 4   3.16  3.16
-## 5   3.76  3.76
-## 6   2.14  2.14
-## 7   0.57  0.57
-## 8   1.83  1.83
-## 9   1.71  1.71
-## 10  1.25  1.25
-##    vars    n mean   sd median trimmed  mad   min  max range  skew kurtosis   se
-## LV    1 1000 0.25 1.93   0.31    0.26 1.91 -5.97 7.19 13.17 -0.08     0.05 0.06
-## RE    2 1000 0.25 1.93   0.31    0.26 1.91 -5.97 7.19 13.17 -0.08     0.05 0.06
-##    LV RE
-## LV  1  1
-## RE  1  1</code></pre>
+<pre><code>      LV    RE
+1  -0.86 -0.86
+2   1.70  1.70
+3  -1.18 -1.18
+4   3.16  3.16
+5   3.76  3.76
+6   2.14  2.14
+7   0.57  0.57
+8   1.83  1.83
+9   1.71  1.71
+10  1.25  1.25
+   vars    n mean   sd median trimmed  mad   min  max range  skew kurtosis   se
+LV    1 1000 0.25 1.93   0.31    0.26 1.91 -5.97 7.19 13.17 -0.08     0.05 0.06
+RE    2 1000 0.25 1.93   0.31    0.26 1.91 -5.97 7.19 13.17 -0.08     0.05 0.06
+   LV RE
+LV  1  1
+RE  1  1</code></pre>
 </div>
 </div>
 </div>
@@ -293,13 +293,13 @@ y4 = 1*f1 + 3*(f2) + rnorm(n, sd=sqrt(4))
 
 y = data.frame(y1, y2, y3, y4)
 head(y)</code></pre>
-<pre><code>##          y1         y2         y3         y4
-## 1 0.8233074  0.6094268 -2.9239599 -1.9196902
-## 2 2.4320979  0.8722732  0.4130522 -0.6960228
-## 3 0.9059002 -2.6873153 -4.6821983 -4.7305664
-## 4 0.6309905  2.0462769  4.5094473  6.4255891
-## 5 2.6525856  6.4423691  6.0122283  6.2786173
-## 6 0.3857095  4.3329025  3.8898125  2.1616358</code></pre>
+<pre><code>         y1         y2         y3         y4
+1 0.8233074  0.6094268 -2.9239599 -1.9196902
+2 2.4320979  0.8722732  0.4130522 -0.6960228
+3 0.9059002 -2.6873153 -4.6821983 -4.7305664
+4 0.6309905  2.0462769  4.5094473  6.4255891
+5 2.6525856  6.4423691  6.0122283  6.2786173
+6 0.3857095  4.3329025  3.8898125  2.1616358</code></pre>
 <pre class="r"><code># reshape to long for later use with nlme
 ylong = y
 ylong %&lt;&gt;% 
@@ -330,120 +330,120 @@ semPlot::semPaths(semres2, what='path', whatLabels='est', whatstyle='lisrel')</c
 <h3>SEM</h3>
 <p>For the SEM approach we get the results we’d expect, with estimates right near the true values.</p>
 <pre class="r"><code>summary(semres2)</code></pre>
-<pre><code>## lavaan (0.5-20) converged normally after  28 iterations
-## 
-##   Number of observations                          1000
-## 
-##   Estimator                                         ML
-##   Minimum Function Test Statistic                5.918
-##   Degrees of freedom                                 5
-##   P-value (Chi-square)                           0.314
-## 
-## Parameter Estimates:
-## 
-##   Information                                 Expected
-##   Standard Errors                             Standard
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  Z-value  P(&gt;|z|)
-##   I =~                                                
-##     y1                1.000                           
-##     y2                1.000                           
-##     y3                1.000                           
-##     y4                1.000                           
-##   S =~                                                
-##     y1                0.000                           
-##     y2                1.000                           
-##     y3                2.000                           
-##     y4                3.000                           
-## 
-## Covariances:
-##                    Estimate  Std.Err  Z-value  P(&gt;|z|)
-##   I ~~                                                
-##     S                 0.317    0.064    4.931    0.000
-## 
-## Intercepts:
-##                    Estimate  Std.Err  Z-value  P(&gt;|z|)
-##     y1                0.000                           
-##     y2                0.000                           
-##     y3                0.000                           
-##     y4                0.000                           
-##     I                 0.480    0.043   11.096    0.000
-##     S                 0.224    0.038    5.929    0.000
-## 
-## Variances:
-##                    Estimate  Std.Err  Z-value  P(&gt;|z|)
-##     y1                1.033    0.110    9.411    0.000
-##     y2                1.922    0.108   17.809    0.000
-##     y3                3.159    0.199   15.840    0.000
-##     y4                3.932    0.347   11.323    0.000
-##     I                 1.006    0.114    8.849    0.000
-##     S                 0.995    0.069   14.364    0.000</code></pre>
+<pre><code>lavaan (0.5-20) converged normally after  28 iterations
+
+  Number of observations                          1000
+
+  Estimator                                         ML
+  Minimum Function Test Statistic                5.918
+  Degrees of freedom                                 5
+  P-value (Chi-square)                           0.314
+
+Parameter Estimates:
+
+  Information                                 Expected
+  Standard Errors                             Standard
+
+Latent Variables:
+                   Estimate  Std.Err  Z-value  P(&gt;|z|)
+  I =~                                                
+    y1                1.000                           
+    y2                1.000                           
+    y3                1.000                           
+    y4                1.000                           
+  S =~                                                
+    y1                0.000                           
+    y2                1.000                           
+    y3                2.000                           
+    y4                3.000                           
+
+Covariances:
+                   Estimate  Std.Err  Z-value  P(&gt;|z|)
+  I ~~                                                
+    S                 0.317    0.064    4.931    0.000
+
+Intercepts:
+                   Estimate  Std.Err  Z-value  P(&gt;|z|)
+    y1                0.000                           
+    y2                0.000                           
+    y3                0.000                           
+    y4                0.000                           
+    I                 0.480    0.043   11.096    0.000
+    S                 0.224    0.038    5.929    0.000
+
+Variances:
+                   Estimate  Std.Err  Z-value  P(&gt;|z|)
+    y1                1.033    0.110    9.411    0.000
+    y2                1.922    0.108   17.809    0.000
+    y3                3.159    0.199   15.840    0.000
+    y4                3.932    0.347   11.323    0.000
+    I                 1.006    0.114    8.849    0.000
+    S                 0.995    0.069   14.364    0.000</code></pre>
 </div>
 <div id="mixed-model-2" class="section level3">
 <h3>Mixed Model</h3>
 <p>With the mixed model we see the between group sd/variance is akin to the latent variable variance, and residual variance is what we’d expect also.</p>
 <pre class="r"><code>summary(nlmemod2)</code></pre>
-<pre><code>## Linear mixed-effects model fit by maximum likelihood
-##  Data: ylong 
-##        AIC     BIC    logLik
-##   17107.75 17164.4 -8544.875
-## 
-## Random effects:
-##  Formula: ~time | subject
-##  Structure: General positive-definite, Log-Cholesky parametrization
-##             StdDev    Corr  
-## (Intercept) 1.0031982 (Intr)
-## time        0.9973894 0.317 
-## Residual    1.0161174       
-## 
-## Variance function:
-##  Structure: Different standard deviations per stratum
-##  Formula: ~1 | variable 
-##  Parameter estimates:
-##       y1       y2       y3       y4 
-## 1.000000 1.364544 1.749243 1.951385 
-## Fixed effects: y ~ time 
-##                 Value  Std.Error   DF   t-value p-value
-## (Intercept) 0.4797851 0.04324928 2999 11.093483       0
-## time        0.2242885 0.03783797 2999  5.927604       0
-##  Correlation: 
-##      (Intr)
-## time -0.054
-## 
-## Standardized Within-Group Residuals:
-##          Min           Q1          Med           Q3          Max 
-## -2.668449980 -0.582027043 -0.006143264  0.582212366  3.137291189 
-## 
-## Number of Observations: 4000
-## Number of Groups: 1000</code></pre>
+<pre><code>Linear mixed-effects model fit by maximum likelihood
+ Data: ylong 
+       AIC     BIC    logLik
+  17107.75 17164.4 -8544.875
+
+Random effects:
+ Formula: ~time | subject
+ Structure: General positive-definite, Log-Cholesky parametrization
+            StdDev    Corr  
+(Intercept) 1.0031982 (Intr)
+time        0.9973894 0.317 
+Residual    1.0161174       
+
+Variance function:
+ Structure: Different standard deviations per stratum
+ Formula: ~1 | variable 
+ Parameter estimates:
+      y1       y2       y3       y4 
+1.000000 1.364544 1.749243 1.951385 
+Fixed effects: y ~ time 
+                Value  Std.Error   DF   t-value p-value
+(Intercept) 0.4797851 0.04324928 2999 11.093483       0
+time        0.2242885 0.03783797 2999  5.927604       0
+ Correlation: 
+     (Intr)
+time -0.054
+
+Standardized Within-Group Residuals:
+         Min           Q1          Med           Q3          Max 
+-2.668449980 -0.582027043 -0.006143264  0.582212366  3.137291189 
+
+Number of Observations: 4000
+Number of Groups: 1000 </code></pre>
 <p>Let’s compare the estimated residual variances again.</p>
-<pre><code>##                  y1       y2       y3       y4
-## varsMixed  1.016117 1.386537 1.777437 1.982836
-## varsGrowth 1.016122 1.386542 1.777426 1.982842</code></pre>
+<pre><code>                 y1       y2       y3       y4
+varsMixed  1.016117 1.386537 1.777437 1.982836
+varsGrowth 1.016122 1.386542 1.777426 1.982842</code></pre>
 <p>Comparing the latent variable scores to the random effects, once again we’re getting similar results. For the latent variable regarding slopes, we’ll subtract out the fixed effect.</p>
-<pre><code>##        I     S X.Intercept.  time
-## 1   0.38 -0.68         0.38 -0.68
-## 2   1.16 -0.30         1.16 -0.30
-## 3  -0.14 -1.48        -0.14 -1.48
-## 4   0.93  1.43         0.93  1.43
-## 5   2.32  1.62         2.32  1.62
-## 6   1.08  0.92         1.08  0.92
-## 7   0.63  1.01         0.63  1.01
-## 8   1.40  1.76         1.40  1.76
-## 9   1.27  0.43         1.27  0.43
-## 10  0.33  0.82         0.33  0.82
-##              vars    n mean   sd median trimmed  mad   min  max range  skew kurtosis   se
-## I               1 1000 0.48 0.80   0.49    0.48 0.79 -2.21 2.96  5.18 -0.08    -0.06 0.03
-## S               2 1000 0.22 0.88   0.25    0.21 0.89 -2.83 3.04  5.87  0.08     0.06 0.03
-## X.Intercept.    3 1000 0.48 0.80   0.49    0.48 0.79 -2.21 2.96  5.18 -0.08    -0.06 0.03
-## time            4 1000 0.22 0.88   0.25    0.21 0.89 -2.83 3.04  5.87  0.08     0.06 0.03
-##              I X.Intercept.
-## I            1            1
-## X.Intercept. 1            1
-##      S time
-## S    1    1
-## time 1    1</code></pre>
+<pre><code>       I     S X.Intercept.  time
+1   0.38 -0.68         0.38 -0.68
+2   1.16 -0.30         1.16 -0.30
+3  -0.14 -1.48        -0.14 -1.48
+4   0.93  1.43         0.93  1.43
+5   2.32  1.62         2.32  1.62
+6   1.08  0.92         1.08  0.92
+7   0.63  1.01         0.63  1.01
+8   1.40  1.76         1.40  1.76
+9   1.27  0.43         1.27  0.43
+10  0.33  0.82         0.33  0.82
+             vars    n mean   sd median trimmed  mad   min  max range  skew kurtosis   se
+I               1 1000 0.48 0.80   0.49    0.48 0.79 -2.21 2.96  5.18 -0.08    -0.06 0.03
+S               2 1000 0.22 0.88   0.25    0.21 0.89 -2.83 3.04  5.87  0.08     0.06 0.03
+X.Intercept.    3 1000 0.48 0.80   0.49    0.48 0.79 -2.21 2.96  5.18 -0.08    -0.06 0.03
+time            4 1000 0.22 0.88   0.25    0.21 0.89 -2.83 3.04  5.87  0.08     0.06 0.03
+             I X.Intercept.
+I            1            1
+X.Intercept. 1            1
+     S time
+S    1    1
+time 1    1</code></pre>
 </div>
 </div>
 </div>
@@ -459,7 +459,7 @@ semPlot::semPaths(semres2, what='path', whatLabels='est', whatstyle='lisrel')</c
 <li><span class="emph">Correlated residuals</span>: In growth model settings it’s common to specify autocorrelated residuals based on time. The syntax to do so in the SEM framework is very tedious.</li>
 <li><span class="emph">Parallel Processes</span>: Within the Bayesian framework one can incorporate [parallel processes] (multivariate mixed models) via a multivariate outcome fairly easily with the <a href="https://github.com/paul-buerkner/brms">brms package</a> (<a href="https://github.com/mclark--/MultivariateMultiLevelModeling/blob/master/multivariate.knit.md">example</a> with Stan).</li>
 <li><span class="emph">Indirect Effects</span>: Indirect effects can also be incorporated in the standard mixed model framework (<a href="https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_multilevelMediation.R">example with Stan</a>, see also the <a href="https://cran.r-project.org/package=mediation">mediation</a> package for using lme4 for multilevel mediation).</li>
-<li><span class="emph">Sample sizes</span>: SEM is an inherently large sample technique, and growth curve models can become quite complicated in terms of the number of parameters to be estimated. Obviously large samples are always desirable for either approach, but e.g. where mixed models can be run on clustered data with 30 clusters, it would be a bit odd to use SEM for 30 observations. I have some simulation results <a href>here</a>. One would need at least 50 clusters with many data points within each for the growth curve model to approach the performance of the mixed model, in which setting even a few clusters with few time points is okay.</li>
+<li><span class="emph">Sample sizes</span>: SEM is an inherently large sample technique, and growth curve models can become quite complicated in terms of the number of parameters to be estimated. Obviously large samples are always desirable for either approach, but e.g. where mixed models can be run on clustered data with 30 clusters, it would be a bit odd to use SEM for 30 observations. I have some simulation results <a href="https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/growth_vs_mixed_sim.md">here</a>. It may be that one would need at least 50 clusters with many data points within each for the growth curve model to approach the performance of the mixed model, where setting even a few clusters with few time points is okay.</li>
 <li><span class="emph">Balanced data</span>: Growth curve modeling requires balanced data across all time points, and so missing data necessarily has to be estimated or one will potentially lose too much of it. Mixed models do not, but whether one should still estimate the missing values is a matter of debate.</li>
 <li><span class="emph">Other</span>: Mixed models have natural ties to spatial and additive models, as well as a straightforward Bayesian interpretation regarding a prior distribution for the random effects.</li>
 </ul>
