@@ -5,6 +5,7 @@ date: '`r Sys.Date()`'
 output:
   html_document:
     css: ../../other.css
+    keep_md: yes
     theme: united
     toc: yes
 ---
@@ -98,7 +99,9 @@ LGC probably should not be run with very few time points, at least for these clu
 # Future
 
 Balanced vs not
+
 Varying residual variance
+
 vs. Bayesian mixed
 
 
