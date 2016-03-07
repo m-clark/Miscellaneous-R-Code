@@ -3,7 +3,7 @@ Miscellaneous (mostly) R Code
 
 This is a place for miscellaneous R and other code I've put together for clients, co-workers or myself for learning and demonstration purposes. The attempt is made to put together some well-commented and/or conceptually clear code from scratch, though most functionality is readily available in any number of well-developed R packages.  Typically examples are provided using such packages for comparison of results.
 
-At present I'm now doing these via markdown, so any demo code will have an md, Rmd, and html file rather than, or in addition to a (purled) R file.  For a quick peek that shows most things in the way intended, one can look at the md file directly within github. Otherwise, one can view the html files [here](https://htmlpreview.github.io/).
+At present I'm now doing these via markdown, so any demo code will typically have an md, Rmd, and html file rather than, or in addition to a (purled) R file.  For a quick peek that shows most things in the way intended, one can look at the md file directly within github. Otherwise, one can view the html files [here](https://htmlpreview.github.io/).
 
 
 Model Fitting
@@ -34,7 +34,11 @@ two factor random effects [(R)](https://github.com/mclark--/Miscellaneous-R-Code
 [EM state space model](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20for%20state%20space%20unobserved%20components.R),
 [Gaussian Process noisy](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoisy.R),
 [Gaussian Process noise-free](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoiseFree.R), 
-[reproducing kernel hilbert space regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/RKHSReg/RKHSReg.md), [comparison of mixed and additive models](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/mixedModelML/mixedModelML.md)...
+[reproducing kernel hilbert space regression](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/RKHSReg/RKHSReg.md), 
+[stochastic volatility](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/stochasticVolatility.R),
+[bivariate probit](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/bivariateProbit.R),
+[quantile regression](http://htmlpreview.github.io/?https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/quantileRegression.html)
+...
 
 ### Bayesian (mostly with Stan/rstan)
 [BEST t-test](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstant_testBEST.R),
@@ -52,11 +56,15 @@ mixed model with beta response [(Stan)](https://github.com/mclark--/Miscellaneou
 
 SC and TR
 ---------
-Code specific to short courses and technical reports I put together from time to time.
+Short courses and technical reports I put together from time to time. This is currently changing from linking to the relevant code to linking to the docs themselves.  The docs are or will be (after updating) made for web presentation first, but some will link to pdf.
 
 [Introduction to R](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/coursecode.r),
 [Generalized Additive Models](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/GAMS.R),
 [Machine Learning](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/MLcode.R),
+[Mixed Models, generally speaking](http://htmlpreview.github.io/?https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/mixedModels.pdf) [(files)](https://github.com/mclark--/Miscellaneous-R-Code/tree/master/SC%20and%20TR/mixedModels)[(pdf)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/mixedModels.pdf),
+[Comparison of mixed models and 'ANOVA'](http://htmlpreview.github.io/?https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/anovamixed.html) [(files)](https://github.com/mclark--/Miscellaneous-R-Code/tree/master/SC%20and%20TR/mixedModels)  [(pdf)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/anovamixed.pdf),
+[Comparison of mixed and additive models](http://htmlpreview.github.io/?https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModelML/mixedModelML.html) [(files)](https://github.com/mclark--/Miscellaneous-R-Code/tree/master/SC%20and%20TR/mixedModels) [(pdf)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModelML/mixedModelML.pdf),
+[Comparison of mixed and latent growth curve models](http://htmlpreview.github.io/?https://github.com/mclark--/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/growth_vs_mixed.html) [(files)](https://github.com/mclark--/Miscellaneous-R-Code/tree/master/SC%20and%20TR/mixedModels), 
 ...
 
 Other
@@ -70,7 +78,7 @@ Recursive Word Wrap [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/
 Scrape xkcd [(R)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.R) [(Python)](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/xkcdscrape.py), 
 [Shakespearean Insulter](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/shakespeareanInsulter.R), 
 [ggplot2 theme](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/ggtheme.R),
-[R matrix speedups] (https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/matrixOperations.md), ...
+[R matrix speedups](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/Programming_Shenanigans/matrixOperations.md), ...
 
 
 
