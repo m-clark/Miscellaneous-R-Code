@@ -1,0 +1,111 @@
+---
+title: "Growth Curve and Mixed Models"
+author: "Michael Clark"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    css: ../../other.css
+    keep_md: yes
+    theme: united
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, message=F, R.options=list(width=120), comment=NA)
+```
+
+# Intro
+
+I wanted to compare latent growth curve (LGC) and mixed models for settings with low(ish) numbers of clusters.  As an example, having 50 individuals with measured at 4 time points each wouldn't cause many to think twice in the mixed model setting, while running a structural equation model with 50 individuals has never been recommended. Growth curve models are notably constrained SEM, as many parameters are fixed, which helps matters, but I wanted to investigate this further. 
+
+# Setup
+
+I put together some quick code for simulation (it hasn't really been inspected too thoroughly but seemed okay in initial tests). The parameters are as follows:
+
+- Number of clusters: 10, 25, 50 
+- Time points within cluster: 5, 10, 25
+- Correlation of random effects: -.5 to .5 
+
+Thus sample sizes range from the ridiculously small (10\*5 = 50 total observations) to fairly healthy (50\*25 = 1250 total). Random effects were drawn from a multivariate normal and had that exact correlation (i.e. there was no distribution for the correlation; using the <span class="pack">MASS</span> package with `empirical = TRUE`).  Fixed effects are 3 and .75 for the intercept and effect of 'time'. Variances of the random effects and residuals were `1.0`.  Note that the mixed model estimated residual variance separately for each time point as would be the default in the LGC model. Number of simulated data sets for each of the 45 settings is 500.
+
+Growth curve models were estimated with the R package <span class="pack">lavaan</span>, the mixed models were estimated with <span class="pack">nlme</span> with `varIdent` weights argument.
+
+# Results
+I'm showing and summarizing the results here, but I've not checked them too closely yet.
+
+
+## Parameter estimates
+Bias here refers to the difference in the mean estimated parameter value vs. the true.
+
+### Fixed effects
+```{r loadResult}
+load('../../SC and TR/mixedModels/growth_vs_mixed_files/growthvsMixed_EstResults.RData')
+library(dplyr)
+```
+
+Maybe slight issues with the smallest samples sizes for the intercept, but nothing worrisome.
+
+```{r biasFE, }
+biasFE %>% select(nClusters, nWithinCluster, corRE, biasLGC_Int, biasMM_Int, biasLGC_Time, biasMM_Time)
+```
+
+
+### Random effect variance
+Both underestimate random effects variance at these settings, and more so with smaller overall sample sizes, but neither more than the other.
+
+```{r biasRE}
+biasRE %>% select(nClusters, nWithinCluster, corRE, biasLGC_Int, biasMM_Int, biasLGC_Time, biasMM_Time)
+```
+
+
+### Random effect correlation
+With few time points (5, 10) and/or smaller number of clusters (10, 25), both generally seem to overestimate the correlation when it is positive, maybe more so with LGC.
+
+```{r biasREcor}
+biasREcor %>% select(nClusters, nWithinCluster, corRE, biasLGC_corRE, biasMM_corRE)
+```
+
+
+## Interval width
+95% confidence intervals were taken as the quantiles of the simulation estimates.
+
+### Fixed effects
+General trend of narrower interval estimates for mixed models with smaller sample settings, and low number of clusters generally.
+
+```{r widthFixed}
+fixedEffects %>% select(nClusters, nWithinCluster, corRE, widthGrowth_Int, widthMixed_Int, widthGrowth_Time,
+                        widthMixed_Time, mixedWidthMinusgrowthWidth_Int, mixedWidthMinusgrowthWidth_Time)
+```
+
+### Random effect variance
+General trend of narrower interval estimates for mixed models with smaller sample settings, and low number of clusters generally.
+
+```{r widthRandom}
+randomEffects %>% select(nClusters, nWithinCluster, corRE, widthGrowth_Int, widthMixed_Int, widthGrowth_Time,
+                         widthMixed_Time, mixedWidthMinusgrowthWidth_Int, mixedWidthMinusgrowthWidth_Time)
+```
+
+
+### Random effect correlation
+The actual interval estimates for LGC were not confined to [-1,1], and results are somewhat mixed until overall number of observations exceeds 100, where there is no preference the approaches.
+
+```{r widthRandomCor}
+randomEffectsCor %>% select(nClusters, nWithinCluster, corRE, widthGrowth, widthMixed, mixedWidthMinusgrowthWidth)
+```
+
+# Summary
+LGC probably should not be run with very few time points, at least for these cluster sizes.  Both approaches underestimate the random effects variance at these cluster sizes. Where there are differences which aren't in many of the tested situations, mixed models tend to have the preferable results.
+
+# Future
+
+Balanced vs not
+
+Varying residual variance
+
+vs. Bayesian mixed
+
+
+
+
+# Code
+[link](https://github.com/mclark--/Miscellaneous-R-Code/tree/master/SC%20and%20TR/mixedModels/growthCurvevsMixedModel.R)

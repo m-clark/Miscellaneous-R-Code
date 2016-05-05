@@ -1,15 +1,14 @@
 ---
 title: "Repeated Measures and Mixed Models"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     highlight: default
     theme: united
     toc: yes
+    toc_float: yes
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(message=F, cache=FALSE)
+knitr::opts_chunk$set(message=F, cache=FALSE, comment=NA, warning=F)
 ```
 
 ## Introduction
@@ -40,6 +39,7 @@ head(dflong)
 When I meant the effect is eyeballable, everyone in the treatment group improves from pre to post, while controls are mixed at best, and this effect is visually obvious.  I should note that when patterns are this obvious, the compulsion to do statistical tests should be stifled.  We only do so here for expository reasons.
 
 ```{r vizEffect, echo=FALSE}
+dflong$time = factor(dflong$time, levels=c('pre', 'post'))
 library(ggplot2)
 ggplot(aes(x=time, y=score, group=id, color=treat), data=dflong) +
   geom_point() +
@@ -142,11 +142,10 @@ c(tF*A, ancovaF)
 ```
 
 
-Since [Lord's Paradox]() was introduced, there has been some back and forth among various papers ever since debating whether one should use ANCOVA vs. t-test on change scores.  Aside from it not really being a paradox (both statisticians are correct), it's unclear to me that the debate is very useful for applied researchers for various reasons.  For one, I've never seen a study in which I'd be interested in the results of a t-test.  At best it tells an overly simplistic story, and we have far better, and as easily implemented, tools to help us understand the complexities of nature.  As such, a t-test on gain scores is never going to be an option outside of a perhaps misguided use as a descriptive statistic. Some are concerned about statistical power, but basing your assessment of treatment viability based solely on an arbitrary p-value cutoff is borderline unethical for some lines of research (in my opinion), so that shouldn't be the overriding concern either. In addition, whether observational or experimental, a statistical result will not tell you about causal relations.  You can, however, specify those causal effects that you think exist and run a model appropriate to the situation, focusing on the specific effect of interest.  In this case the t-test and ANCOVA can be seen as different effects, *total* and *direct* respectively, from the same causal model (see [Pearl, 2014](http://ftp.cs.ucla.edu/pub/stat_ser/r436.pdf)).
+Since [Lord's Paradox]() was introduced, there has been some back and forth among various papers ever since debating whether one should use ANCOVA vs. t-test on change scores.  Aside from it not really being a paradox (both statisticians are correct), it's unclear to me that the debate is very useful for applied researchers for various reasons.  For one, I've never seen a study in which I'd be interested in the results of a t-test.  At best it tells an overly simplistic story, and we have far better, and as easily implemented, tools to help us understand the complexities of nature.  As such, a t-test on gain scores is at best used as a descriptive statistic. Some are concerned about statistical power, but basing your assessment of treatment viability based solely on an arbitrary p-value cutoff is borderline unethical for some lines of research (in my opinion), so that shouldn't be the overriding concern either. In addition, whether observational or experimental, a statistical result will not tell you about causal relations.  You can, however, specify those causal effects that you think exist and run a model appropriate to the situation, focusing on the specific effect of interest.  In this case the t-test and ANCOVA can be seen as different effects, *total* and *direct* respectively, from the same causal model (see [Pearl, 2014](http://ftp.cs.ucla.edu/pub/stat_ser/r436.pdf), and the example of it in the [appendix](#appendix)).  As such, conducting separate power analyses for the t-test vs. ANCOVA makes no sense, as they belong to the same model, and can also be (essentially) equivalent if pre and post are strongly correlated.
 
-Statistically speaking, as we will see, both approaches are special cases of more flexible models that can better handle the nuances of the typical, more complex data situation in which there are multiple predictors, interactions of interest, nonlinear relationships, or more than two time points, etc., such that neither would be appropriate. But statistically, ANCOVA is no different than the SLiM, so it only has the issues that the SLiM has. A t-test on change scores is part of a repeated measures ANOVA result that is a special case of mixed models, which themselves generalize the SLiM.
+Statistically speaking, as we will also see, both approaches are special cases of more flexible models that can better handle the nuances of the typical, more complex data situation in which there are multiple predictors, interactions of interest, nonlinear relationships, or more than two time points, etc., such that neither would be appropriate for many situations. But statistically, ANCOVA is no different than the SLiM, so it only has the issues that the SLiM has. A t-test on change scores is part of a repeated measures ANOVA result that is a special case of mixed models, which themselves generalize the SLiM.
 
-Finally, there is actually a way to convert the t-test on change scores to the ANCOVA result, such that, *if there is a strong correlation between pre and post*, one can find an equivalence (using the squared t vs. the ANCOVA F) with increasing sample size.  The code in the [Appendix](#t-test-ancova-equivalence) demonstrates this.
 
 ### Repeated Measures Anova
 
@@ -179,13 +178,44 @@ In general, standard ANOVA techniques are special cases of modeling approaches t
 
 
 
-## Appendix
+## <a name='appendix'>Appendix</a>
 
-## t-test ANCOVA equivalence
+### t-test vs. ANCOVA: different paths of the same model
+Consider the following mediation models. The image is taken from Pearl (2014), where in our case S is the treatment and $W_i$ is our pretest, and $W_f$ is our posttest. $Y$ represents the change score, but is not necessary to explicitly model for our purposes.
+
+<img src="pearlpic.png" style="display:block; margin: 0 auto;">
+
+We will model this as a structural equation model, with pretest serving as a means for an indirect effect of treatment. The t-test on the change score we saw earlier is the total effect in this scenario: it is the direct effect *b*, plus the indirect effect *a\*c*, minus the initial path *a*.  The direct effect *b* is what we get in the ANCOVA.
+
+
+```{r tvsAncova1}
+# pearl lords paradox
+
+mod = "
+  pre ~ a*treat
+  post ~ b*treat + c*pre
+  # change ~ -1*pre + 1*post
+ 
+  # total effect
+  TE := (b + a*c) - a
+"
+
+library(lavaan)
+lpmod = sem(mod, data=df)
+
+summary(lpmod)
+summary(lm(change~treat, df))  # t-test on change scores = total effect
+summary(lm(post~treat+pre, df)) # 'ancova' uncovers direct effect etc.
+```
+
+This shows that the question isn't about whether to use change scores or control for baseline with ANCOVA/regression.  The change score is defined as a weighted combination of pre and post scores, which the model ultimately regards.
+
+### t-test vs. ANCOVA: an equivalence
 
 Set **n** to very large and the estimates will converge. The values may be pretty close even without the transform, which just makes it exact with large N. Again, this assumes a notable correlation between pre and post, but that's typically the case.  Note also, that this assumes zero correlation between treatment condition and pre-test score, which should be the case in the experimental setting. The issue with regard to Lord's Paradox revolves around the situation in which groups are different at baseline/pre.
 
-```{r tvsAncova}
+
+```{r tvsAncova2}
 # setup
 set.seed(12)
 n = 1000
@@ -230,7 +260,21 @@ c(tConverted = tF*A, ancovaF=ancovaF)
 ```
 
 
-## More mixed model, repeated measures anova equivalence
+The idea here can be explained with reference to the previous path model example.  Let's rewrite the total effect as follows:
+
+```{r tvsAncova3, eval=F}
+"
+.
+.
+.
+  TE := b - a(1 - c)
+"
+```
+
+
+If we refer to the previous example we don't have to think in terms of an ad hoc adjustment. Relative to the path model noted, in this setting we are essentially setting moving path *c* closer to a value of 1, which results in the total effect being equivalent to *b*.
+
+### More mixed model, repeated measures anova equivalence
 
 ```{r moreMixed}
 library(nlme)
