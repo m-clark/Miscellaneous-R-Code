@@ -138,7 +138,7 @@ probMembershipFlex = flexmod4@size/sum(flexmod4@size)
 
 list(params=cbind(meanvarFlex, meanvar), clusterpobs=cbind(probMembership, probMembershipFlex) )
 
-### Some plots; ggtheme available at https://github.com/mclark--/Miscellaneous-R-Code/blob/master/Other/ggtheme.R
+### Some plots; ggtheme available at https://github.com/m-clark/Miscellaneous-R-Code/blob/master/Other/ggtheme.R
 library(ggplot2)
 qplot(x=eruptions, y=waiting, data=faithful) + ggtheme
 

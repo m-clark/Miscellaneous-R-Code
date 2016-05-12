@@ -1,7 +1,7 @@
 ##########################################################################################################
 ### Log likelihood function to estimate parameters for a Zero-inflated Negative Binomial model. With   ###
 ### examples and comparison to pscl package output. Also includes approach based on Hilbe GLM text.    ###
-### see also: https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/poiszeroinfl.R ###
+### see also: https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/poiszeroinfl.R ###
 ##########################################################################################################
 
 ZINB = function(y, X, par) {

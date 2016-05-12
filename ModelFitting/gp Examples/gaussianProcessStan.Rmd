@@ -7,10 +7,10 @@ output: html_document
 
 # Intro
 
-The following demonstrates a gaussian process using the Bayesian programming language Stan.  I also have a pure R approach ([1](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoisy.R),
-[2](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoiseFree.R)), where you will find a little more context,  and a Matlab implementation ([1](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gprDemoNoiseFree.m)).  
+The following demonstrates a gaussian process using the Bayesian programming language Stan.  I also have a pure R approach ([1](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoisy.R),
+[2](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoiseFree.R)), where you will find a little more context,  and a Matlab implementation ([1](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gprDemoNoiseFree.m)).  
 
-The R code for this demo is [here](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianProcessStan.R), the Stan model code [here](https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gpStanModelCode.stan).  A primary reference is Rasmussen & Williams (2006).
+The R code for this demo is [here](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianProcessStan.R), the Stan model code [here](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gpStanModelCode.stan).  A primary reference is Rasmussen & Williams (2006).
 
 
 # Data and Parameter Setup

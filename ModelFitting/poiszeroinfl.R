@@ -1,7 +1,7 @@
 ########################################################################################################
 ### Log likelihood function to estimate parameters for a Zero-inflated Poisson model. With examples  ###
 ### and comparison to pscl package output. Also includes approach based on Hilbe GLM text.           ###
-### see also: https://github.com/mclark--/Miscellaneous-R-Code/blob/master/ModelFitting/NBzeroinfl.R ###
+### see also: https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/NBzeroinfl.R ###
 ########################################################################################################
 
 ZIP = function(y, X, par) {

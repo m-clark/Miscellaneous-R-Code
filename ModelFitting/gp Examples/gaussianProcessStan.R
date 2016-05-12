@@ -84,7 +84,7 @@ th = 20
 chains = 4
 
 
-# With N = 20 Ntest = 200 takes about 2 min for gen squared expo
+# With N = 20 Ntest = 200 takes about 2 min for gen squared expo, 10+min for 300
 
 p = proc.time()
 fit = stan(data=standata, file=gp, iter = iterations, warmup = wu, thin=th, 
@@ -124,10 +124,20 @@ quantiles = data.frame(t(apply(yRep, 2, quantile, p=c(.025,.975)))); colnames(qu
 gdat3 = data.frame(x = sort(xtest), y=yRepMean, quantiles)
 ttle = stringr::str_extract(gp, "(?<=_)(.*)(?=\\.)")
 
+library(kernlab)
+comparisonModel = gausspr(x, y, kernel=rbfdot(sigma=1), var=.1, scaled=F, tol=1e-5)
+comparisonY = predict(comparisonModel, newdata=xtest)
+
+library(mgcv)
+comparisonModel2 = gam(y~s(x, bs='gp', m=c(2,2☻,2)))
+comparisonY2 = predict(comparisonModel2, newdata=data.frame(x=xtest))
+
 gdat3 %>% 
   ggvis(~x, ~y) %>% 
   layer_ribbons(y=~ll, y2=~ul, fillOpacity:=.1) %>% 
-  layer_paths(strokeOpacity:=.5, stroke:='blue') %>% 
+  layer_paths(strokeOpacity:=.5, stroke:='blue') %>%
+  layer_paths(y=~comparisonY, strokeOpacity:=.5, stroke:='red') %>%
+  layer_paths(y=~comparisonY2, strokeOpacity:=.5, stroke:='green') %>%
   layer_points(x=~x, y=~y, fill:='#ff5500', fillOpacity:=.5, data=gdat) %>% 
   add_axis('x', grid=F) %>% 
   add_axis("x", orient = "top", ticks = 0, title = ttle,
