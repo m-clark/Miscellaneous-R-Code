@@ -33,7 +33,7 @@ modgam = gam(yield ~ scale(temp, scale=F) + s(batch, bs='re'), data=GasolineYiel
 #######################
 ### Stan model code ###
 #######################
-stanmodelcode <-'
+stanmodelcode ='
 data {                              
   int<lower=0> N;                   // number of observations
   int<lower=1> L;                   // number of batches
@@ -44,7 +44,7 @@ data {
 
 transformed data {
   vector[N] tempCen;
-  tempCen <- temp - mean(temp);     // centered explanatory variable
+  tempCen = temp - mean(temp);     // centered explanatory variable
 }
 
 parameters {
@@ -68,17 +68,17 @@ transformed parameters{
   vector[L] SlopeRE;
 
   for (l in 1:L){
-    IntRE[l] <- gammaIntercept[l]*sd_int;
-    SlopeRE[l] <- gammaTemp[l]*sd_beta ;
+    IntRE[l] = gammaIntercept[l]*sd_int;
+    SlopeRE[l] = gammaTemp[l]*sd_beta ;
   }
   
   // model calculations
   for(n in 1:N) {
-    yhat[n] <- inv_logit((IntRE[id[n]] + Intercept) + (SlopeRE[id[n]] + betaTemp) * tempCen[n]);   
+    yhat[n] = inv_logit((IntRE[id[n]] + Intercept) + (SlopeRE[id[n]] + betaTemp) * tempCen[n]);   
   }
   
-  A <- yhat * phi;           
-  B <- (1.0-yhat) * phi;     
+  A = yhat * phi;           
+  B = (1.0-yhat) * phi;     
 }
 
 model {
@@ -113,19 +113,18 @@ dat = list(N = nrow(GasolineYield), yield=GasolineYield$yield,
 
 
 ### Run the model and check diagnostics
-test <- stan(model_code = stanmodelcode, model_name = "example", 
+test = stan(model_code = stanmodelcode, model_name = "example", 
              init=0,  # initializing unbounded at zero or setting the range for random init values proved useful
              # init_r=.01,  
              data = dat, iter = 2000, warmup=200, thin=1, chains = 2, 
              pars = c('Intercept','betaTemp','IntRE', 'SlopeRE', 'phi', 'sd_int', 'sd_beta'), verbose = F, refresh=2000/4) 
 
 # diagnostics
-traceplot(test, inc=T)
-ainfo <- get_adaptation_info(test)
+ainfo = get_adaptation_info(test)
 cat(ainfo[[1]])
 samplerpar = get_sampler_params(test)[[1]]
 summary(samplerpar)
-pairs(test, pars=c('Intercept', 'betaTemp'))
+shinystan::launch_shinystan(test)
 
 # summary
 print(test, digits_summary=4)
@@ -144,25 +143,13 @@ nchains = 4
 
 
 ### setup and run in parallel
-library(parallel)
-cl = makeCluster(4)
-
-clusterEvalQ(cl, library(rstan))
-clusterExport(cl, c('stanmodelcode', 'dat', 'test', 'iters', 'wu', 'thin')) 
-
-p = proc.time()
-parfit = parSapply(cl, 1:nchains, function(i) stan(model_code = stanmodelcode, model_name = "mixedreg", 
+fit2 = stan(model_code = stanmodelcode, model_name = "mixedreg", 
                                                    init=0,       # see comment in test run
                                                    # init_r=.01, 
                                                    fit = test, 
-                                                   data = dat, iter = iters, warmup=wu, thin=thin, chains = 1, chain_id=i,
-                                                   verbose = T, refresh=iters/4), 
-                   simplify=F) 
-
-proc.time() - p
-
-stopCluster(cl)
-
+                                                   data = dat, iter = iters, warmup=wu, thin=thin, 
+                                                   cores = 4,
+                                                   verbose = T, refresh=iters/4)
 
 ### combine the chains
 fit2 = sflist2stanfit(parfit)
@@ -179,8 +166,7 @@ summary(samplerpar)
 print(fit2, pars = c('Intercept','betaTemp','IntRE', 'SlopeRE', 'phi', 'sd_int', 'sd_beta', 'lp__'), 
       digits=4, probs = c(.025, .5, 0.975))
 
-traceplot(fit2, inc_warmup=F, pars = c('Intercept','betaTemp','IntRE', 'SlopeRE', 'phi', 'sd_int', 'sd_beta', 'lp__'))
-
+shinystan::launch_shinystan(fit2)
 
 ### Compare to mgcv
 summary(modgam)

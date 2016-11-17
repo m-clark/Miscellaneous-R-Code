@@ -46,7 +46,7 @@ data {
 transformed data{
   real meany;                                   // mean of y; see mu prior
   
-  meany <- mean(y); 
+  meany = mean(y); 
 }
 
 parameters {
@@ -81,13 +81,13 @@ generated quantities {
   real CLES2;                                   // a more explicit approach; the mean should roughly equal CLES
 
   for (n in 1:N){
-    yRep[n] <- student_t_rng(nu, mu[groupID[n]], sigma[groupID[n]]);
+    yRep[n] = student_t_rng(nu, mu[groupID[n]], sigma[groupID[n]]);
   }
 
-  muDiff <- mu[1] - mu[2];
-  CohensD <- muDiff / sqrt(sum(sigma)/2);
-  CLES <- normal_cdf(muDiff / sqrt(sum(sigma)), 0, 1);
-  CLES2 <- student_t_rng(nu, mu[1], sigma[1]) - student_t_rng(nu, mu[2], sigma[2]) > 0;
+  muDiff = mu[1] - mu[2];
+  CohensD = muDiff / sqrt(sum(sigma)/2);
+  CLES = normal_cdf(muDiff / sqrt(sum(sigma)), 0, 1);
+  CLES2 = student_t_rng(nu, mu[1], sigma[1]) - student_t_rng(nu, mu[2], sigma[2]) > 0;
 }
 
 '
@@ -101,10 +101,9 @@ generated quantities {
 ### Run model/examine basic diagnostic plots
 library(rstan) 
 # you can ignore the informational message
-fit = stan(model_code=stanmodelcode, data=standat, iter=12000, warmup=2000, chains=2, thin=10)
-traceplot(fit, pars=c('mu', 'sigma', 'muDiff','CohensD', 'CLES', 'nu','lp__'))
-# pairs(fit, pars=c('mu', 'sigma', 'muDiff','CohensD', 'CLES', 'nu'))
+fit = stan(model_code=stanmodelcode, data=standat, iter=12000, warmup=2000, cores=4, thin=10)
 
+shinystan::launch_shinystan(fit)
 
 ### Print summary of model
 print(fit, digits=3, pars=c('mu', 'sigma', 'muDiff', 'CohensD', 'CLES', 'CLES2','nu','lp__'))
@@ -144,7 +143,7 @@ t.test(y1,y2)
 
 ### Compare to BEST; note that it requires coda, whose traceplot function will overwrite rstan's
 library(BEST)
-BESTout <- BESTmcmc(y1, y2, numSavedSteps=12000, thinSteps=10, burnInSteps=2000) 
+BESTout = BESTmcmc(y1, y2, numSavedSteps=12000, thinSteps=10, burnInSteps=2000) 
 summary(BESTout)
 
 
@@ -167,17 +166,14 @@ ggplot(aes(x=value), data=gdat) +
   geom_line(aes(group=observation, color=groupID), stat='density', alpha=.05) +
   geom_point(aes(x=y, y=0, color=factor(groupID)), alpha=.15, size=5, data=data.frame(y, groupID)) +
   xlim(c(-8,8)) +   # might get a warning if extreme values are cut out
-  geom_density(aes(group=groupID, color=groupID, x=y), alpha=.05, data.frame(groupID=factor(groupID),y)) +
-  ggtheme
-
+  geom_density(aes(group=groupID, color=groupID, x=y), alpha=.05, data.frame(groupID=factor(groupID),y)) 
 
 ### plot mean difference or other values of interest
 ggplot(aes(x=muDiff), data=data.frame(muDiff=muDiff)) + 
   geom_density(alpha=.25) +
   xlim(c(0,3.5)) +
   geom_point(x=muDiff, y=0, alpha=.01, size=3) +
-  geom_path(aes(x=quantile(muDiff, c(.025, .975)), y=c(.2,.2)), size=2, alpha=.5, color='darkred') +
-  ggtheme
+  geom_path(aes(x=quantile(muDiff, c(.025, .975)), y=c(.2,.2)), size=2, alpha=.5, color='darkred', data=data.frame())
 
 
 ### BEST plots

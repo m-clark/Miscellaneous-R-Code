@@ -18,7 +18,7 @@ library(betareg)
 # ?ReadingSkills
 # y = ReadingSkills$accuracy 
 # 
-# brmod <- betareg(accuracy ~ dyslexia + iq, data = ReadingSkills)
+# brmod = betareg(accuracy ~ dyslexia + iq, data = ReadingSkills)
 # X = cbind(1, scale(model.matrix(brmod)[,c('dyslexia','iq')], scale=F))
 
 
@@ -32,7 +32,7 @@ library(betareg)
 # data(WeatherTask)
 # ?WeatherTask
 # y = WeatherTask$agreement
-# brmod <- betareg(agreement ~ priming + eliciting, data = WeatherTask)
+# brmod = betareg(agreement ~ priming + eliciting, data = WeatherTask)
 # X = model.matrix(brmod)
 
 # simulated data; probably a better illustration, or at least better behaved one.
@@ -51,7 +51,7 @@ y = rbeta(N, A, B)
 hist(y, 'FD')
 
 # model for later comparison
-brmod <- betareg(y ~ ., data = data.frame(y, X[,-1]))
+brmod = betareg(y ~ ., data = data.frame(y, X[,-1]))
 summary(brmod)
 
 
@@ -79,23 +79,23 @@ parameters {
 transformed parameters{
   vector[K] beta;
 
-  beta <- theta * 10;               // "matt trick" if desired
+  beta = theta * 10;               // "matt trick" if desired
 }
 
 model {
   // model calculations
   vector[N] Xbeta;                  // linear predictor
-  vector<lower=0,upper=1>[N] mu;    // transformed linear predictor
-  vector<lower=0>[N] A;             // parameter for beta distn
-  vector<lower=0>[N] B;             // parameter for beta distn
+  vector[N] mu;                     // transformed linear predictor
+  vector[N] A;             // parameter for beta distn
+  vector[N] B;             // parameter for beta distn
 
-  Xbeta <- X * beta;
+  Xbeta = X * beta;
   for (i in 1:N) { 
-    mu[i] <- inv_logit(Xbeta[i]);   
+    mu[i] = inv_logit(Xbeta[i]);   
   }
 
-  A <- mu * phi;
-  B <- (1.0 - mu) * phi;
+  A = mu * phi;
+  B = (1.0 - mu) * phi;
 
   // priors
   theta ~ normal(0, 1);   
@@ -114,12 +114,12 @@ model {
 # Note you will get some informational messages but they appear to be inconsequential;
 
 library(rstan)
-test <- stan(model_code = stanmodelcode, model_name = "betareg", #init=0, init_r=.01,
+test = stan(model_code = stanmodelcode, model_name = "betareg", #init=0, init_r=.01,
              pars = c('beta','phi'), data = dat, iter = 2000, 
              warmup=200, thin=1, chains = 3, verbose = F) 
 print(test, digits=3)
-traceplot(test, inc_warmup=T)
-traceplot(test, inc_warmup=F)
+# traceplot(test, inc_warmup=T)
+# traceplot(test, inc_warmup=F)
 
 summary(brmod)
 
@@ -127,24 +127,17 @@ summary(brmod)
 #################
 ### Final Run ###
 #################
-fit <- stan(model_code = stanmodelcode, model_name = "betareg", fit=test,
+fit = stan(model_code = stanmodelcode, model_name = "betareg", fit=test,
             data = dat, iter = 22000, warmup=2000, thin=20, 
-            chains = 3, verbose = F) 
+            cores = 4, verbose = F) 
 print(fit, pars = c('beta','phi'),digits_summary=3, probs = c(0, .025, .5, .975, 1))
 
 summary(brmod)
 
-traceplot(fit,  pars = c('beta','phi'), inc_warmup=T)
-traceplot(fit, pars = c('beta','phi'), inc_warmup=F)
-pairs(fit, pars = c('beta','phi'))
 
 # diagnostics
-ainfo <- get_adaptation_info(fit)
-cat(ainfo[[1]])
-samplerpar = get_sampler_params(fit)[[1]]
-summary(samplerpar)
-plot(samplerpar[,'accept_stat__'], pch=19, col=scales:::alpha('black', .1))
-plot(density(samplerpar[,'accept_stat__']))
+shinystan::launch_shinystan(fit)
+
 
 ### posterior predictive check ###
 # extract posterior draws
@@ -175,18 +168,18 @@ gdat = data.frame(X,y)
 gdatyRep = melt(yRep)
 
 # individual observation distibutions; note the theme is my own (available on github), but otherwise you'll have to define yours.
-ggplot(aes(x=y), xlim=c(.2,1), data=gdat) + 
-  stat_density(geom='line', lwd=2, alpha=.2) + 
-  geom_line(aes(x=value,  group=as.factor(Var2), col=as.factor(Var2)), stat='density', data=gdatyRep, show_guide=F, alpha=.15) +
-  ggtheme
+ggplot() + 
+  geom_line(aes(x=value, group=factor(Var2)), color='darkred', stat='density', lwd=.5, alpha=.05, data=gdatyRep) +
+  stat_density(aes(x=y), data=gdat, alpha=.15, geom='density', color=NA, fill='black') +
+  lazerhawk::theme_trueMinimal()
 
-# whole response distributions, comparison with betareg fits
+# whole response distributions, comparison with betareg fits (takes awhile)
 ggplot(aes(x=y), xlim=c(.2,1), data=gdat) + 
   geom_line(aes(x=value,  group=as.factor(Var1), col=as.factor(Var1)), stat='density', data=gdatyRep, show_guide=F, alpha=.05) +
   stat_density(geom='line', lwd=2, alpha=.2) + 
   stat_density(aes(x=brmod$fitted), geom='line', col='darkred', lwd=2, alpha=.2) +
   stat_density(aes(x=value), geom='line', col='#FF5500', lwd=2, alpha=.2, data=gdatyRep) +
-  ggtheme
+  lazerhawk::theme_trueMinimal()
 
 # Examine quantiles
 sapply(list(yRep=gdatyRep$value, brFitted=brmod$fitted.values, y=y), quantile, p=c(0,.1,.25,.5,.625,.75,.8,.9,.95,1))

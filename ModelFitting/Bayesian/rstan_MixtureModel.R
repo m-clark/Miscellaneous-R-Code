@@ -49,7 +49,7 @@ parameters {
 
 transformed parameters {
   ordered[K] mu;
-  mu <- mu_loc + mu_scale * cumulative_sum(mu_prop);               # means of the components
+  mu = mu_loc + mu_scale * cumulative_sum(mu_prop);               # means of the components
 }
 
 model {
@@ -62,14 +62,13 @@ model {
   {
     real ps[K];
     vector[K] log_theta;
-    log_theta <- log(theta);
+    log_theta = log(theta);
 
     for (n in 1:N) {
       for (k in 1:K) {
-        ps[k] <- log_theta[k]
-                 + normal_log(y[n],mu[k],sigma[k]);
+        ps[k] = log_theta[k] + normal_lpdf(y[n] | mu[k], sigma[k]);
       }
-      increment_log_prob(log_sum_exp(ps));
+      target += log_sum_exp(ps);
     }
   }
 }
@@ -82,14 +81,14 @@ model {
 library(rstan)
 
 # the following may take several minutes per chain depending on the data
-test <- stan(model_code = stanmodelcode, model_name = "example", 
-            data = standat, iter = 7000, warmup=2000, thin=5, chains = 2, 
-            verbose = F)   
+test = stan(model_code = stanmodelcode, model_name = "example", 
+            data = standat, iter = 7000, warmup=2000, thin=5, chains = 2, cores=2,
+            verbose = F)
 
-traceplot(test)
+# shinystan::launch_shinystan(test)
 print(test, digits=3)
 
-### compare to flexmix
+### compare to flexmix: coefs in flexmod1 = mu in test
 library(flexmix)
 flexmod1 = flexmix(standat$y~1, k=2, control=list(tolerance=1e-12, iter.max=1000))
 summary(flexmod1)
@@ -101,23 +100,9 @@ parameters(flexmod1)
 ######################
 
 # This can take a notably long time (i.e. hours) depending on the data.
-library(parallel)
-cl = makeCluster(3)
-clusterEvalQ(cl, library(rstan))
-
-clusterExport(cl, c('stanmodelcode', 'standat', 'test')) 
-
-p = proc.time()
-parfit = parSapply(cl, 1:3, function(i) stan(model_code = stanmodelcode, model_name = "mixture", fit = test, 
-                                             data = standat, iter = 62000, warmup=12000, thin=50, chains = 1, chain_id=i,
-                                             verbose = T), 
-                   simplify=F) 
-
-proc.time() - p
-stopCluster(cl)
-
-fit = sflist2stanfit(parfit) 
+fit = stan(model_code = stanmodelcode, model_name = "mixture", fit = test, 
+                                             data = standat, iter = 62000, warmup=12000, thin=50, cores = 4,
+                                             verbose = T)
 print(fit, digits=3)
-traceplot(fit)
-# # pairs(fit)
+shinystan::launch_shinystan(fit)
  
