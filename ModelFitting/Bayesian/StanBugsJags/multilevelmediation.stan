@@ -47,8 +47,8 @@ model {
   }
 
   for (n in 1:N){
-    mu_Med[n] <- alpha_xm + gammaAlpha_xm[Group[n]] + beta_xm*X[n];
-    mu_y[n] <- alpha + gammaAlpha[Group[n]] + beta1*X[n] + beta2*Med[n] ;
+    mu_Med[n] = alpha_xm + gammaAlpha_xm[Group[n]] + beta_xm*X[n];
+    mu_y[n] = alpha + gammaAlpha[Group[n]] + beta1*X[n] + beta2*Med[n] ;
   }
 
 
@@ -61,5 +61,5 @@ generated quantities{
   real indEffect;
 
   # since no random slope for beta2
-  indEffect <- beta_xm *beta2;
+  indEffect = beta_xm *beta2;
 }

@@ -19,7 +19,7 @@ transformed parameters {    // Transformed parameters block; declarations and st
 
 model {                     // Model block; declarations and statements.
   vector[N] mu;
-  mu <- X * beta;           // creation of linear predictor
+  mu = X * beta;           // creation of linear predictor
 
   // priors
   beta ~ normal(0, 10);
@@ -35,8 +35,8 @@ generated quantities {      // Generated quantities block; declarations and stat
   real R2;                  // Calculate Rsq as a demonstration
   vector[N] mu;
   
-  mu <- X * beta;
-  rss <- dot_self(mu-y);
-  totalss <- dot_self(y-mean(y));
-  R2 <- 1 - rss/totalss;
+  mu = X * beta;
+  rss = dot_self(mu-y);
+  totalss = dot_self(y-mean(y));
+  R2 = 1 - rss/totalss;
 }
