@@ -45,7 +45,7 @@ transformed parameters {
   vector[N] yhat; 
 
   for (n in 1:N)                         // Linear predictor
-    yhat[n] <- gammaIntercept[Subject[n]] + gammaDays[Subject[n]] * Days[n];
+    yhat[n] = gammaIntercept[Subject[n]] + gammaDays[Subject[n]] * Days[n];
 } 
 
 model {
@@ -83,31 +83,17 @@ mod_lme
 print(fit, digits_summary=3, pars=c('gammaIntercept', 'gammaDays'))
 
 ### Diagnostic plots
-traceplot(fit, pars=c('Intercept','beta','sigma_y', 'sd_int', 'sd_beta'))
-traceplot(fit, pars=c('Intercept','beta','sigma_y', 'sd_int', 'sd_beta'), inc_warmup=F)
+shinystan::launch_shinystan(fit)
 
 ###############################
 ### A parallelized approach ###
 ###############################
-library(parallel)
-cl = makeCluster(3)
-clusterEvalQ(cl, library(rstan))
 
-clusterExport(cl, c('stanmodelcode', 'dat', 'fit')) 
+fit2 = stan(model_code = stanmodelcode, model_name = "mixedreg", #init=0,
+            fit = fit, # if using the same model code, this will use the previous compilation
+            data = dat, iter = 120000, warmup=20000, thin=10, cores=3,
+            verbose = T)
 
-p = proc.time()
-parfit = parSapply(cl, 1:3, function(i) stan(model_code = stanmodelcode, model_name = "mixedreg", #init=0,
-                                                   fit = fit, # if using the same model code, this will use the previous compilation
-                                                   data = dat, iter = 120000, warmup=20000, thin=10, chains = 1, chain_id=i,
-                                                   verbose = T), 
-                    simplify=F) 
-
-proc.time() - p
-
-stopCluster(cl)
-
-# combine the chains
-fit2 = sflist2stanfit(parfit)
 
 # examine some diagnostics
 ainfo = get_adaptation_info(fit2)
@@ -123,5 +109,4 @@ print(fit2, pars= c('Intercept','beta','sigma_y', 'sd_int', 'sd_beta','lp__'), d
 mod_lme
 
 # diagnostics
-traceplot(fit2, inc_warmup=F, pars=c('Intercept','beta','sigma_y', 'sd_int', 'sd_beta', 'lp__'))
-pairs(fit2, pars=c('Intercept','beta'))
+shinystan::launch_shinystan(fit2)

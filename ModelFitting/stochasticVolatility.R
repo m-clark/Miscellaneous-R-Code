@@ -70,11 +70,11 @@ parameters {
 
 transformed parameters{
   vector[T] h;                         // log volatility at time t
-  h <- h_std * sigma;
-  h[1] <- h[1] / sqrt(1-phi * phi);
-  h <- h + mu;
+  h = h_std * sigma;
+  h[1] = h[1] / sqrt(1-phi * phi);
+  h = h + mu;
   for (t in 2:T)
-    h[t] <- h[t] + phi * (h[t-1] - mu);
+    h[t] = h[t] + phi * (h[t-1] - mu);
 }
 
 model {
@@ -92,7 +92,7 @@ generated quantities{
   vector[T] yRep;
 
   for (t in 1:T){
-    yRep[t] <- normal_rng(0, exp(h[t]/2));
+    yRep[t] = normal_rng(0, exp(h[t]/2));
   }  
   
 }
@@ -110,7 +110,6 @@ library(rstan)
 #                  iter = 4000, warmup = 2000, thin = 10)
 
 # print(stochvol_1, dig=3, par=c('mu', 'phi', 'sigma'), probs=c(.025,.5,.975))
-# traceplot(stochvol_1,  par=c('mu', 'phi', 'sigma'))
 
 # # much better
 stochvol_2 = stan(model_code = stanmodelcodePerformance,
@@ -118,26 +117,15 @@ stochvol_2 = stan(model_code = stanmodelcodePerformance,
                  iter = 4000, warmup = 2000, thin = 10)
 
 # print(stochvol_2, dig=3, par=c('mu', 'phi', 'sigma'), probs=c(.025,.5,.975))
-# traceplot(stochvol_2,  par=c('mu', 'phi', 'sigma'))
 
 
-library(parallel)
-cl = makeCluster(4)
-clusterEvalQ(cl, library(rstan))
-clusterExport(cl, c('standat', 'stanmodelcodePerformance'))
+stochvol_final = stan(model_code = stanmodelcodePerformance,
+                data = standat, cores = 4,
+                iter = 22000, warmup = 2000, thin = 20)
 
-stochvol = parSapply(cl, 1:4, function(chain) stan(model_code = stanmodelcodePerformance,
-                data = standat, chains = chain,
-                iter = 22000, warmup = 2000, thin = 20))
-stopCluster(cl)
-
-stochvol_final = sflist2stanfit(stochvol)
 print(stochvol_final, dig=3, par=c('mu', 'phi', 'sigma'), probs=c(.025,.5,.975))
 
-traceplot(stochvol_final,  par=c('mu', 'phi', 'sigma'))
-# pairs(stochvol_final,  par=c('mu', 'phi', 'sigma'))
-plot(stochvol_final)
-
+shinystan::launch_shinystan(stochvol_final)
 
 # get log volatility and data replicates
 h = extract(stochvol_final, 'h')$h

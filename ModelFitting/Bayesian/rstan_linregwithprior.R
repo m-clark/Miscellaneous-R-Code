@@ -54,7 +54,7 @@ modlm = lm(y~., data.frame(d))
 dat = list(N = nrow(d), y=y, X1=d[,1], X2=d[,2], X3=d[,3])
 
 # Create the stan model object.
-stanmodelcode <-'
+stanmodelcode ='
 data {                      // all of data noted here must be in the list that is imported
   int<lower=0> N;           // Sample size
   vector[N] X1;             // Predictor X1
@@ -89,7 +89,7 @@ library(rstan)
 
 ### Run the model and examine results ###
 # fit
-fit <- stan(model_code = stanmodelcode, model_name = "example", 
+fit = stan(model_code = stanmodelcode, model_name = "example", 
             data = dat, iter = 12000, warmup=2000, thin=10, chains = 3, # sample_file = 'norm.csv', if you want to save
             verbose = F) 
 
@@ -109,7 +109,7 @@ summary(modlm)
 dat = list(N = nrow(d), k=4, y=y, X=X)
 
 # Create the stan model object
-stanmodelcode <-'
+stanmodelcode ='
 data {                      // Data block; declarations only
   int<lower=0> N;           // Sample size                         
   int<lower=0> k;           // Dimension of model matrix
@@ -132,7 +132,7 @@ transformed parameters {    // Transformed parameters block; declarations and st
 
 model {                     // Model block; declarations and statements.
   vector[N] mu;
-  mu <- X * beta;           // creation of linear predictor
+  mu = X * beta;           // creation of linear predictor
 
   // priors
   beta ~ normal(0, 10);
@@ -148,16 +148,16 @@ generated quantities {     // Generated quantities block; declarations and state
   real R2;                 // Calculate Rsq as a demonstration
   vector[N] mu;
   
-  mu <- X * beta;
-  rss <- dot_self(mu-y);
-  totalss <- dot_self(y-mean(y));
-  R2 <- 1 - rss/totalss;
+  mu = X * beta;
+  rss = dot_self(mu-y);
+  totalss = dot_self(y-mean(y));
+  R2 = 1 - rss/totalss;
 }
 '
 
 ### Run the model and examine results ###
 # Note that you should be able to see a slight speed gain
-fit <- stan(model_code = stanmodelcode, model_name = "example", 
+fit = stan(model_code = stanmodelcode, model_name = "example", 
             data = dat, iter = 12000, warmup=2000, thin=10, chains = 3, #sample_file = 'norm.csv', if you want to save
             verbose = F)  
 
@@ -171,7 +171,5 @@ print(fit, digits_summary=3, pars=c('beta','sigma', 'R2'),
 summary(modlm)
 
 # Visualize
-traceplot(fit, pars=c('beta','sigma'))
-traceplot(fit, pars=c('beta','sigma'), inc_warmup=F)
-plot(fit, pars=c('beta','sigma'))  # ugh
-pairs(fit, pars=c('beta','sigma'))
+library(shinystan)
+launch_shinystan(fit)

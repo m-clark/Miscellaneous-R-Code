@@ -95,6 +95,11 @@ summary(modMain)
 # should equal the naive estimate in the following code
 medLme = fixef(modMed)[2]*fixef(modMain)[3]
 
+# using the mediation package will provide a better estimate
+library(mediation)
+medMixed = mediate(model.m=modMed, model.y = modMain, treat = 'X', mediator ='Med')
+summary(medMixed)
+
 
 
 #################
@@ -105,7 +110,7 @@ medLme = fixef(modMed)[2]*fixef(modMain)[3]
 # used for efficiency.  As a rough guide, the default data where N=500 took
 # about 5 min to run for the main model with iter=12000 and warmup of 2000.
 
-modelStan <- "
+modelStan = "
 data {
   int<lower=1> N;                                # Sample size
   vector[N] X;                                   # Explanatory variable
@@ -146,11 +151,11 @@ transformed parameters{
   vector[J] gammaBeta2;
 
   for (j in 1:J){
-    gammaAlphaMed[j] <- gamma[j,1];
-    gammaBetaMed[j] <- gamma[j,2];
-    gammaAlpha[j] <- gamma[j,3];
-    gammaBeta1[j] <- gamma[j,4];
-    gammaBeta2[j] <- gamma[j,5];
+    gammaAlphaMed[j] = gamma[j,1];
+    gammaBetaMed[j] = gamma[j,2];
+    gammaAlpha[j] = gamma[j,3];
+    gammaBeta1[j] = gamma[j,4];
+    gammaBeta2[j] = gamma[j,5];
   }
 }
 
@@ -187,16 +192,16 @@ model {
   sigma_ranef  ~ cauchy(0, 1);
   Omega_chol ~  lkj_corr_cholesky(2.0);
 
-  D  <- diag_matrix(sigma_ranef);
-  DC <- D * Omega_chol;
+  D  = diag_matrix(sigma_ranef);
+  DC = D * Omega_chol;
   
   for (j in 1:J)                                 # loop for Group random effects
     gamma[j] ~ multi_normal_cholesky(rep_vector(0, 5), DC);
 
   ## Linear predictors
   for (n in 1:N){
-    mu_Med[n] <- alphaMed + gammaAlphaMed[Group[n]] + (betaMed + gammaBetaMed[Group[n]])*X[n];
-    mu_y[n]   <- alphaMain + gammaAlpha[Group[n]] + (beta1Main+gammaBeta1[Group[n]])*X[n] + (beta2Main+gammaBeta2[Group[n]])*Med[n] ;
+    mu_Med[n] = alphaMed + gammaAlphaMed[Group[n]] + (betaMed + gammaBetaMed[Group[n]])*X[n];
+    mu_y[n]   = alphaMain + gammaAlpha[Group[n]] + (beta1Main+gammaBeta1[Group[n]])*X[n] + (beta2Main+gammaBeta2[Group[n]])*Med[n] ;
   }
   
   
@@ -211,11 +216,11 @@ generated quantities{
   real totalEffect;
   matrix[5,5] covMatRE;
   
-  covMatRE <- diag_matrix(sigma_ranef) * tcrossprod(Omega_chol) * diag_matrix(sigma_ranef);
+  covMatRE = diag_matrix(sigma_ranef) * tcrossprod(Omega_chol) * diag_matrix(sigma_ranef);
 
-  naiveIndEffect <- betaMed*beta2Main;
-  avgIndEffect <- betaMed*beta2Main + covMatRE[2,5];
-  totalEffect <- avgIndEffect + beta1Main;
+  naiveIndEffect = betaMed*beta2Main;
+  avgIndEffect = betaMed*beta2Main + covMatRE[2,5];
+  totalEffect = avgIndEffect + beta1Main;
 }
 "
 
@@ -232,7 +237,7 @@ p = proc.time()
 fit0 = stan(model_code = modelStan, data = standat, iter = 400, warmup=200, 
             thin=1, chains = 1, verbose = F)
 proc.time() - p
- 
+
 # print(fit0)
 
 # traceplot(fit0)
@@ -248,26 +253,9 @@ wu = 2000
 thin = 20
 chains = 4
 
-library(parallel)
-cl = makeCluster(chains)
-clusterEvalQ(cl, library(rstan))
-
-clusterExport(cl, c('modelStan', 'standat', 'fit0', 'iter', 'wu', 'thin', 'chains')) 
-
-### Run
-p = proc.time()
-parfit=parSapply(cl, 1:chains, function(i) stan(model_code=modelStan, fit=fit0, 
-                                                data=standat, iter=iter, warmup=wu, 
-                                                thin=thin, chains=1, chain_id=i), 
-                 simplify=F) 
-
-(proc.time() - p)[3]/60
-
-stopCluster(cl)
-
-# combine the chains
-fit = sflist2stanfit(parfit)
-
+fit = stan(model_code=modelStan, fit=fit0, 
+           data=standat, iter=iter, warmup=wu, 
+           thin=thin, cores=4)
 
 
 #########################
@@ -316,7 +304,8 @@ list(covmat_RE[3:5,3:5], round(vcovMain, 2), round(summary(modMain)$varcor$group
 c(true = betaMed*beta2Main + covmat_RE[2,5],
   est = get_posterior_mean(fit, 'avgIndEffect')[,5],
   naiveBayes = get_posterior_mean(fit, 'naiveIndEffect')[,5],
-  naiveLme = medLme)
+  naiveLme = medLme,
+  mediate = medMixed$d0)
 
 
 
@@ -326,8 +315,7 @@ c(true = betaMed*beta2Main + covmat_RE[2,5],
 samplerpar = get_sampler_params(fit)[[1]]
 summary(samplerpar)
 
-traceplot(fit, pars=mainpars, inc_warmup=F)
-plot(fit, pars=mainpars)
+shinystan::launch_shinystan(fit)
 
 
 
@@ -386,15 +374,3 @@ Med = (alphaMed + ranef_alphaMed) + (betaMed+ranef_betaMed)*X + resid_Med[,1]
 y = (alphaMain + ranef_alphaMain) + (beta1Main+ranef_beta1Main)*X + (beta2Main + ranef_beta2Main)*Med + resid_Main[,1]
 group = rep(1:50, e=10)
 
-
-### A piecemeal lme for comparison; can't directly estimate mediated effect, and it
-### won't pick up on correlation of random effects between models
-library(lme4)
-modMed = lmer(Med ~ X + (1+X|group))
-summary(modMed)
-
-modMain = lmer(y ~ X + Med + (1+X+Med|group))
-summary(modMain)
-
-# should equal the naive estimate in the following code
-medLme = fixef(modMed)[2]*fixef(modMain)[3]

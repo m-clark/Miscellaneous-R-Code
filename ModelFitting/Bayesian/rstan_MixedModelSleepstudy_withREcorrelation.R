@@ -34,8 +34,8 @@ transformed data {
   real IntBase;
   real RTsd;
   
-  IntBase <- mean(RT);                    // Intercept starting point
-  RTsd <- sd(RT);
+  IntBase = mean(RT);                    // Intercept starting point
+  RTsd = sd(RT);
 }
 
 parameters {
@@ -53,12 +53,12 @@ transformed parameters {
   real Intercept;
   real beta;
 
-  Intercept <- IntBase + Intercept01 * RTsd;
-  beta <- beta01 * 10;
+  Intercept = IntBase + Intercept01 * RTsd;
+  beta = beta01 * 10;
 
   for (i in 1:I){  
-    gammaIntercept[i]  <- gamma[i,1];
-    gammaDays[i] <- gamma[i,2];
+    gammaIntercept[i]  = gamma[i,1];
+    gammaDays[i] = gamma[i,2];
   }
 
 } 
@@ -69,9 +69,9 @@ model {
   vector[N] yhat;                         // Linear predictor
   vector[2] mu;                           // vector of Intercept and beta
 
-  D <- diag_matrix(sigma_u);
-  mu[1] <- Intercept;
-  mu[2] <- beta;
+  D = diag_matrix(sigma_u);
+  mu[1] = Intercept;
+  mu[2] = beta;
 
   // priors
   Intercept01 ~ normal(0, 1);             // example of weakly informative priors;
@@ -82,14 +82,14 @@ model {
   sigma_u ~ cauchy(0, 2.5);               // prior for RE scale
   sigma_y ~ cauchy(0, 2.5);               // prior for residual scale
 
-  DC <- D * Omega_chol;
+  DC = D * Omega_chol;
 
   for (i in 1:I)                          // loop for Subject random effects
     gamma[i] ~ multi_normal_cholesky(mu, DC);
 
   // likelihood
   for (n in 1:N)                          
-    yhat[n] <- gammaIntercept[Subject[n]] + gammaDays[Subject[n]] * Days[n];
+    yhat[n] = gammaIntercept[Subject[n]] + gammaDays[Subject[n]] * Days[n];
 
   RT ~ normal(yhat, sigma_y);
 }
@@ -97,7 +97,7 @@ model {
 generated quantities {
   matrix[2,2] Omega;                      // correlation of RE
   
-  Omega <- tcrossprod(Omega_chol);
+  Omega = tcrossprod(Omega_chol);
 }
 '
 
@@ -119,7 +119,7 @@ mod_lme
 print(fit, digits_summary=3, pars=c('gammaIntercept', 'gammaDays'))
 
 ### Diagnostic plots
-traceplot(fit, pars=c('Intercept', 'beta','sigma_y', 'sigma_u', 'Omega[1,2]'))
+shinystan::launch_shinystan(fit)
 
 
 ###############################
@@ -130,26 +130,12 @@ wu = 2000
 thin = 10
 chains = 4
 
-library(parallel)
-cl = makeCluster(chains)
-clusterEvalQ(cl, library(rstan))
+fit2 = stan(model_code=stanmodelcode, model_name="mixedreg",
+            fit=fit, data=dat, iter=iter, warmup=wu, 
+            thin=thin, cores=4)
 
-clusterExport(cl, c('stanmodelcode', 'dat', 'fit', 'iter', 'wu', 'thin', 'chains')) 
 
-p = proc.time()
-parfit=parSapply(cl, 1:chains, function(i) stan(model_code=stanmodelcode, model_name="mixedreg",
-                                                fit=fit, data=dat, iter=iter, warmup=wu, 
-                                                thin=thin, chains=1, chain_id=i), 
-                 simplify=F) 
-
-proc.time() - p
-
-stopCluster(cl)
-
-# combine the chains
-fit2 = sflist2stanfit(parfit)
-
-# examine some diagnostics
+# some diagnostics
 ainfo = get_adaptation_info(fit2)
 cat(ainfo[[1]])
 samplerpar = get_sampler_params(fit2)[[1]]
@@ -163,8 +149,5 @@ print(fit2, pars= c('Intercept', 'beta','sigma_y', 'sigma_u', 'Omega[1,2]', 'lp_
 mod_lme
 
 # Diagnostics
-traceplot(fit2, inc_warmup=F, pars=c('Intercept', 'beta','sigma_y', 'sigma_u', 'Omega[1,2]', 'lp__'))
+shinystan::launch_shinystan(fit2)
 
-pairs(fit2, pars=c('sigma_u'))
-pairs(fit2, pars=c('Intercept', 'beta'))
-# plot(fit2)

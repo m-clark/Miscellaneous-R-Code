@@ -11,9 +11,9 @@ transformed data {
   int <lower=1> P;
 //   matrix[N,Ncol_x+1] MM;                      # in case you want to work with a model matrix
 //   
-//   MM <- append_col(rep_vector(1, N), X);
-//   P <- cols(MM);
-  P <- Ncol_x + 1;
+//   MM = append_col(rep_vector(1, N), X);
+//   P = cols(MM);
+  P = Ncol_x + 1;
 }
 
 parameters {
@@ -37,8 +37,8 @@ transformed parameters {
   real Intercept;
   real beta;
 
-  Intercept <- fixefs[1];
-  beta <- fixefs[2];
+  Intercept = fixefs[1];
+  beta = fixefs[2];
 } 
 
 model {
@@ -66,25 +66,25 @@ model {
   sigma_y ~ cauchy(0, 2.5);                      
   
   # multivariate draw for fixed effects
-  sigma_fe[1] <- sigma_int_fe;
-  sigma_fe[2] <- sigma_beta_fe;
-  DC_fe <- diag_pre_multiply(sigma_fe, Omega_FE_chol);
+  sigma_fe[1] = sigma_int_fe;
+  sigma_fe[2] = sigma_beta_fe;
+  DC_fe = diag_pre_multiply(sigma_fe, Omega_FE_chol);
 
   fixefs ~ multi_normal_cholesky(rep_vector(0, 2), DC_fe);
   
   
   # multivariate draw for random effects
-  sigma_re[1] <- sigma_int_re;
-  sigma_re[2] <- sigma_beta_re;
-  DC_re <- diag_pre_multiply(sigma_re, Omega_RE_chol);
+  sigma_re[1] = sigma_int_re;
+  sigma_re[2] = sigma_beta_re;
+  DC_re = diag_pre_multiply(sigma_re, Omega_RE_chol);
   
   gamma ~ multi_normal_cholesky(fixefs, DC_re);
   
   
   # likelihood
   for (n in 1:N){                          
-    # LP[n] <- MM[n] * betavec;                  # tried matrix approach, but it was actually 2-3 times slower
-    LP[n] <- gamma[Group[n],1] + gamma[Group[n],2] * X[n,1];
+    # LP[n] = MM[n] * betavec;                  # tried matrix approach, but it was actually 2-3 times slower
+    LP[n] = gamma[Group[n],1] + gamma[Group[n],2] * X[n,1];
   }
   y ~ normal(LP, sigma_y);
 }
@@ -93,6 +93,6 @@ generated quantities {
   corr_matrix[P] Omega_FE;                       # correlation of FE
   corr_matrix[2] Omega_RE;                       # correlation of RE
 
-  Omega_FE <- tcrossprod(Omega_FE_chol);
-  Omega_RE <- tcrossprod(Omega_RE_chol);
+  Omega_FE = tcrossprod(Omega_FE_chol);
+  Omega_RE = tcrossprod(Omega_RE_chol);
 }

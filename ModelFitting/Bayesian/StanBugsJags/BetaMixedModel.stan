@@ -9,7 +9,7 @@ data {
 
 transformed data {
   vector[N] tempCen;
-  tempCen <- temp - mean(temp);     // centered explanatory variable
+  tempCen = temp - mean(temp);     // centered explanatory variable
 }
 
 parameters {
@@ -33,17 +33,17 @@ transformed parameters{
   vector[L] SlopeRE;
 
   for (l in 1:L){
-    IntRE[l] <- gammaIntercept[l]*sd_int;
-    SlopeRE[l] <- gammaTemp[l]*sd_beta ;
+    IntRE[l] = gammaIntercept[l]*sd_int;
+    SlopeRE[l] = gammaTemp[l]*sd_beta ;
   }
   
   // model calculations
   for(n in 1:N) {
-    yhat[n] <- inv_logit((IntRE[id[n]] + Intercept) + (SlopeRE[id[n]] + betaTemp) * tempCen[n]);   
+    yhat[n] = inv_logit((IntRE[id[n]] + Intercept) + (SlopeRE[id[n]] + betaTemp) * tempCen[n]);   
   }
   
-  A <- yhat * phi;           
-  B <- (1.0-yhat) * phi;     
+  A = yhat * phi;           
+  B = (1.0-yhat) * phi;     
 }
 
 model {
