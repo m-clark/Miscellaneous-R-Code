@@ -1,0 +1,92 @@
+data{
+  int<lower=1> N;                             // sample size
+  int<lower=1> P;                             // number of variables
+  int<lower=1> K;                             // number of factors
+  matrix[N,P]  X;                             // data matrix of order [N,P]
+}
+
+transformed data{
+  int<lower=1> L;
+  L <- P-K;                                   // Number of loadings
+}
+
+
+parameters{
+  vector[P] b;                                // intercepts
+  vector[L] lambda01;                         // initial factor loadings
+  matrix[N,K] FS;                             // factor scores, matrix of order [N,K]
+  corr_matrix[K] phi;                         // factor correlations
+  vector<lower=0, upper=pi()/2>[K] sdFactorsUnif;
+  vector<lower=0, upper=pi()/2>[P] sdXUnif;      
+  //vector<lower=0, upper=pi()/2>[L] sdLambdaUnif;
+}
+
+transformed parameters{
+}
+
+model{
+  matrix[N,P] mu;
+  matrix[K,K] Ld;
+  vector[K] muFactors;
+  vector[L] lambda;                           // factor loadings
+  vector[K] sdFactors;               // sd of factors
+  vector[P] sdX;                     // variance for each variable
+  //vector<lower=0>[L] sdLambda;                // hyperprior variance for loading estimates
+  
+  // the following will equate the sd to (half) cauchy(0, 2.5)
+  for (k in 1:K) sdFactors[k] <- 0 + 2.5*tan(sdFactorsUnif[k]);
+  for (p in 1:P) sdX[p] <- 0 + 2.5*tan(sdXUnif[p]);
+  // for (l in 1:L) sdLambda[l] <- 0 + 2.5*tan(sdLambdaUnif[l]);
+  
+  lambda <- lambda01 * 5;
+  
+  muFactors <- rep_vector(0,K);               // Factor means, set to zero
+  Ld <- diag_matrix(sdFactors) * cholesky_decompose(phi);
+
+  for(n in 1:N){
+    mu[n,1]  <- b[1] + FS[n,1];               // Agree
+    mu[n,2]  <- b[2] + FS[n,1]*lambda[1];
+    mu[n,3]  <- b[3] + FS[n,1]*lambda[2];
+    mu[n,4]  <- b[4] + FS[n,1]*lambda[3];
+    mu[n,5]  <- b[5] + FS[n,1]*lambda[4];
+
+    mu[n,6]  <- b[6] + FS[n,2];               // Consc
+    mu[n,7]  <- b[7] + FS[n,2]*lambda[5];
+    mu[n,8]  <- b[8] + FS[n,2]*lambda[6];
+    mu[n,9]  <- b[9] + FS[n,2]*lambda[7];
+    mu[n,10] <- b[10] + FS[n,2]*lambda[8];
+
+    mu[n,11] <- b[11] + FS[n,3];              // Extro
+    mu[n,12] <- b[12] + FS[n,3]*lambda[9];
+    mu[n,13] <- b[13] + FS[n,3]*lambda[10];
+    mu[n,14] <- b[14] + FS[n,3]*lambda[11];
+    mu[n,15] <- b[15] + FS[n,3]*lambda[12];
+
+    mu[n,16] <- b[16] + FS[n,4];              // Neuro
+    mu[n,17] <- b[17] + FS[n,4]*lambda[13];
+    mu[n,18] <- b[18] + FS[n,4]*lambda[14];
+    mu[n,19] <- b[19] + FS[n,4]*lambda[15];
+    mu[n,20] <- b[20] + FS[n,4]*lambda[16];
+
+    mu[n,21] <- b[21] + FS[n,5];              // Open
+    mu[n,22] <- b[22] + FS[n,5]*lambda[17];
+    mu[n,23] <- b[23] + FS[n,5]*lambda[18];
+    mu[n,24] <- b[24] + FS[n,5]*lambda[19];
+    mu[n,25] <- b[25] + FS[n,5]*lambda[20];
+  }
+
+  // priors
+  phi ~ lkj_corr(2.0);
+  // sdX ~ cauchy(0, 2.5);
+  // sdLambda ~ cauchy(0, 2.5);
+  // sdFactors ~ cauchy(0, 2.5);
+  
+  b ~ normal(0, 10);
+  lambda01 ~ normal(0, 1);
+  
+  for(i in 1:N){   
+    X[i] ~ normal(mu[i], sdX);
+    FS[i] ~ multi_normal_cholesky(muFactors, Ld);
+  }
+  
+}

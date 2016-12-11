@@ -8,6 +8,7 @@ At present I'm now doing these via markdown, so any demo code will typically hav
 
 Model Fitting
 -------------
+
 Code related to fitting of various models. 
 
 [standard regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/standardlm.R), 
@@ -40,7 +41,9 @@ two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/
 [quantile regression](http://htmlpreview.github.io/?https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/quantileRegression.html)
 ...
 
+
 ### Bayesian (mostly with Stan/rstan)
+
 [BEST t-test](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstant_testBEST.R),
 [linear regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_linregwithprior.R)
 (Compare with [BUGS version](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/bugs_linreg.R), [JAGS](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/jags_linreg.R)),
@@ -54,21 +57,16 @@ mixed model with beta response [(Stan)](https://github.com/m-clark/Miscellaneous
 [variational bayes regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/variationalBayesRegression.Rmd), 
 [gaussian process](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting//gp%20Examples/gaussianProcessStan.Rmd), ...
 
+
 SC and TR
 ---------
-Short courses and technical reports I put together from time to time. This is currently changing from linking to the relevant code to linking to the docs themselves.  The docs are or will be (after updating) made for web presentation first, but some will link to pdf.
 
-[Introduction to R](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/SC%20and%20TR/coursecode.r),
-[Generalized Additive Models](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/SC%20and%20TR/GAMS.R),
-[Machine Learning](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/SC%20and%20TR/MLcode.R),
-[Mixed Models, generally speaking](http://htmlpreview.github.io/?https://github.com/m-clark/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/mixedModels.html) [(files)](https://github.com/m-clark/Miscellaneous-R-Code/tree/master/SC%20and%20TR/mixedModels)[(pdf)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/mixedModels.pdf),
-[Comparison of mixed models and 'ANOVA'](http://htmlpreview.github.io/?https://github.com/m-clark/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/anovamixed.html) [(files)](https://github.com/m-clark/Miscellaneous-R-Code/tree/master/SC%20and%20TR/mixedModels)  [(pdf)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/anovamixed.pdf),
-[Comparison of mixed and additive models](http://htmlpreview.github.io/?https://github.com/m-clark/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModelML/mixedModelML.html) [(files)](https://github.com/m-clark/Miscellaneous-R-Code/tree/master/SC%20and%20TR/mixedModels) [(pdf)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModelML/mixedModelML.pdf),
-[Comparison of mixed and latent growth curve models](http://htmlpreview.github.io/?https://github.com/m-clark/Miscellaneous-R-Code/blob/master/SC%20and%20TR/mixedModels/growth_vs_mixed.html) [(files)](https://github.com/m-clark/Miscellaneous-R-Code/tree/master/SC%20and%20TR/mixedModels), 
-...
+This part of the repository is deprecated, but used to be a section of 'short courses' and 'technical reports'.  See the [Workshops](https://github.com/m-clark/Workshops) or [Docs](https://github.com/m-clark/docs) repositories instead, or go to the [workshops](http://m-clark.github.io/workshops/) and [documents](http://m-clark.github.io/documents/) sections of the website where you can see finished products ...
+
 
 Other
 -----
+
 Random shenanigans.
 
 FizzBuzz test [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.R) [(julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.jl) [(Python)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/Other/fizzbuzz.py),
