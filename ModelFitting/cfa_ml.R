@@ -35,8 +35,7 @@ describe(y)
 round(cor(y), 3)
 
 #see the factor structure
-library(corrplot)
-corrplot(cor(y))
+lazerhawk::corrheat(cor(y))
 
 # example exploratory fa
 #fa(y, nfactors=2, rotate="oblimin") 

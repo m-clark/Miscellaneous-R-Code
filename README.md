@@ -3,7 +3,7 @@ Miscellaneous (mostly) R Code
 
 This is a place for miscellaneous R and other code I've put together for clients, co-workers or myself for learning and demonstration purposes. The attempt is made to put together some well-commented and/or conceptually clear code from scratch, though most functionality is readily available in any number of well-developed R packages.  Typically examples are provided using such packages for comparison of results.
 
-At present I'm now doing these via markdown, so any demo code will typically have an md, Rmd, and html file rather than, or in addition to a (purled) R file.  For a quick peek that shows most things in the way intended, one can look at the md file directly within github. Otherwise, one can view the html files [here](https://htmlpreview.github.io/).
+More recently, I usually just create a document of some kind rather than a standard `*.R` file, so you might check out the [docs](https://github.com/m-clark/docs) repo as well.
 
 
 Model Fitting
@@ -61,7 +61,7 @@ mixed model with beta response [(Stan)](https://github.com/m-clark/Miscellaneous
 SC and TR
 ---------
 
-This part of the repository is deprecated, but used to be a section of 'short courses' and 'technical reports'.  See the [Workshops](https://github.com/m-clark/Workshops) or [Docs](https://github.com/m-clark/docs) repositories instead, or go to the [workshops](http://m-clark.github.io/workshops/) and [documents](http://m-clark.github.io/documents/) sections of the website where you can see finished products ...
+This part of the repository is deprecated, but used to be a section of 'short courses' and 'technical reports'.  See the [Workshops](https://github.com/m-clark/Workshops) or [docs](https://github.com/m-clark/docs) repositories instead, or go to the [workshops](http://m-clark.github.io/workshops/) and [documents](http://m-clark.github.io/documents/) sections of the website where you can see finished products ...
 
 
 Other
