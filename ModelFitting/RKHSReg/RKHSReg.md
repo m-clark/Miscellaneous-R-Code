@@ -1,7 +1,7 @@
 # Reproducing Kernel Hilbert Space Regression
 
 # Introduction
-*Rescued* this R code from Reproducing Kernel Hilbert Spaces for Penalized Regression: A tutorial, [Nosedal-Sanchez et al. (2010)](http://www.tandfonline.com/doi/abs/10.1080/00031305.2012.678196), specifically, their code in the appendix.  The original code had several issues most of which has been cleaned up. Blocked text represents quotes taken directly from the article, while I add additional notes elsewhere. I leave their inline comments intact, though in some places the deletion of unnecessary code may put them a bit out of context, and may add my own in a few empty spots.  I also made some textual and code corrections.  The purled code (i.e. with no text) can be found in this same directory/filename with .R extension.
+This R code comes from Reproducing Kernel Hilbert Spaces for Penalized Regression: A tutorial, [Nosedal-Sanchez et al. (2010)](http://www.tandfonline.com/doi/abs/10.1080/00031305.2012.678196), specifically, their code in the appendix.  The original code had several issues most of which has been cleaned up. Blocked text represents quotes taken directly from the article, while I add additional notes elsewhere. I leave their inline comments intact, though in some places the deletion of unnecessary code may put them a bit out of context, and may add my own in a few empty spots.  I also made some textual and code corrections.  The purled code (i.e. with no text) can be found in this same directory/filename with .R extension.
 
 # Ridge Regression
 
@@ -167,7 +167,7 @@ estimation along with the true function and data.
 
 ```r
 rk.1 = function(s, t) {
-  return(.5*min(s, t)^2 * max(s, t) + (1/6)*min(s, t)^3)
+  return(.5*min(s, t)^2 * max(s, t) - (1/6)*min(s, t)^3)
 }
 ```
 

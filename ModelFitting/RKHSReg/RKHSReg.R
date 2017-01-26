@@ -54,7 +54,7 @@ x = matrix(runif(n), nrow=n, ncol=1)
 x.star = as.matrix(sort(x))                      # sorted x, used by plot
 y = sin(2*pi*x.star) + rnorm(n, sd=0.2)
 rk.1 = function(s, t) {
-  return(.5*min(s, t)^2 * max(s, t) + (1/6)*min(s, t)^3)
+  return(.5*min(s, t)^2 * max(s, t) - (1/6)*min(s, t)^3)
 }
 smoothing.spline = function(X, y, lambda) {
   Gramm = get.gramm(X, rkfunc=rk.1)                  # Gramm matrix (nxn)
