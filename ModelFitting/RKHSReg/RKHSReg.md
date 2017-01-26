@@ -167,7 +167,7 @@ estimation along with the true function and data.
 
 ```r
 rk.1 = function(s, t) {
-  return(.5*min(s, t)^2 * max(s, t) - (1/6)*min(s, t)^3)
+  return(.5*min(s, t)^2 * max(s, t) - (1/6)*min(s, t)^3)        # sign error fixed here
 }
 ```
 
@@ -234,3 +234,209 @@ opt.mod.2 = smoothing.spline(x.star, y, lambda[which.min(V)])       # fit optima
 <img src="RKHSReg_files/figure-html/unnamed-chunk-14-1.png" title="" alt="" style="display: block; margin: auto;" />
 
 > This graph is plotted in Figure A.2.
+
+
+
+
+
+
+
+
+# \*\* ORIGINAL CODE  \*\*
+
+The website where the article is located was no longer displaying supplemental files.  This comes from an earlier draft at http://www.math.unm.edu/~alvaro/rkhs_tutorial_12-06-2010.pdf, so might not be exactly as it was uploaded.  I used Rstudio's default cleanup to make the code a little easier to read, and maybe added a little spacing, but otherwise it is identical to what's in the linked paper.
+
+## A.1
+
+```r
+###### Data ########
+set.seed(3)
+n <- 20
+x1 <- runif(n)
+x2 <- runif(n)
+X <- matrix(c(x1, x2), ncol = 2) # design matrix
+y <- 2 + 3 * x1 + rnorm(n, sd = 0.25)
+
+##### function to find the inverse of a matrix ####
+my.inv <- function(X, eps = 1e-12) {
+  eig.X <- eigen(X, symmetric = T)
+  P <- eig.X[[2]] lambda <- eig.X[[1]] ind <- lambda > eps
+  lambda[ind] <- 1 / lambda[ind] lambda[!ind] <- 0
+  ans <- P %*% diag(lambda, nrow = length(lambda)) %*% t(P)
+  return(ans)
+}
+
+###### Reproducing Kernel #########
+rk <- function(s, t) {
+  p <- length(s)
+  rk <- 0
+  for (i in 1:p) {
+    rk <- s[i] * t[i] + rk
+  }
+  return((rk))
+}
+
+##### Gram matrix #######
+get.gramm <- function(X) {
+  n <- dim(X)[1]
+  Gramm <-
+    matrix(0, n, n) #initializes Gramm array #i=index for rows
+  #j=index for columns Gramm<-as.matrix(Gramm) # Gramm matrix
+  for (i in 1:n) {
+    for (j in 1:n) {
+      Gramm[i, j] <- rk(X[i,], X[j,])
+    }
+  } return(Gramm)
+}
+
+
+ridge.regression <- function(X, y, lambda) {
+  Gramm <- get.gramm(X) #Gramm matrix (nxn)
+  n <- dim(X)[1] # n=length of y
+  J <- matrix(1, n, 1) # vector of ones dim
+  Q <- cbind(J, Gramm) # design matrix
+  m <- 1 # dimension of the null space of the penalty
+  S <- matrix(0, n + m, n + m) #initialize S
+  S[(m + 1):(n + m), (m + 1):(n + m)] <- Gramm #non-zero part of S
+  M <- (t(Q) %*% Q + lambda * S)
+  M.inv <- my.inv(M) # inverse of M
+  gamma.hat <- crossprod(M.inv, crossprod(Q, y))
+  f.hat <- Q %*% gamma.hat
+  A <- Q %*% M.inv %*% t(Q)
+  tr.A <- sum(diag(A)) #trace of hat matrix
+  rss <- t(y - f.hat) %*% (y - f.hat) #residual sum of squares
+  gcv <- n * rss / (n - tr.A) ^ 2 #obtain GCV score
+  return(list(
+    f.hat = f.hat,
+    gamma.hat = gamma.hat,
+    gcv = gcv
+  ))
+}
+
+
+# Plot of GCV
+
+lambda <- 1e-8 V <- rep(0, 40) for (i in 1:40) {
+  V[i] <- ridge.regression(X, y, lambda)$gcv #obtain GCV score
+  lambda <- lambda * 1.5 #increase lambda
+}
+
+index <- (1:40) plot(
+  1.5 ^ (index - 1) * 1e-8,
+  V,
+  type = "l",
+  main = "GCV
+  score",
+  lwd = 2,
+  xlab = "lambda",
+  ylab = "GCV"
+) # plot score
+
+
+i <- (1:60)[V == min(V)] # extract index of min(V)
+opt.mod <- ridge.regression(X, y, 1.5 ^ (i - 1) * 1e-8) #fit optimal model
+
+### finding beta.0, beta.1 and beta.2 ##########
+gamma.hat <- opt.mod$gamma.hat
+beta.hat.0 <- opt.mod$gamma.hat[1]#intercept
+beta.hat <- gamma.hat[2:21,] %*% X #slope and noise term coefficients
+```
+
+## A.2
+
+```r
+###### Data ######## 
+set.seed(3) 
+n <- 50
+x <- matrix(runif(n), nrow, ncol = 1)
+x.star <- matrix(sort(x), nrow, ncol = 1) # sorted x, used by plot
+y <- sin(2 * pi * x.star) + rnorm(n, sd = 0.2)
+
+
+#### Reproducing Kernel for <f,g>=int_0^1 f’’(x)g’’(x)dx #####
+rk.1 <- function(s, t) {
+  return((1 / 2) * min(s, t) ^ 2) * (max(s, t) + (1 / 6) * (min(s, t)) ^ 3)
+}
+
+get.gramm.1 <- function(X) {
+  n <- dim(X)[1]
+  Gramm <- matrix(0, n, n) #initializes Gramm array
+  #i=index for rows
+  #j=index for columns
+  Gramm <- as.matrix(Gramm) # Gramm matrix
+  for (i in 1:n) {
+    for (j in 1:n) {
+      Gramm[i, j] <- rk.1(X[i, ], X[j, ])
+    }
+  }
+  return(Gramm)
+}
+
+smoothing.spline <- function(X, y, lambda) {
+  Gramm <- get.gramm.1(X) #Gramm matrix (nxn)
+  n <- dim(X)[1] # n=length of y
+  J <- matrix(1, n, 1) # vector of ones dim
+  T <- cbind(J, X) # matrix with a basis for the null space of the penalty
+  Q <- cbind(T, Gramm) # design matrix
+  m <- dim(T)[2] # dimension of the null space of the penalty
+  S <- matrix(0, n + m, n + m) #initialize S
+  S[(m + 1):(n + m), (m + 1):(n + m)] <- Gramm #non-zero part of S
+  M <- (t(Q) %*% Q + lambda * S)
+  M.inv <- my.inv(M) # inverse of M
+  gamma.hat <- crossprod(M.inv, crossprod(Q, y))
+  f.hat <- Q %*% gamma.hat
+  A <- Q %*% M.inv %*% t(Q)
+  tr.A <- sum(diag(A)) #trace of hat matrix
+  rss <- t(y - f.hat) %*% (y - f.hat) #residual sum of squares
+  gcv <- n * rss / (n - tr.A) ^ 2 #obtain GCV score
+  return(list(
+    f.hat = f.hat,
+    gamma.hat = gamma.hat,
+    gcv = gcv
+  ))
+}
+
+
+
+### Now we have to find an optimal lambda using GCV...
+### Plot of GCV
+lambda <- 1e-8 V <- rep(0, 60) for (i in 1:60) {
+  V[i] <- smoothing.spline(x.star, y, lambda)$gcv #obtain GCV score
+  lambda <- lambda * 1.5 #increase lambda
+} 
+plot(1:60,
+     V,
+     type = "l",
+     main = "GCV score",
+     xlab = "i") # plot score
+i <- (1:60)[V == min(V)] # extract index of min(V)
+opt.mod.2 <- smoothing.spline(x.star, y, 1.5 ^ (i - 1) * 1e-8) #fit optimal
+model
+
+#Graph (Cubic Spline)
+plot(
+  x.star,
+  opt.mod.2$f.hat,
+  type = "l",
+  lty = 2,
+  lwd = 2,
+  col = "blue",
+  xlab = "x",
+  ylim = c(-2.5, 1.5),
+  xlim = c(-0.1, 1.1),
+  ylab = "response",
+  main = "Cubic Spline"
+)
+#predictions
+lines(x.star, sin(2 * pi * x.star), lty = 1, lwd = 2) #true
+legend(
+  -0.1,
+  -1.5,
+  c("predictions", "true"),
+  lty = c(2, 1),
+  bty = "n",
+  lwd = c(2, 2),
+  col = c("blue", "black")
+) 
+points(x.star, y)
+```
