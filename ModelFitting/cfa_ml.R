@@ -158,7 +158,7 @@ fit.std <- cfa(model, data=y, mimic='Mplus', estimator='ML', std.lv=T, std.ov=T)
 
 # note that lavaan does not count the intercepts among the free params for AIC/BIC 
 # by default, but the mimic='Mplus' should have them correspond to optim's output
-summary(fit, fit.measures=TRUE)   
+summary(fit, fit.measures=TRUE, standardized=T)   
 
 
 ########################
