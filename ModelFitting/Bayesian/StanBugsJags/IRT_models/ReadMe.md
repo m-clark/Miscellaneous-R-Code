@@ -1,0 +1,1 @@
+These are the basic 1 through 4 parameter IRT models with Stan, and comparisons to models from ltm and sirt packages in R in the test_stan_irt.R file. 
