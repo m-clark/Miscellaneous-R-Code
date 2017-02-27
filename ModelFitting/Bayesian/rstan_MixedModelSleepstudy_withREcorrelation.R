@@ -136,8 +136,6 @@ fit2 = stan(model_code=stanmodelcode, model_name="mixedreg",
 
 
 # some diagnostics
-ainfo = get_adaptation_info(fit2)
-cat(ainfo[[1]])
 samplerpar = get_sampler_params(fit2)[[1]]
 summary(samplerpar)
 

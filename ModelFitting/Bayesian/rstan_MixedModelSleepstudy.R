@@ -13,7 +13,7 @@ data(sleepstudy)
 # ?sleepstudy
 
 # Create a model for later comparison
-mod_lme = lmer(Reaction~Days+(Days|Subject), sleepstudy)
+mod_lme = lmer(Reaction ~ Days + (1 | Subject) + (0 + Days | Subject), sleepstudy)
 
 dat = list(N=nrow(sleepstudy), I=length(unique(sleepstudy$Subject)), 
            Subject=as.numeric(sleepstudy$Subject), Days = sleepstudy$Days, 
@@ -70,7 +70,7 @@ model {
 
 library(rstan)
 fit = stan(model_code = stanmodelcode, model_name = "example",
-            data = dat, iter = 22000, warmup=2000, thin=20, chains = 4,
+            data = dat, iter = 7000, warmup=2000, thin=20, chains = 4,
             verbose = F) 
 
 ### Summarize
@@ -91,13 +91,11 @@ shinystan::launch_shinystan(fit)
 
 fit2 = stan(model_code = stanmodelcode, model_name = "mixedreg", #init=0,
             fit = fit, # if using the same model code, this will use the previous compilation
-            data = dat, iter = 120000, warmup=20000, thin=10, cores=3,
+            data = dat, iter = 7000, warmup=2000, thin=20, cores=4,
             verbose = T)
 
 
 # examine some diagnostics
-ainfo = get_adaptation_info(fit2)
-cat(ainfo[[1]])
 samplerpar = get_sampler_params(fit2)[[1]]
 summary(samplerpar)
 
