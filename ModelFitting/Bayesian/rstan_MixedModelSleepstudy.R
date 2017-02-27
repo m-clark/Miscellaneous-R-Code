@@ -30,6 +30,14 @@ data {                                    // data setup
   int<lower=1,upper=I> Subject[N];        // Subject
 }
 
+transformed data {
+  real startInt;                          // Create starting point for Intercept (mean day 0)
+
+  startInt = 0;
+  for (n in 1:N) 
+    if (Days[n] == 0) startInt = startInt + RT[n]/I;
+}
+
 parameters {
   real Intercept;                         // fixed effects
   real beta;
@@ -50,15 +58,15 @@ transformed parameters {
 
 model {
   // priors
-  Intercept ~ normal(0, 100);            // example of weakly informative priors (and ignoring Matt trick for now);
+  Intercept ~ normal(startInt, 100);     // example of weakly informative priors;
   beta ~ normal(0, 100);                 // remove to essentially duplicate lme4 via improper prior
 
   gammaIntercept ~ normal(Intercept, sd_int);
   gammaDays ~ normal(beta, sd_beta);
   
-  sd_int ~ cauchy(0, 2.5);
-  sd_beta ~ cauchy(0, 2.5);
-  sigma_y ~ cauchy(0, 2.5);
+  sd_int ~ cauchy(0, 5);
+  sd_beta ~ cauchy(0, 5);
+  sigma_y ~ cauchy(0, 5);
 
   // likelihood
   RT ~ normal(yhat, sigma_y);
