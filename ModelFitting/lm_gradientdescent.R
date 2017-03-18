@@ -31,7 +31,7 @@ gd = function(par, X, y, tolerance=1e-3, maxit=1000, stepsize=1e-3, adapt=F,
   tol = 1
   iter = 1
   
-  while(iter==maxit || tol > tolerance){
+  while(tol > tolerance && iter < maxit){
     LP = X%*%beta
     grad = t(X) %*% (LP - y)
     betaCurrent = beta - stepsize * grad
@@ -43,7 +43,7 @@ gd = function(par, X, y, tolerance=1e-3, maxit=1000, stepsize=1e-3, adapt=F,
     if(verbose && iter%%10 == 0) message(paste('Iteration:', iter))
   }
   
-  if(plotLoss) plot(loss, type='l')
+  if(plotLoss) plot(loss, type='l', bty='n')
   
   list(par=beta, loss=loss, RSE=sqrt(crossprod(LP-y)/(nrow(X)-ncol(X))), 
        iter=iter, fitted=LP)

@@ -1,6 +1,6 @@
-# The following demonstrates a standard cumulative ordinal regression via 
-# maximum likelihood. Default is with probit link function. Alternatively you
-# can compare it with a logit link, which will result in values roughly
+# The following demonstrates a standard cumulative link ordinal regression model
+# via maximum likelihood. Default is with probit link function. Alternatively
+# you can compare it with a logit link, which will result in values roughly 
 # 1.7*parameters estimates from the probit.
 
 
