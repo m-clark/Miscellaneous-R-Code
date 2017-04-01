@@ -39,6 +39,9 @@ two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/
 [stochastic volatility](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/stochasticVolatility.R),
 [bivariate probit](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/bivariateProbit.R),
 [quantile regression](http://htmlpreview.github.io/?https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/quantileRegression.html)
+[ordinal regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/ordinal_regression.R)
+[extreme learning machine](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/elm.R)
+[Chinese restaurant process, Indian buffet process](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/crp.R)
 ...
 
 
@@ -55,7 +58,9 @@ mixed model with beta response [(Stan)](https://github.com/m-clark/Miscellaneous
 [topic model](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/topicModelgibbs.R),
 [multilevel mediation](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/rstan_multilevelMediation.R), 
 [variational bayes regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/variationalBayesRegression.Rmd), 
-[gaussian process](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting//gp%20Examples/gaussianProcessStan.Rmd), ...
+[gaussian process](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting//gp%20Examples/gaussianProcessStan.Rmd),
+[horseshoe prior](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/horseshoe/README.md), ...
+[item response theory](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Bayesian/StanBugsJags/IRT_models), ...
 
 
 SC and TR
