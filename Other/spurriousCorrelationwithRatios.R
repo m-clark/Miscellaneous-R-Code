@@ -1,4 +1,6 @@
-# a function that will take an input n and generate n x y and z values. The correlation of interest is between x and y, when either or both are a ratio based on z.
+# a function that will take an input n and generate n x y and z values. The
+# correlation of interest is between x and y, when either or both are a ratio
+# based on z.
 
 spurcorr = function(n){
   x = rpois(n, 10)
