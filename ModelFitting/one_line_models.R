@@ -76,6 +76,28 @@ coef(glm.fit(X, y_count, family=poisson()))
 
 
 
+# Ridge Regression --------------------------------------------------------
+
+# penalty parameter 
+lambda = .1
+
+# Analytical solution
+solve(crossprod(X) + diag(length(y)*lambda, ncol(X))) %*% crossprod(X,y)
+
+# run model via maximum likelihoood
+optim(
+  rep(0, ncol(X)),
+  fn = function(b, X, y) crossprod(y - X%*%b) + lambda*length(y)*crossprod(b),  # model function
+  X = X,
+  y = y,
+  method = 'BFGS'
+)$par
+
+# use lm for comparison
+coef(lm.fit(X,y))
+
+
+
 #  Naive bayes for binary data --------------------------------------------
 
 # data setup

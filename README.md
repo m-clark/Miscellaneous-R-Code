@@ -41,6 +41,8 @@ two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/
 [bivariate probit](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/bivariateProbit.R),
 [quantile regression](http://htmlpreview.github.io/?https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/quantileRegression.html),
 [ordinal regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/ordinal_regression.R),
+[lasso regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/lasso.R),
+[ridge regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/ridge.R),
 [naive bayes](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/naivebayes.R),
 [extreme learning machine](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/elm.R),
 [Chinese restaurant process, Indian buffet process](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/crp.R), 
