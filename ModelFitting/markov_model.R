@@ -1,4 +1,4 @@
-# markov chains and hidden markov models
+# markov chains models
 
 
 
