@@ -1,0 +1,56 @@
+---
+title: "Multinomial Logistic Regression"
+author: "Michael Clark"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+
+css: ../../other.css
+---
+
+
+```{r setup, include=FALSE, eval=TRUE}
+knitr::opts_chunk$set(echo = T, message=F, warning=F, comment=NA, autodep=F, eval=T, cache.rebuild=F, cache=T,
+                      R.options=list(width=120), fig.width=8, fig.align = 'center')
+```
+
+```{r load_common_packages, echo=FALSE, cache=FALSE, eval=TRUE}
+library(tidyverse); library(htmltools); library(tufte); library(lazerhawk)
+```
+
+
+
+
+# Introduction
+
+While standard statistics training in applied disciplines often will cover logistic regression a single binary outcome, often the extensions are not.  These include binomial regression of counts/proportions, cases with a single occurrence of more than two possible events, multinomial regression for counts, or ordinal regression.
+
+Here we'll spend some time with multinomial regression.  Even when some are exposed to multinomial regression, they come away thinking it's only 'logistic regression when there are more than two categories'.   However, it's actually more flexible than that, as we'll see. Note that in this case, some disciplines will refer to the <span class="emph">categorical distribution</span> rather than the multinomial.
+
+
+
+# Starting out
+
+The data set contains variables on 200 students. The outcome variable is prog, program type. The predictor variables are social economic status, ses, a three-level categorical variable and writing score, write, a continuous variable.
+
+```{r import_data_and_setup, echo=-9}
+library(haven); library(tidyverse)
+program = read_dta("https://stats.idre.ucla.edu/stat/data/hsbdemo.dta") %>% 
+  as_factor() %>% 
+  mutate(prog = relevel(prog, ref = "academic"))
+
+library(mlogit); library(dplyr)
+
+DT::datatable(program, options=list(dom='tp', scrollX=T))
+
+# convert to long form for use with mlogit later
+programLong = program %>% 
+  select(id, prog, ses, write) %>% 
+  mlogit.data(shape='wide', choice='prog', id.var='id')
+
+DT::datatable(programLong, options=list(dom='tp', scrollX=T))
+mlogit_mod = mlogit(prog ~ 1| write + ses, data=programLong)
+mlogit_coefs = coef(mlogit_mod)[c(1,5,7,3,2,6,8,4)]
+```
+
