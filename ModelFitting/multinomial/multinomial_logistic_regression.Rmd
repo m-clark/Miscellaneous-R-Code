@@ -3,9 +3,9 @@ title: "Multinomial Logistic Regression"
 author: "Michael Clark"
 output: 
   html_document:
-    toc: true
-    toc_float: true
-
+    highlight: pygments
+    toc: yes
+    toc_float: yes
 css: ../../other.css
 ---
 
@@ -29,12 +29,51 @@ While standard statistics training in applied disciplines often will cover logis
 Here we'll spend some time with multinomial regression.  Even when some are exposed to multinomial regression, they come away thinking it's only 'logistic regression when there are more than two categories'.   However, it's actually more flexible than that, as we'll see. Note that in this case, some disciplines will refer to the <span class="emph">categorical distribution</span> rather than the multinomial.
 
 
+# Preliminaries
+
+First let's compare the binomial and multinomial distributions to get our bearings.  In standard logistic regression we have a binary target, e.g. 'yes-no', 'alive-dead'.  Let's see how such a distribution would look.
+
+```{r bin_dist1}
+rbinom(10, size=1, prob=.5)
+mean(rbinom(1000, size=1, prob=.5)) # roughly .5
+```
+
+But note that we have say `size = 1`.  This doesn't have to be the case.  What if the label of interest can occur multiple times?
+
+```{r bin_dist2}
+rbinom(10, size=1:10, prob=.5)
+
+# roughly .5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
+sapply(1:10, rbinom, n=1000, prob=.5) %>% colMeans() 
+```
+
+So for the binomial regression models, we can model the case where the event occurs or it doesn't, or occurs some amount of times out of a total, i.e. proportions.
+
+
+The multinomial is the same, just with more categories.  Before we saw the probabilities associated of one category (whatever equals 1), because the other is just 1 minus that.  Now we examine the probabilities for each category in the case of more than two categories.
+
+```{r multinom_dist1}
+rmultinom(10, size=1, prob=c(.25, .25, .5))
+rowMeans(rmultinom(1000, size=1, prob=c(.25, .25, .5))) # roughly .25, .25, .5
+```
+
+In the above, we have multiple categories (3), but only one of them has a chance of occurring.  However, they could all occur with different frequency.  In the following we show the case where the size can be 8, but also allowed to vary.
+
+
+```{r multinom_dist2}
+rmultinom(10, size=8, prob=c(.25, .25, .5))
+rowMeans(rmultinom(1000, size=8, prob=c(.25, .25, .5))) # roughly 2, 2, 4
+lapply(1:10, rmultinom, n=1000, prob=c(.25, .25, .5)) %>% map(rowMeans)
+```
+
+In the last instance, the first set of results with `size=1` is the same as previous, with means of .25, .25, .5. Keeping the probability of each category the same, but bumping the total number of possible occurrences to 8, the mean counts become 2, 2, and 4 for each category respectively.  In what follows, we will stay in `size=1` territory, but just be aware the other situation is very common, e.g. with compositional data, text analysis etc.
+
 
 # Starting out
 
-The data set contains variables on 200 students. The outcome variable is prog, program type. The predictor variables are social economic status, ses, a three-level categorical variable and writing score, write, a continuous variable.
+The data set contains variables on 200 students. The outcome variable is `prog`, *program type*. The predictor variables are *social economic status*, `ses`, a three-level categorical variable, and *writing score*, `write`, a continuous variable.
 
-```{r import_data_and_setup, echo=-9}
+```{r import_data_and_setup, echo=-c(6, 11)}
 library(haven); library(tidyverse)
 program = read_dta("https://stats.idre.ucla.edu/stat/data/hsbdemo.dta") %>% 
   as_factor() %>% 
@@ -42,9 +81,9 @@ program = read_dta("https://stats.idre.ucla.edu/stat/data/hsbdemo.dta") %>%
 
 library(mlogit); library(dplyr)
 
-DT::datatable(program, options=list(dom='tp', scrollX=T))
+DT::datatable(program, options=list(dom='tp', scrollX=T, pageLength=5))
 
-# convert to long form for use with mlogit later
+# convert to long form for use with mlogit package
 programLong = program %>% 
   select(id, prog, ses, write) %>% 
   mlogit.data(shape='wide', choice='prog', id.var='id')
