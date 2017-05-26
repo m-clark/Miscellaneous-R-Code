@@ -24,7 +24,7 @@ library(tidyverse); library(htmltools); library(tufte); library(lazerhawk)
 
 # Introduction
 
-While standard statistics training in applied disciplines often will cover logistic regression a single binary outcome, often the extensions are not.  These include binomial regression of counts/proportions, cases with a single occurrence of more than two possible events, multinomial regression for counts, or ordinal regression.
+While standard statistics training in applied disciplines often will cover logistic regression a single binary outcome, often the natural extensions to it are not.  These include binomial regression of counts/proportions, cases with a single occurrence of more than two possible events, multinomial regression for counts, or ordinal regression.
 
 Here we'll spend some time with multinomial regression.  Even when some are exposed to multinomial regression, they come away thinking it's only 'logistic regression when there are more than two categories'.   However, it's actually more flexible than that, as we'll see. Note that in this case, some disciplines will refer to the <span class="emph">categorical distribution</span> rather than the multinomial.
 
@@ -50,46 +50,157 @@ sapply(1:10, rbinom, n=1000, prob=.5) %>% colMeans()
 So for the binomial regression models, we can model the case where the event occurs or it doesn't, or occurs some amount of times out of a total, i.e. proportions.
 
 
-The multinomial is the same, just with more categories.  Before we saw the probabilities associated of one category (whatever equals 1), because the other is just 1 minus that.  Now we examine the probabilities for each category in the case of more than two categories.
+In terms of regression model, the multinomial can be seen the same situation, just with more category labels.  Before we saw the probabilities associated of one category (whatever equals 1), because the other is just 1 minus that.  Now we examine the probabilities for each category in the case of more than two categories[^rmultinom].
 
 ```{r multinom_dist1}
 rmultinom(10, size=1, prob=c(.25, .25, .5))
 rowMeans(rmultinom(1000, size=1, prob=c(.25, .25, .5))) # roughly .25, .25, .5
 ```
 
-In the above, we have multiple categories (3), but only one of them has a chance of occurring.  However, they could all occur with different frequency.  In the following we show the case where the size can be 8, but also allowed to vary.
+<br>
 
+In the above, we have multiple categories (3), but only one of them has a chance of occurring.  However, they could all occur with different frequency.  In the following we show the case where the size can be 8.
+
+<br>
 
 ```{r multinom_dist2}
 rmultinom(10, size=8, prob=c(.25, .25, .5))
 rowMeans(rmultinom(1000, size=8, prob=c(.25, .25, .5))) # roughly 2, 2, 4
+```
+
+<br>
+
+Keeping the probability of each category the same, but bumping the total number of possible occurrences to 8, the mean counts become 2, 2, and 4 for each category respectively.  Now we let the size vary.
+
+<br>
+
+```{r multinom_dist3}
 lapply(1:10, rmultinom, n=1000, prob=c(.25, .25, .5)) %>% map(rowMeans)
 ```
 
-In the last instance, the first set of results with `size=1` is the same as previous, with means of .25, .25, .5. Keeping the probability of each category the same, but bumping the total number of possible occurrences to 8, the mean counts become 2, 2, and 4 for each category respectively.  In what follows, we will stay in `size=1` territory, but just be aware the other situation is very common, e.g. with compositional data, text analysis etc.
+<br>
+
+In this last instance, the first set of results with `size=1` and when `size=8` we get the same results as previously.  In the demonstration that follows, we will stay in `size=1` territory, but just be aware that modeling with multinomial counts is very common, e.g. with compositional data, text analysis etc.
 
 
 # Starting out
 
 The data set contains variables on 200 students. The outcome variable is `prog`, *program type*. The predictor variables are *social economic status*, `ses`, a three-level categorical variable, and *writing score*, `write`, a continuous variable.
 
-```{r import_data_and_setup, echo=-c(6, 11)}
+<br>
+
+```{r import_data_and_setup, echo=-c(6)}
 library(haven); library(tidyverse)
 program = read_dta("https://stats.idre.ucla.edu/stat/data/hsbdemo.dta") %>% 
   as_factor() %>% 
   mutate(prog = relevel(prog, ref = "academic"))
 
-library(mlogit); library(dplyr)
+
 
 DT::datatable(program, options=list(dom='tp', scrollX=T, pageLength=5))
+```
 
+<br>
+We'll also need the data in 'long form', where each individual is now represented by three rows, one for each choice. The variable `prog` now is just a logical indicating which program they belong to. The covariates are constant within child, though in this format, one can see how we could have choice specific covariates, i.e. ones whose values vary by choice.  We'll return to this later.
+<br>
+
+```{r mlogit_long_data, echo=1:2}
 # convert to long form for use with mlogit package
 programLong = program %>% 
   select(id, prog, ses, write) %>% 
   mlogit.data(shape='wide', choice='prog', id.var='id')
 
 DT::datatable(programLong, options=list(dom='tp', scrollX=T))
+library(mlogit)
 mlogit_mod = mlogit(prog ~ 1| write + ses, data=programLong)
 mlogit_coefs = coef(mlogit_mod)[c(1,5,7,3,2,6,8,4)]
 ```
 
+
+## Model Description
+
+With standard logistic regression of with two categories, we could have though of the model as geared toward an underlying continuum.  For example, in modeling whether someone voted for candidate, the underlying continuum might represent Conservatism.  The same idea holds here, and with multinomial models, they are frequently described in terms of the underlying <span class="emph">utility</span> of a specific choice[^utility].
+
+
+The utility for the alternative $k$ is then :
+
+$$
+U_{ik}=\alpha_k + \color{lightgray}{\beta x_{ik}} + \gamma_k z_i + \color{lightgray}{\delta_k w_{ik}}
+$$
+
+
+- <span class="" style="color:#bfbfbf">alternative specific variables $x_{ik}$ with a generic
+  coefficient $\beta$</span>
+- individual specific variables $z_i$ with an alternative specific
+  coefficients $\gamma_k$
+- <span class="" style="color:#bfbfbf">alternative specific variables $w_{ik}$ with an alternative
+  specific coefficient $\delta_k$.</span>
+  
+I've grayed out the parts that don't concern us for now, but we'll come back to them.  This utility $\mathcal{U}$ can only be considered in relative terms however, i.e. you will only choose something if the utility of that choice is greater than others.  In that case, we are concerned with modeling utility differences.  So with a multinomial logistic regression model, in the case of $\mathcal{K}$ categories for the target variable, we will have $\mathcal{K}-1$ sets of results, where one of the categories is arbitrarily chosen as the reference category.  In this situation, while you can interpret it as two logistic regressions of reference vs $\mathcal{K}_2$ and reference vs. $\mathcal{K}_3$, as we will see, actually running separate logistic regressions would not produce the same result.  We'll write our own likelihood function and compare it to the <span class="pack">mlogit</span> results.
+
+A word about <span class="pack">mlogit</span>.  This is an extensive package with an extremely thorough [vignette](https://cran.r-project.org/web/packages/mlogit/vignettes/mlogit.pdf) that is worth going through.  However, be prepared to spend most of your time just getting the data prepared, and the content and approach is likely to be highly unintuitive[^mlogitodd].
+
+```{r multinom_function}
+multinomregML <- function(par, X, y) {
+  levs = levels(y)
+  ref = levs[1]               # reference level (category label 1)
+  
+  y0 = y==ref
+  y1 = y==levs[2]             # category 2
+  y2 = y==levs[3]             # category 3
+  
+  par = matrix(par, ncol=2)
+  
+  # more like mnlogit depiction
+  # V1 = X %*% par[1:4]
+  # V2 = X %*% par[5:8]
+  # ll = sum(-log(1 + exp(V1)+exp(V2))) + sum(V1[y1],V2[y2])  
+  
+  V = X %*% par               #  a vectorized approach
+  baseProbVec = 1/(1 + rowSums(exp(V)))
+  
+  loglik = sum(log(baseProbVec))  + crossprod(c(V), c(y1, y2))
+  loglik
+}
+
+
+mm = model.matrix(prog ~ ses + write, data = program)
+multi_result = optim(runif(8, -.1, .1), multinomregML, X=mm,
+                     y=program$prog, 
+                     control=list(maxit=1000, reltol=1e-12, ndeps=rep(1e-8, 8),
+                                  trace=T, fnscale=-1, type=3),
+                     method='BFGS')
+multi_result
+
+mlogit_result = mlogit(prog ~ 0|ses + write, data = programLong)
+summary(mlogit_result)$Coef %>% round(3) %>% pander::pander(justify='lrrrr')
+
+
+cbind(coef(mlogit_result)[c(1,3,5,7,2,4,6,8)], multi_result$par) %>% round(5)
+cbind(logLik(mlogit_result), multi_result$value)
+```
+
+
+What if we had done two logistic regressions?
+
+```{r}
+# general vs. academic
+coef_general = program %>% 
+  filter(prog != 'vocation') %>% 
+  mutate(general=prog=='general') %>% 
+  glm(general ~ ses + write, data=., family=binomial) %>% 
+  coef
+coef_vocation = program %>% 
+  filter(prog != 'general') %>% 
+  mutate(vocation=prog=='vocation') %>% 
+  glm(vocation ~ ses + write, data=., family=binomial) %>% 
+  coef
+cbind(multi_result$par, c(coef_general, coef_vocation))
+```
+
+
+[^rmultinom]: If you're like me, you'll have to mentally transpose the <span class="func">rmultinom</span> output.  You'll also have to explicitly do it in any normal data situation if you actually work with it, as your data would almost never expect to deal with it in that fashion.  You will typically have in your data frame a single column representing the class label, or a column for each class with a one in the column for the class, or counts for each column.
+
+[^mlogitodd]: Unfortunately this is not just my own opinion.  Much of that data prep really should be done internally after initial specifications, and all of it is completely unnecessary for the types of models in which there are only individually varying data, which is probably the most common application outside of econometrics and marketing.  It is also unclear how to proceed when it comes to some experimental designs specifically applied to choice situations.
+
+[^utility]: Multinomial models are frequently used in econometrics and marketing to model e.g. product choice based on price and other covariates.
