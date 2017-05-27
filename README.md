@@ -20,7 +20,12 @@ one factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/
 two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.R) 
 [(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.jl) 
 [(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.m), 
-[mixed model via ML](https://m-clark.github.io/docs/mixedModels/mixedModelML.html)
+[mixed model via ML](https://m-clark.github.io/docs/mixedModels/mixedModelML.html),
+[bivariate probit](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/bivariateProbit.R),
+[naive bayes](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/naivebayes.R),
+[multinomial regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/multinomial.R),
+[ordinal regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/ordinal_regression.R),
+[quantile regression](http://htmlpreview.github.io/?https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/quantileRegression.html),
 [cubic spline](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/cubicsplines.R), 
 [hurdle poisson](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/hurdle.R), 
 [hurdle negbin](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/hurdle.R), 
@@ -38,12 +43,9 @@ two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/
 [Gaussian Process noise-free](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoiseFree.R), 
 [reproducing kernel hilbert space regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/RKHSReg/RKHSReg.md), 
 [stochastic volatility](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/stochasticVolatility.R),
-[bivariate probit](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/bivariateProbit.R),
-[quantile regression](http://htmlpreview.github.io/?https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/quantileRegression.html),
-[ordinal regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/ordinal_regression.R),
 [lasso regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/lasso.R),
 [ridge regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/ridge.R),
-[naive bayes](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/naivebayes.R),
+[newton and IRLS](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/newton_irls.R),
 [extreme learning machine](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/elm.R),
 [Chinese restaurant process, Indian buffet process](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/crp.R), 
 [One-line models (an exercise)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/one_line_models.R),
