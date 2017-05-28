@@ -2,7 +2,7 @@
 # One line models ---------------------------------------------------------
 
 # A terrible idea put to good use in demonstrating vectorization and other 
-# efficient coding practices, after data set up, parameters are learned via a 
+# efficient coding practices. After data set up, parameters are learned via a 
 # one-line minimizing/maximizing function, typically using optim.  Or maybe it's
 # just a fun exercise. Who can say?
 
@@ -81,9 +81,6 @@ coef(glm.fit(X, y_count, family=poisson()))
 # penalty parameter 
 lambda = .1
 
-# Analytical solution
-solve(crossprod(X) + diag(length(y)*lambda, ncol(X))) %*% crossprod(X,y)
-
 # run model via maximum likelihoood
 optim(
   rep(0, ncol(X)),
@@ -93,8 +90,26 @@ optim(
   method = 'BFGS'
 )$par
 
-# use lm for comparison
-coef(lm.fit(X,y))
+# glmnet for comparison
+coef(glmnet::glmnet(X[,-1], y, alpha=0, lambda=.1, intercept=T))
+
+
+# Lasso Regression --------------------------------------------------------
+
+# penalty parameter 
+lambda = .1
+
+# run model via maximum likelihoood
+optim(
+  rep(0, ncol(X)),
+  fn = function(b, X, y) crossprod(y - X%*%b) + lambda*length(y)*sum(abs(b)),  # model function
+  X = X,
+  y = y,
+  method = 'BFGS'
+)$par
+
+# glmnet for comparison
+coef(glmnet::glmnet(X, y, alpha=1, lambda=.1, thresh=1e-12, intercept=T))
 
 
 

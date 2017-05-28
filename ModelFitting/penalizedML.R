@@ -5,7 +5,8 @@
 # penalties are possible with the function.  One using the (squared) L2 norm (aka #
 # ridge regression, tikhonov regularization), another using the L1 norm (aka      #
 # lasso) which has the possibility of penalizing coefficients to zero, and thus   #
-# can serve as a model selection procedure.                                       #
+# can serve as a model selection procedure. I have a more technical appraoch to   # 
+# the lasso in the lasso.R file.                                                  #
 #                                                                                 #
 # Note that both L2 and L1 approaches can be seen as maximum a posteriori (MAP)   #
 # estimates for a Bayesian regression with a specific prior on the coefficients.  #
