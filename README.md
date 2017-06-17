@@ -25,6 +25,7 @@ two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/
 [(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.m), 
 [mixed model via ML](https://m-clark.github.io/docs/mixedModels/mixedModelML.html),
 [bivariate probit](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/bivariateProbit.R),
+[heckman selection](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/heckman_selection.R),
 [naive bayes](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/naivebayes.R),
 [multinomial regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/multinomial.R),
 [ordinal regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/ordinal_regression.R),
