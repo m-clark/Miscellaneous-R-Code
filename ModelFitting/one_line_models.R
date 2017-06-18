@@ -2,9 +2,9 @@
 # One line models ---------------------------------------------------------
 
 # A terrible idea put to good use in demonstrating vectorization and other 
-# efficient coding practices. After data set up, parameters are learned via a 
-# one-line minimizing/maximizing function, typically using optim.  Or maybe it's
-# just a fun exercise. Who can say?
+# efficient coding practices.  Or maybe it's just a fun exercise. Who can say?
+# After data set up, parameters are learned via a one-line minimizing/maximizing
+# function, typically using optim, or analytically if possible.
 
 library(tidyverse)
 
@@ -12,7 +12,7 @@ library(tidyverse)
 
 # data setup
 set.seed(8675309)
-N = 100
+N = 500
 npreds = 5
 X = cbind(1, matrix(rnorm(N*npreds), ncol=npreds))
 beta = runif(ncol(X), -1, 1)
@@ -24,7 +24,7 @@ crossprod(solve(crossprod(X)), crossprod(X, y))
 # use lm for comparison
 coef(lm.fit(X,y))
 
-# run model via maximum likelihoood
+# run model via least squares loss
 optim(
   rep(0, ncol(X)),
   fn = function(b, X, y) crossprod(y - X %*% b),  # model function
@@ -32,6 +32,16 @@ optim(
   y = y,
   method = 'BFGS'
 )$par
+
+# run model via maximum likelihoood
+optim(
+  rep(0, ncol(X) + 1),
+  fn = function(par, X, y) -sum(dnorm(y, X %*% par[-1], exp(par[1]), log=T)),  # model function
+  X = X,
+  y = y,
+  method = 'BFGS', 
+  control=list(reltol=1e-12)
+)$par[-1]
 
 # use lm for comparison
 coef(lm.fit(X,y))
@@ -80,18 +90,27 @@ coef(glm.fit(X, y_count, family=poisson()))
 
 # penalty parameter 
 lambda = .1
+Xstd = scale(X[,-1])
+ystd = scale(y)
 
-# run model via maximum likelihoood
+# run model  
 optim(
-  rep(0, ncol(X)),
+  rep(0, ncol(Xstd)),
   fn = function(b, X, y) crossprod(y - X%*%b) + lambda*length(y)*crossprod(b),  # model function
-  X = X,
-  y = y,
+  X = Xstd,
+  y = ystd,
   method = 'BFGS'
 )$par
 
+# analytical
+solve(crossprod(Xstd) + diag(length(ystd)*lambda, ncol(Xstd))) %*% crossprod(Xstd, ystd)
+
+# via augmented data
+solve(crossprod(rbind(Xstd, diag(sqrt(length(ystd)*lambda), ncol(Xstd))))) %*% 
+  crossprod(rbind(Xstd, diag(sqrt(length(ystd)*lambda), ncol(Xstd))), c(ystd, rep(0, ncol(Xstd))))
+
 # glmnet for comparison
-coef(glmnet::glmnet(X[,-1], y, alpha=0, lambda=.1, intercept=T))
+coef(glmnet::glmnet(Xstd, ystd, alpha=0, lambda=.1, intercept=F))
 
 
 # Lasso Regression --------------------------------------------------------
@@ -99,17 +118,17 @@ coef(glmnet::glmnet(X[,-1], y, alpha=0, lambda=.1, intercept=T))
 # penalty parameter 
 lambda = .1
 
-# run model via maximum likelihoood
+# run model
 optim(
-  rep(0, ncol(X)),
+  rep(0, ncol(Xstd)),
   fn = function(b, X, y) crossprod(y - X%*%b) + lambda*length(y)*sum(abs(b)),  # model function
-  X = X,
-  y = y,
+  X = Xstd,
+  y = ystd,
   method = 'BFGS'
 )$par
 
 # glmnet for comparison
-coef(glmnet::glmnet(X, y, alpha=1, lambda=.1, thresh=1e-12, intercept=T))
+coef(glmnet::glmnet(Xstd, ystd, alpha=1, lambda=.1, intercept=F))
 
 
 
@@ -145,7 +164,8 @@ X = cbind(kittyblarg, kittyhappy)
 
 # run model
 optim(par = rep(0, ncol(X)), 
-      fn = function(b, X, died, t) -sum(sapply(1:nrow(X), function(i) died[i]*((X%*%b)[i] - log(sum(exp((X%*%b)[1:nrow(X)>=i])))))), 
+      fn = function(b, X, died, t) 
+        -sum(sapply(1:nrow(X), function(i) died[i]*((X%*%b)[i] - log(sum(exp((X%*%b)[1:nrow(X)>=i])))))), 
       X = X,
       died = d$kittydied, 
       t=dur, 
@@ -171,7 +191,8 @@ y = sleepstudy$Reaction
 
 # run model
 optim(par = c(0, 0), 
-      fn = function(b, X, Z, y) -mvtnorm::dmvnorm(y, X%*%coef(lm.fit(X, y)), tcrossprod(Z)*exp(b[1])^2 + diag(nrow(X))*exp(b[2])^2, log=T),
+      fn = function(b, X, Z, y) 
+        -mvtnorm::dmvnorm(y, X%*%coef(lm.fit(X, y)), tcrossprod(Z)*exp(b[1])^2 + diag(nrow(X))*exp(b[2])^2, log=T),
       X = X,
       Z = Z,
       y = y,
