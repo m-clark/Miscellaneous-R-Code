@@ -1,7 +1,7 @@
 # Reproducing Kernel Hilbert Space Regression
 
 # Introduction
-This R code comes from Reproducing Kernel Hilbert Spaces for Penalized Regression: A tutorial, [Nosedal-Sanchez et al. (2010)](http://www.tandfonline.com/doi/abs/10.1080/00031305.2012.678196), specifically, their code in the appendix.  The original code had several issues most of which has been cleaned up. Blocked text represents quotes taken directly from the article, while I add additional notes elsewhere. I leave their inline comments intact, though in some places the deletion of unnecessary code may put them a bit out of context, and may add my own in a few empty spots.  I also made some textual and code corrections.  The purled code (i.e. with no text) can be found in this same directory/filename with .R extension.
+This R code comes from Reproducing Kernel Hilbert Spaces for Penalized Regression: A tutorial, [Nosedal-Sanchez et al. (2010)](http://www.tandfonline.com/doi/abs/10.1080/00031305.2012.678196), specifically, their code in the appendix.  The original code had several issues, most of which has been cleaned up. Blocked text represents quotes taken directly from the article, while I add additional notes elsewhere. I leave their inline comments intact for the most part, though in some places the deletion of unnecessary code may put them a bit out of context. I also may add my own in a few empty spots, and made some textual and code corrections.  The purled code (i.e. with no text) can be found in this same directory/filename with .R extension.
 
 # Ridge Regression
 
@@ -172,7 +172,7 @@ rk.1 = function(s, t) {
 ```
 
 
-MC note: no need to redo the gram function do to previous change that accepts the kernel as an argument
+MC note: no need to redo the gram function due to previous change that accepts the kernel as an argument
 
 ### Smoothing Spline
 
