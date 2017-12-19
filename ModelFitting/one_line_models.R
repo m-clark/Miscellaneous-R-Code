@@ -121,10 +121,10 @@ lambda = .1
 # run model
 optim(
   rep(0, ncol(Xstd)),
-  fn = function(b, X, y) crossprod(y - X%*%b) + lambda*length(y)*sum(abs(b)),  # model function
+  fn = function(b, X, y) crossprod(y - X%*%b) + 2*length(y)*lambda*sum(abs(b)),  # model function
   X = Xstd,
   y = ystd,
-  method = 'BFGS', 
+  method = 'BFGS',
   control=list(reltol=1e-12)
 )$par
 
