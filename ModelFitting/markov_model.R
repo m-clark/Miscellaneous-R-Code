@@ -148,7 +148,7 @@ list(`Estimated via optim`= estmat,
 # plot
 plot(new('markovchain', transitionMatrix=estmat,
     states=c('a','b', 'c'),
-    name='Estiamted Markov Chain'))
+    name='Estimated Markov Chain'))
 
 
 # if you don't want warnings due to zeros; see also constrOptim
