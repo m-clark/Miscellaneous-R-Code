@@ -31,7 +31,7 @@ markovchainFit(observed_states)
 # Create data -------------------------------------------------------------
 
 # a recursive function to take a matrix power
-mat_power<- function(M, N){
+mat_power = function(M, N){
   if (N==1) return(M)
   
   M %*% mat_power(M, N-1)
@@ -97,7 +97,7 @@ markovchainFit(observed_states)
 
 # Now we create a function to calculate the (negative) log likeihood
 
-markov_model <- function(par, x) {
+markov_model = function(par, x) {
   # par should be the c(A) of tran probabilities A
   nstates = length(unique(x))
   

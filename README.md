@@ -38,6 +38,9 @@ two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/
 [zero-inflated negbin](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/NBzeroinfl.R), 
 [Cox survival](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/survivalCox.R),
 [confirmatory factor analysis](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/cfa_ml.R),
+[Markov model](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/markov_model.R),
+hidden Markov model [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/hmm_viterbi.R)
+[(Python)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/hmm_viterbi.py),
 [EM mixture univariate](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20Mixture.R),
 [EM mixture multivariate](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20Mixture%20MV.R),
 [EM probit](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20algorithm%20for%20probit%20example.R),

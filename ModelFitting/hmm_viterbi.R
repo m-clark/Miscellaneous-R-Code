@@ -7,7 +7,7 @@
 # lists of tuples and thus was very inefficient and provided output that wasn't
 # succinct.  The second function takes a vectorized approach and returns a
 # matrix in a much more straightforward fashion.  Both will provide the same
-# result as the Python code.
+# result as the Python code. See also, markov_model.R
 
 
 
@@ -70,12 +70,20 @@ emit_p = list(
 
 #: Demo --------------------------------------------------------------------
 
-test = viterbi(obs, states, start_p, trans_p, emit_p)
+test = viterbi(obs, 
+               states, 
+               start_p, 
+               trans_p, 
+               emit_p)
 # test
 
 set.seed(123)
 obs = sample(obs, 6, replace = T)
-test = viterbi(obs, states, start_p, trans_p, emit_p)
+test = viterbi(obs, 
+               states, 
+               start_p, 
+               trans_p, 
+               emit_p)
 # test
 
 
@@ -116,7 +124,11 @@ trans_mat = do.call(rbind, trans_p)
 
 #: Demo --------------------------------------------------------------------
 
-viterbi_sane(obs, states, start_p, trans_mat, emit_mat)
+viterbi_sane(obs, 
+             states, 
+             start_p, 
+             trans_mat, 
+             emit_mat)
 
 
 
@@ -140,4 +152,8 @@ emission_probability = rbind(
   'Sunny' = c('walk'= 0.6, 'shop'= 0.3, 'clean'= 0.1)
 )
 
-viterbi_sane(observations, states, start_probability, transition_probability, emission_probability)
+viterbi_sane(observations, 
+             states, 
+             start_probability, 
+             transition_probability, 
+             emission_probability)
