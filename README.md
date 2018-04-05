@@ -16,6 +16,7 @@ Code related to fitting of various models.
 [lasso regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/lasso.R),
 [ridge regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/ridge.R),
 [newton and IRLS](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/newton_irls.R),
+nelder-mead [(Python)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.py) [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.R),
 [gradient descent regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/lm_gradientdescent.R) [(online)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/stochastic_gradientdescent.R), 
 one factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.R) 
 [(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.jl) 
