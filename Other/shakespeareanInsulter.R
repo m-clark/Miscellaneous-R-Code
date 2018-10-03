@@ -12,8 +12,13 @@ shakesInsult = function(){
   
   w3 = c('apple-john','baggage','barnacle','bladder','boar-pig','bugbear','bum-bailey','canker-blossom','clack-dish','clotpole','coxcomb','codpiece','death-token','dewberry','flap-dragon','flax-wench','flirt-gill','foot-licker','fustilarian','giglet','gudgeon','haggard','harpy','hedge-pig','horn-beast','hugger-mugger','joithead','lewdster','lout','maggot-pie','malt-worm','mammet','measle','minnow','miscreant','moldwarp','mumble-news','nut-hook','pigeon-egg','pignut','puttock','pumpion','ratsbane','scut','skainsmate','strumpet','varlot','vassal','whey-face','wagtail')
   
-  cat('Your Shakespearean insult for the day is...', 'Thou', sample(w1, 1), sample(w2, 1), sample(w3, 1))
+  return( paste( 'Thou', sample(w1, 1), sample(w2, 1), sample(w3, 1),collapse=" "))
 }
 
+cat('Your Shakespearean insult for the day is...', shakesInsult(),"\n")
 
-shakesInsult()
+#
+#  alternatively, use the cowsay package, to let various animals insult you!
+#
+require(cowsay)
+say(what = shakesInsult(),by="random")
