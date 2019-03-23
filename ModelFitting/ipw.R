@@ -1,17 +1,18 @@
-# Demonstration of a marginal structural model for estimation of so-called
-# 'causal' effects using inverse probability weighting.  
+# Demonstration of a simple marginal structural model for estimation of
+# so-called 'causal' effects using inverse probability weighting.
 
-# Example data is from  and comparison made to the ipw package.  See more here:
+# Example data is from, and comparison made to, the ipw package.  See more here:
 # https://www.jstatsoft.org/article/view/v043i13/v43i13.pdf
 
 
 # Preliminaries -----------------------------------------------------------
 
 library(tidyverse)
+library(ipw)
 
 # Data Setup --------------------------------------------------------------
 
-# this from helpfile at ?iwpopint
+# this example is from the helpfile at ?iwpopint
 set.seed(16)
 n <- 1000
 simdat <- data.frame(l = rnorm(n, 10, 5))
@@ -20,7 +21,6 @@ pa <- plogis(a.lin)
 simdat$a <- rbinom(n, 1, prob = pa)
 simdat$y <- 10 * simdat$a + 0.5 * simdat$l + rnorm(n, -10, 5)
 
-library("ipw")
 ipw_result <- ipwpoint(
   exposure = a,
   family = "binomial",
@@ -49,7 +49,6 @@ rbind(summary(wts), summary(ipw_result$ipw.weights))
 simdat$sw <- ipw_result$ipw.weights
 
 
-
 # Marginal Structural Model -----------------------------------------------
 
 # Marginal structural model for the causal effect of a on y corrected for
@@ -64,7 +63,6 @@ msm <- svyglm(
 )
 
 summary(msm)
-# confint(msm)
 
 # create the likelihood function for using the weights
 maxlike = function(
@@ -97,6 +95,8 @@ result = optim(par = c(sigma = 0, intercept = 0, b = 0),
                control = list(abstol=1e-12)
 )
 
+dispersion = exp(result$par[1])^2
+beta = result$par[-1]
 
 
 # Compute standard errors -------------------------------------------------
@@ -104,28 +104,28 @@ result = optim(par = c(sigma = 0, intercept = 0, b = 0),
 # the following is the survey package raw version to get the appropriate
 # standard errors, which the ipw approach uses
 glm_basic = glm(y ~ a, data=simdat, weights = wts)       # to get unscaled cov
-res = X %*% result$par[c('intercept', 'b')] - simdat$y   # residuals
-glm_vcov <- summary(glm_basic)$cov.unscaled              # naive weighted vcov
-estfun <- X * c(res) * wts                  
-x = estfun %*% glm_vcov 
+res = resid(glm_basic, type = 'working')                 # residuals
+glm_vcov_unsc <- summary(glm_basic)$cov.unscaled         # weighted vcov unscaled by dispersion solve(crossprod(qr(X)))
+estfun <- X * res * wts                  
+x = estfun %*% glm_vcov_unsc 
 
 # get standard errors
-se = sqrt(diag(crossprod(x)*n/(n-1)))                    # a 'cluster robust' standard error where rows = clusters
-se2 = sqrt(diag(sandwich::sandwich(glm_basic)))          # much easier way to get it
+se = sqrt(diag(crossprod(x)*n/(n-1)))                    # a robust standard error
+se_robust = sqrt(diag(sandwich::sandwich(glm_basic)))    # much easier way to get it
 se_msm = sqrt(diag(vcov(msm)))
 
-tibble(se, se2, se_msm)
+tibble(se, se_robust, se_msm)
 
 
 # Compare results ---------------------------------------------------------
 
 tibble(
-  Estimate = result$par[-1],
-  naive_se = sqrt(diag(solve(result$hessian))[c('intercept', 'b')]),
-  se = se,
+  Estimate = beta,
+  init_se = sqrt(diag(solve(result$hessian)))[c('intercept', 'b')],   # same as scaled se from glm_basic
+  se_robust = se_robust,
   t = Estimate/se,
   p = 2*pt(abs(t), df = n - ncol(X), lower.tail = F),  
-  sigma = exp(c(result$par[1], NA))^2              # compare with dispersion from msm
+  dispersion = dispersion             
 )
 
 # compare to msm
