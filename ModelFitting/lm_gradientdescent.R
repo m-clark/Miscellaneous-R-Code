@@ -39,14 +39,19 @@ gd = function(par, X, y, tolerance=1e-3, maxit=1000, stepsize=1e-3, adapt=F,
     beta = betaCurrent
     loss = append(loss, crossprod(LP-y))
     iter = iter + 1
-    if(adapt) stepsize = ifelse(loss[iter] < loss[iter-1],  stepsize*1.2, stepsize*.8)
-    if(verbose && iter%%10 == 0) message(paste('Iteration:', iter))
+    if (adapt) stepsize = ifelse(loss[iter] < loss[iter-1],  stepsize*1.2, stepsize*.8)
+    if (verbose && iter%%10 == 0) message(paste('Iteration:', iter))
   }
   
-  if(plotLoss) plot(loss, type='l', bty='n')
+  if (plotLoss) plot(loss, type='l', bty='n')
   
-  list(par=beta, loss=loss, RSE=sqrt(crossprod(LP-y)/(nrow(X)-ncol(X))), 
-       iter=iter, fitted=LP)
+  list(
+    par = beta,
+    loss = loss,
+    RSE = sqrt(crossprod(LP - y) / (nrow(X) - ncol(X))),
+    iter = iter,
+    fitted = LP
+  )
 }
 
 ###########
