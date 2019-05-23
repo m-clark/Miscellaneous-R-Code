@@ -7,9 +7,10 @@
 # stopping point is implemented in order to trace results over all data
 # points/iterations.
 
-# On revisiting this much later, I believe this was motivated by the example in
-# Murphy's Probabilistic Machine Learning.  I made some cleanup to the code in
-# 2019, added some comments, but mostly left it ol' skool.
+# On revisiting this much later, I thought it useful to add that I believe this
+# was motivated by the example in Murphy's Probabilistic Machine Learning.  I
+# also made some cleanup to my original code, added some comments, but mostly
+# left it as it was.
 
 ##################
 ### Data Setup ###
