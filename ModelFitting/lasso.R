@@ -27,7 +27,7 @@ lasso <- function(X, y, lambda = .1, soft=T, tol=1e-6, iter=100, verbose=T) {
     w_old = w 
     a = colSums(X^2)
     l = length(y)*lambda  # for consistency with glmnet approach
-    c_ = sapply(1:10, function(j)  sum(X[,j]*(y - X[,-j]%*%w_old[-j])))
+    c_ = sapply(1:J, function(j)  sum(X[,j]*(y - X[,-j]%*%w_old[-j])))
     if (soft) {
       for (j in 1:J) {
         w[j] = soft_thresh(c_[j]/a[j], l/a[j])
