@@ -103,7 +103,7 @@ rbind(tobit = c(res$par[1:5], sigma=exp(res$par[6]), logLike=-res$value),
 
 acad_apt = acad_apt %>% 
   mutate(apt2 = apt,
-         apt2 = if_else(apt2 < 500, 500L, apt2))
+         apt2 = if_else(apt2 < 500, 500, apt2))
 
 res = optim(par=init, tobit, y=acad_apt$apt2, X=X, ll=400,
             method = 'BFGS', 
