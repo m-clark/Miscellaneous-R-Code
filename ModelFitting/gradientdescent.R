@@ -59,11 +59,13 @@ gd = function(par, X, y, tolerance=1e-3, maxit=1000, stepsize=1e-3, adapt=F,
 ###########
 
 ### starting values
+
 init = rep(0, 3)
 
 # for any particular data you'd have to fiddle with the stepsize, which could 
 # be assessed via cross-validation, or alternatively one can use an
 # adaptive approach, a simple one of which is implemented in the function
+
 out = gd(init, X=X, y=y, tolerance = 1e-5, stepsize=.0001, adapt=T)
 str(out)
 round(out$par,5)

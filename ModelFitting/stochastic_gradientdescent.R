@@ -1,4 +1,4 @@
-# 'Online' learning via online/stochastic gradient descent.  See also, standard 
+# 'Online' learning via stochastic gradient descent.  See also, standard 
 # gradient descent in lm_gradientdescent.R In the following, we have basic data 
 # for standard regression, but in this 'online' learning case, we are assuming 
 # each observation comes to us as a stream over time rather than as a single 
