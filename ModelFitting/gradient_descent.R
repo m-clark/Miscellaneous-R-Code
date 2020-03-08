@@ -9,47 +9,68 @@
 ### Data Setup ###
 ##################
 
-# basic data for standard regression. 
+# basic data for standard regression
+
 set.seed(8675309)
 n = 1000
 x1 = rnorm(n)
 x2 = rnorm(n)
 y = 1 + .5*x1 + .2*x2 + rnorm(n)
 
-X = cbind(Intercept=1, x1, x2)
+X = cbind(Intercept = 1, x1, x2)  # model matrix
 
 
 ##################################
 ### gradient descent algorithm ###
 ##################################
 
-gd = function(par, X, y, tolerance=1e-3, maxit=1000, stepsize=1e-3, adapt=F,
-              verbose=T, plotLoss=T){
+gd = function(
+  par,
+  X,
+  y,
+  tolerance = 1e-3,
+  maxit = 1000,
+  stepsize = 1e-3,
+  adapt = F,
+  verbose = T,
+  plotLoss = T
+  ) {
+  
   # initialize
   beta = par; names(beta) = colnames(X)
-  loss = crossprod(X%*%beta - y)
-  tol = 1
+  loss = crossprod(X %*% beta - y)
+  tol  = 1
   iter = 1
   
   while(tol > tolerance && iter < maxit){
-    LP = X%*%beta
+    
+    LP = X %*% beta
     grad = t(X) %*% (LP - y)
     betaCurrent = beta - stepsize * grad
     tol = max(abs(betaCurrent - beta))
     beta = betaCurrent
-    loss = append(loss, crossprod(LP-y))
+    loss = append(loss, crossprod(LP - y))
     iter = iter + 1
-    if (adapt) stepsize = ifelse(loss[iter] < loss[iter-1],  stepsize*1.2, stepsize*.8)
-    if (verbose && iter%%10 == 0) message(paste('Iteration:', iter))
+    
+    if (adapt)
+      stepsize = ifelse(
+        loss[iter] < loss[iter - 1],  
+        stepsize * 1.2, 
+        stepsize * .8
+        )
+    
+    if (verbose && iter %% 10 == 0)
+      message(paste('Iteration:', iter))
   }
   
-  if (plotLoss) plot(loss, type='l', bty='n')
+  if (plotLoss)
+    plot(loss, type = 'l', bty = 'n')
   
   list(
-    par = beta,
-    loss = loss,
-    RSE = sqrt(crossprod(LP - y) / (nrow(X) - ncol(X))),
-    iter = iter,
+    par    = beta,
+    loss   = loss,
+    RSE    = sqrt(crossprod(LP - y) / (nrow(X) - ncol(X))), 
+    iter   = iter,
     fitted = LP
   )
 }
@@ -66,8 +87,21 @@ init = rep(0, 3)
 # be assessed via cross-validation, or alternatively one can use an
 # adaptive approach, a simple one of which is implemented in the function
 
-out = gd(init, X=X, y=y, tolerance = 1e-5, stepsize=.0001, adapt=T)
-str(out)
-round(out$par,5)
-summary(lm(y ~ x1 + x2))
+gd_result = gd(
+  init,
+  X = X,
+  y = y,
+  tolerance = 1e-8,
+  stepsize = 1e-4,
+  adapt = T
+)
+
+str(gd_result)
+
+rbind(
+  gd = round(gd_result$par[, 1], 5),
+  lm = coef(lm(y ~ x1 + x2))
+)
+
+# summary(lm(y ~ x1 + x2))
 

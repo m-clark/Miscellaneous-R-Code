@@ -16,13 +16,14 @@
 #' @param verbose Print iterations?
 #'
 #' @details This is based on the pure Python implementation by François Chollet
-#'   found at https://github.com/fchollet/nelder-mead. To be honest, this is
-#'   just an academic exercise.  I'm not sure how much one would use the basic
-#'   NM in practice. In my limited experience BFGS would be faster, more
-#'   accurate, and less sensitive to starting values for the types of problems
-#'   I've played around with. Others who actually spend their time researching
-#'   such things seem to agree.
-#'
+#'   found at https://github.com/fchollet/nelder-mead (also in this repo at
+#'   nelder_mead.py). This is mostly just an academic exercise on my part.  I'm
+#'   not sure how much one would use the basic NM for many situations. In my
+#'   experience BFGS and other approaches would be faster, more accurate, and
+#'   less sensitive to starting values for the types of problems I've played
+#'   around with. Others who actually spend their time researching such things
+#'   seem to agree.
+#'   
 #'   There were two issues on
 #'   (GitHub)[https://github.com/fchollet/nelder-mead/issues/2] regarding the
 #'   original code, and I've implemented the suggested corrections with notes.
@@ -40,17 +41,19 @@
 
 # First version -----------------------------------------------------------
 
-nelder_mead = function(f, 
-                       x_start,
-                       step=0.1, 
-                       no_improve_thr=1e-12,
-                       no_improv_break=10, 
-                       max_iter=0,
-                       alpha=1, 
-                       gamma=2, 
-                       rho=0.5, 
-                       sigma=0.5, 
-                       verbose=FALSE) {
+nelder_mead = function(
+  f, 
+  x_start,
+  step = 0.1,
+  no_improve_thr = 1e-12,
+  no_improv_break = 10,
+  max_iter = 0,
+  alpha = 1,
+  gamma = 2,
+  rho = 0.5,
+  sigma = 0.5,
+  verbose = FALSE
+  ) {
   # init
   dim = length(x_start)
   prev_best = f(x_start)
@@ -175,15 +178,21 @@ optimx::optimx(
 
 # A Regression Model ------------------------------------------------------
 
+# I find a regression model to be more applicable/intuitive for my needs so
+# provide an example for that case
+
 # data setup
+
 set.seed(8675309)
 N = 500
 npreds = 5
-X = cbind(1, matrix(rnorm(N*npreds), ncol=npreds))
+X = cbind(1, matrix(rnorm(N * npreds), ncol = npreds))
 beta = runif(ncol(X), -1, 1)
 y = X %*% beta + rnorm(nrow(X))
 
+
 # least squares loss function
+
 f = function(b) {
   crossprod(y - X %*% b)[,1]  # if using optimx need scalar
 }
@@ -191,7 +200,7 @@ f = function(b) {
 # lm estimates
 lm.fit(X, y)$coef
 
-nelder_mead(
+nm_result = nelder_mead(
   f, 
   runif(ncol(X)), 
   max_iter = 2000,
@@ -200,40 +209,52 @@ nelder_mead(
 )
 
 # compare to optimx
+
 opt_out = optimx::optimx(
   runif(ncol(X)),
   fn = f,  # model function
   method = 'Nelder-Mead',
-  control = list(alpha=1, 
-                 gamma=2,
-                 beta=0.5,     #rho
-                 maxit=2000,
-                 reltol = 1e-12)
+  control = list(
+    alpha = 1,
+    gamma = 2,
+    beta = 0.5,
+    #rho
+    maxit = 2000,
+    reltol = 1e-12
+  )
 )
 
-opt_out[1:7]
+rbind(
+  nm_func = unlist(nm_result),
+  nm_optimx = opt_out[1:7]
+)
 
 
 
 # Second version ----------------------------------------------------------
 
-nelder_mead2 = function(f, 
-                        x_start,
-                        step=0.1, 
-                        no_improve_thr=1e-12,
-                        no_improv_break=10, 
-                        max_iter=0,
-                        alpha=1, 
-                        gamma=2, 
-                        rho=0.5, 
-                        sigma=0.5, 
-                        verbose=FALSE) {
+# This is a more natural R approach.
+
+nelder_mead2 = function(
+  f,
+  x_start,
+  step = 0.1,
+  no_improve_thr = 1e-12,
+  no_improv_break = 10,
+  max_iter = 0,
+  alpha = 1,
+  gamma = 2,
+  rho = 0.5,
+  sigma = 0.5,
+  verbose = FALSE
+) {
+  
   # init
   npar = length(x_start)
   nc = npar + 1
   prev_best = f(x_start)
   no_improv = 0
-  res = matrix(c(x_start, prev_best), ncol=nc)
+  res = matrix(c(x_start, prev_best), ncol = nc)
   colnames(res) = c(paste('par', 1:npar, sep = '_'), 'score')
   
   for (i in 1:npar) {
@@ -248,11 +269,11 @@ nelder_mead2 = function(f,
   
   while (TRUE) {
     # order
-    res = res[order(res[,nc]),]   # ascending order
+    res = res[order(res[, nc]), ]   # ascending order
     best = res[1, nc]
     
     # break after max_iter
-    if (max_iter & iters >= max_iter) return(res[1,])
+    if (max_iter & iters >= max_iter) return(res[1, ])
     iters = iters + 1
     
     # break after no_improv_break iterations with no improvement
@@ -265,16 +286,20 @@ nelder_mead2 = function(f,
       no_improv = no_improv + 1
     }
     
-    if (no_improv >= no_improv_break) return(res[1,])
+    
+    if (no_improv >= no_improv_break)
+      return(res[1, ])
     
     nr = nrow(res)
     
-    # centroid: slightly more efficient than double loop
-    x0 = colMeans(res[(1:npar),-nc])
+    # centroid: more efficient than previous double loop
+    x0 = colMeans(res[(1:npar), -nc])
     
     # reflection
-    xr = x0 + alpha*(x0 - res[nr, -nc])
+    xr = x0 + alpha * (x0 - res[nr,-nc])
+    
     rscore = f(xr)
+    
     if (res[1, 'score'] <= rscore & rscore < res[npar, 'score']) {
       res[nr,] = c(xr, rscore)
       next
@@ -282,20 +307,22 @@ nelder_mead2 = function(f,
     
     # expansion
     if (rscore < res[1, 'score']) {
-      xe = x0 + gamma*(xr - x0)   
+      xe = x0 + gamma * (xr - x0)
       escore = f(xe)
       if (escore < rscore) {
-        res[nr,] = c(xe, escore)
+        res[nr, ] = c(xe, escore)
         next
       } else {
-        res[nr,] = c(xr, rscore)
+        res[nr, ] = c(xr, rscore)
         next
       }
     }
     
     # contraction
-    xc = x0 + rho*(res[nr, -nc] - x0)
+    xc = x0 + rho * (res[nr, -nc] - x0)
+    
     cscore = f(xc)
+    
     if (cscore < res[nr, 'score']) {
       res[nr,] = c(xc, cscore)
       next
@@ -303,11 +330,13 @@ nelder_mead2 = function(f,
     
     # reduction
     x1 = res[1, -nc]
+    
     nres = res
+    
     for (i in 1:nr) {
-      redx = x1 + sigma*(res[i, -nc] - x1)
+      redx = x1 + sigma * (res[i, -nc] - x1)
       score = f(redx)
-      nres[i,] = c(redx, score)
+      nres[i, ] = c(redx, score)
     }
     
     res = nres
@@ -328,16 +357,18 @@ nelder_mead2(
   no_improve_thr = 1e-12
 )
 
-
 optimx::optimx(
   par = c(0,0,0), 
   fn = f, 
   method = "Nelder-Mead",
-  control = list(alpha=1, 
-                 gamma=2,
-                 beta=0.5,     #rho
-                 maxit=1000,
-                 reltol=1e-12)
+  control = list(
+    alpha = 1,
+    gamma = 2,
+    beta = 0.5,
+    #rho
+    maxit = 1000,
+    reltol = 1e-12
+  )
 )
 
 
@@ -357,28 +388,34 @@ f = function(b) {
 }
 
 
-lm.fit(X, y)$coef
+lm_par = lm.fit(X, y)$coef
 
-nelder_mead2(
+nm_par = nelder_mead2(
   f, 
   runif(ncol(X)), 
   max_iter = 2000,
   no_improve_thr = 1e-12
 )
 
-
-opt_out = optimx::optimx(
+opt_par = optimx::optimx(
   runif(ncol(X)),
-  fn = f,  # model function
+  fn = f,
   method = 'Nelder-Mead',
-  control = list(alpha=1, 
-                 gamma=2,
-                 beta=0.5,     #rho
-                 maxit=2000,
-                 reltol = 1e-12)
-)
+  control = list(
+    alpha = 1,
+    gamma = 2,
+    beta = 0.5,
+    #rho
+    maxit = 2000,
+    reltol = 1e-12
+  )
+)[1:6]
 
-opt_out
+rbind(
+  lm = lm_par,
+  nm = nm_par,
+  optimx = opt_par
+)
 
 
 

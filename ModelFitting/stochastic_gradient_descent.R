@@ -1,5 +1,5 @@
 # 'Online' learning via stochastic gradient descent.  See also, standard 
-# gradient descent in lm_gradientdescent.R In the following, we have basic data 
+# gradient descent in gradient_descent.R In the following, we have basic data 
 # for standard regression, but in this 'online' learning case, we are assuming 
 # each observation comes to us as a stream over time rather than as a single 
 # batch, and would continue coming in.  Note that there are plenty of variations
@@ -29,47 +29,48 @@ X  = cbind(Intercept = 1, x1, x2)
 ### stochastic gradient descent algorithm ###
 #############################################
 
-sgd = function(par,                                      # parameter estimates
-               X,                                        # model matrix
-               y,                                        # target variable
-               stepsize = 1,                             # the learning rate
-               stepsizeTau = 0,                          # if > 0, a check on the LR at early iterations
-               average = F
-               ){
+sgd = function(
+  par,                                      # parameter estimates
+  X,                                        # model matrix
+  y,                                        # target variable
+  stepsize = 1,                             # the learning rate
+  stepsizeTau = 0,                          # if > 0, a check on the LR at early iterations
+  average = F
+){
   
   # initialize
   beta = par
   names(beta) = colnames(X)
-  betamat = matrix(0, nrow(X), ncol=length(beta))        # Collect all estimates
+  betamat = matrix(0, nrow(X), ncol = length(beta))      # Collect all estimates
   fits = NA                                              # fitted values
   s = 0                                                  # adagrad per parameter learning rate adjustment
   loss = NA                                              # Collect loss at each point
   
-  for (i in 1:nrow(X)){
+  for (i in 1:nrow(X)) {
     Xi   = X[i, , drop=F]
     yi   = y[i]
     LP   = Xi %*% beta                                   # matrix operations not necessary, 
     grad = t(Xi) %*% (LP - yi)                           # but makes consistent with the  standard gd R file
     s    = s + grad^2
-    beta = beta - stepsize*grad/(stepsizeTau + sqrt(s))  # adagrad approach
+    beta = beta - stepsize * grad/(stepsizeTau + sqrt(s))     # adagrad approach
     
     if (average & i > 1) {
-      beta =  beta - 1/i*(betamat[i-1,] - beta)          # a variation
+      beta =  beta - 1/i * (betamat[i - 1, ] - beta)          # a variation
     } 
     
     betamat[i,] = beta
-    fits[i] = LP
-    loss[i] = (LP-yi)^2
+    fits[i]     = LP
+    loss[i]     = (LP - yi)^2
   }
   
   LP = X %*% beta
   lastloss = crossprod(LP - y)
   
   list(
-    par = beta,                                          # final estimates
+    par    = beta,                                       # final estimates
     parvec = betamat,                                    # all estimates
-    loss = loss,                                         # observation level loss
-    RMSE = sqrt(sum(lastloss)/nrow(X)),
+    loss   = loss,                                       # observation level loss
+    RMSE   = sqrt(sum(lastloss)/nrow(X)),
     fitted = fits
   )
 }
@@ -86,34 +87,56 @@ init = rep(0, 3)
 # for any particular data you might have to fiddle with the stepsize, perhaps
 # choosing one based on cross-validation with old data
 
-out = sgd(init, X = X, y = y, stepsize = .2, stepsizeTau = 0, average = F)
-str(out)
-out$par
+sgd_result = sgd(
+  init,
+  X = X,
+  y = y,
+  stepsize = .1,
+  stepsizeTau = .5,
+  average = F
+)
+
+str(sgd_result)
+
+sgd_result$par
 
 # compare
-summary(lm(y ~ x1 + x2))
+# summary(lm(y ~ x1 + x2))
 coef1 = coef(lm(y ~ x1 + x2))
 
+rbind(
+  sgd_result = sgd_result$par[, 1],
+  lm = coef1
+)
 
 # visualize estimates
-library(ggplot2); library(reshape2)
+library(tidyverse)
 
-gd = melt(out$parvec)
-colnames(gd) = c('Iteration', 'Parameter', 'Value')
-gd$Parameter = factor(gd$Parameter, labels = colnames(X))
+gd = data.frame(sgd_result$parvec) %>% 
+  mutate(Iteration = 1:n())
 
-ggplot(aes(x = Iteration, 
-           y = Value, 
-           group = Parameter, 
-           color = Parameter), 
-       data = gd) +
+gd = gd %>% 
+  pivot_longer(cols = -Iteration,
+               names_to = 'Parameter', 
+               values_to = 'Value') %>% 
+  mutate(Parameter = factor(Parameter, labels = colnames(X)))
+
+ggplot(aes(
+  x = Iteration,
+  y = Value,
+  group = Parameter,
+  color = Parameter
+),
+data = gd) +
   geom_path() +
-  geom_point(data = gd[gd$Iteration == n, ], size = 3) +
-  geom_text(aes(label = round(Value, 2)), 
-            hjust = -.5,
-            angle = 45,
-            size = 4, 
-            data = gd[gd$Iteration == n, ]) +
+  geom_point(data = filter(gd, Iteration == n), size = 3) +
+  geom_text(
+    aes(label = round(Value, 2)),
+    hjust = -.5,
+    angle = 45,
+    size = 4,
+    data = filter(gd, Iteration == n)
+  ) +
   theme_minimal()
 
 
@@ -146,17 +169,23 @@ y3 = c(y2, y3)
 ### Run ###
 ###########
 
-out2 = sgd(init, X = X3, y = y3, stepsize = 1, stepsizeTau = 0, average = F)
-str(out2)
+sgd_result2 = sgd(init, X = X3, y = y3, stepsize = 1, stepsizeTau = 0, average = F)
+str(sgd_result2)
 
 # compare with lm for each data part
-out2$parvec[c(n, n + n2, n + n2 + n3), ]
+sgd_result2$parvec[c(n, n + n2, n + n2 + n3), ]
 rbind(coef1, coef2, coef3)
 
 # visualize estimates
-gd = melt(out2$parvec)
-colnames(gd) = c('Iteration', 'Parameter', 'Value')
-gd$Parameter = factor(gd$Parameter, labels = colnames(X))
+gd = data.frame(sgd_result2$parvec) %>% 
+  mutate(Iteration = 1:n())
+
+gd = gd %>% 
+  pivot_longer(cols = -Iteration,
+               names_to = 'Parameter', 
+               values_to = 'Value') %>% 
+  mutate(Parameter = factor(Parameter, labels = colnames(X)))
+
 
 ggplot(aes(x = Iteration,
            y = Value,
@@ -165,13 +194,13 @@ ggplot(aes(x = Iteration,
            ),
        data = gd) +
   geom_path() +
-  geom_point(data = gd[gd$Iteration == (c(n, n + n2, n + n2 + n3)), ], 
+  geom_point(data = filter(gd, Iteration %in% c(n, n + n2, n + n2 + n3)),
              size = 3) +
   geom_text(
     aes(label = round(Value, 2)),
     hjust = -.5,
     angle = 45,
-    data = gd[gd$Iteration == (c(n, n + n2, n + n2 + n3)), ],
+    data = filter(gd, Iteration %in% c(n, n + n2, n + n2 + n3)),
     size = 4,
     show.legend = F
   ) +

@@ -11,20 +11,20 @@ Model Fitting
 
 Code related to fitting of various models. 
 
-[standard linear regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/standardlm.R), 
+[standard linear regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/standard_lm.R), 
 [standard logistic regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/standard_logistic.R), 
-[penalized regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/penalizedML.R), 
+[penalized regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/penalized_ML.R), 
 [lasso regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/lasso.R),
 [ridge regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/ridge.R),
 [newton and IRLS](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/newton_irls.R),
 nelder-mead [(Python)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.py) [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.R),
 [gradient descent regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gradientdescent.R) [(stochastic)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/stochastic_gradientdescent.R), 
-one factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.R) 
-[(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.jl) 
-[(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/onefactorRE.m), 
-two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.R) 
-[(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.jl) 
-[(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/twofactorRE.m), 
+one factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/onefactorRE.R) 
+[(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/onefactorRE.jl) 
+[(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/onefactorRE.m), 
+two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/twofactorRE.R) 
+[(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/twofactorRE.jl) 
+[(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/twofactorRE.m), 
 [mixed model via ML](https://m-clark.github.io/docs/mixedModels/mixedModelML.html),
 [bivariate probit](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/bivariateProbit.R),
 [heckman selection](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/heckman_selection.R),

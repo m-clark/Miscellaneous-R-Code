@@ -7,7 +7,7 @@
 # is widely used in more predictive/'algorithmic' approaches e.g. in
 # machine learning and elsewhere.
 
-# This follows the standardlm.R script.
+# This follows the standard_lm.R script.
 #---------------------------------------------------------------------------------#
 
 
@@ -39,7 +39,7 @@ dfXy = data.frame(X, y)
 
 # A maximum likelihood approach
 
-glmfuncML = function(par, X, y){
+logreg_ML = function(par, X, y){
   # arguments- par: parameters to be estimated; X: predictor matrix with intercept 
   # column; y: response
   
@@ -48,11 +48,11 @@ glmfuncML = function(par, X, y){
   N = nrow(X)
   
   # linear predictor
-  LP = X%*%beta                             # linear predictor
+  LP = X %*% beta                           # linear predictor
   mu = plogis(LP)                           # logit link
   
   # calculate likelihood
-  L = dbinom(y, size = 1, prob=mu, log = TRUE)          # log likelihood
+  L = dbinom(y, size = 1, prob = mu, log = TRUE)         # log likelihood
   #   L =  y*log(mu) + (1 - y)*log(1-mu)    # alternate log likelihood form
   
   -sum(L)                                   # optim by default is minimization, and we want to maximize the likelihood 
@@ -60,7 +60,8 @@ glmfuncML = function(par, X, y){
 }
 
 # An equivalent approach via exponential loss function
-glmfuncClass = function(par, X, y){
+
+logreg_exp = function(par, X, y){
   # arguments- par: parameters to be estimated; X: predictor matrix with intercept 
   # column, y: response
   
@@ -68,26 +69,29 @@ glmfuncClass = function(par, X, y){
   beta = par                                   # coefficients
   
   # linear predictor
-  LP = X%*%beta                                # linear predictor
+  LP = X %*% beta                              # linear predictor
 
   # calculate exponential loss function (convert y to -1:1 from 0:1)
-  L = sum(exp(-ifelse(y, 1,-1) * .5*LP))
+  L = sum(exp(-ifelse(y, 1, -1) * .5 * LP))
 }
+
 
 ##############################
 ### Obtain Model Estimates ###
 ##############################
 
 # Setup for use with optim
+
 X = cbind(1, X)
 
 # initial values
+
 init = rep(0, ncol(X))
 names(init)=c('intercept','b1', 'b2')
 
 optlmML = optim(
   par = init,
-  fn = glmfuncML,
+  fn = logreg_ML,
   X = X,
   y = y,
   control = list(reltol = 1e-8)
@@ -95,25 +99,25 @@ optlmML = optim(
 
 optglmClass = optim(
   par = init,
-  fn = glmfuncClass,
+  fn = logreg_exp,
   X = X,
   y = y, 
   control = list(reltol = 1e-15)
 )
 
-parsML  = optlmML$par
-parsExp  = optglmClass$par
+pars_ML  = optlmML$par
+pars_exp  = optglmClass$par
 
 ##################
 ### Comparison ###
 ##################
 
-### compare to glm 
+### compare to glm
+
 modglm = glm(y~., dfXy, family = binomial)
 
-
 rbind(
-  parsML,
-  parsExp,
-  parsGLM = coef(modglm)
+  pars_ML,
+  pars_exp,
+  pars_GLM = coef(modglm)
 )

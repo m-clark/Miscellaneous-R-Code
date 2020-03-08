@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------------#
-# A standard regression model via penalized likelihood.  See the standardlm.R     #
+# A standard regression model via penalized likelihood.  See the standard_lm.R    #
 # code for comparison. Here the penalty is specified (via lambda argument) but    # 
 # one would typically estimate via cross-validation or some other fashion. Two    #
 # penalties are possible with the function.  One using the (squared) L2 norm (aka #
@@ -18,13 +18,14 @@
 ##############
 # Data Setup #
 ##############
+
 set.seed(123)  # ensures replication
 
 # predictors and response
 N = 100 # sample size
 k = 2   # number of desired predictors
-X = matrix(rnorm(N*k), ncol=k)  
-y = -.5 + .2*X[,1] + .1*X[,2] + rnorm(N, sd=.5)  # increasing N will get estimated values closer to these
+X = matrix(rnorm(N * k), ncol = k)  
+y = -.5 + .2*X[, 1] + .1*X[, 2] + rnorm(N, sd=.5)  # increasing N will get estimated values closer to these
 
 dfXy = data.frame(X,y)
 
@@ -33,8 +34,15 @@ dfXy = data.frame(X,y)
 #############
 # Functions #
 #############
+
 # A maximum likelihood approach
-penalML = function(par, X, y, lambda=.1, type='L2'){
+
+penalized_ML = function(par,
+                        X,
+                        y,
+                        lambda = .1,
+                        type = 'L2') {
+  
   # arguments- par: parameters to be estimated; X: predictor matrix with
   # intercept column; y: response, lambda: penalty coefficient; type: penalty
   # approach
@@ -46,15 +54,15 @@ penalML = function(par, X, y, lambda=.1, type='L2'){
   N = nrow(X)
   
   # linear predictor
-  LP = X%*%beta                                # linear predictor
+  LP = X %*% beta                              # linear predictor
   mu = LP                                      # identity link in the glm sense
   
   # calculate likelihood
-  L = dnorm(y, mean=mu, sd=sigma, log=T)       # log likelihood
+  L = dnorm(y, mean = mu, sd = sigma, log = T) # log likelihood
   
   PL = switch(type,
-              'L2' = -sum(L) + lambda*crossprod(beta[-1]),   # the intercept is not penalized
-              'L1' = -sum(L) + lambda*sum(abs(beta[-1]))
+              'L2' = -sum(L) + lambda * crossprod(beta[-1]),   # the intercept is not penalized
+              'L1' = -sum(L) + lambda * sum(abs(beta[-1]))
               )
 }
 
@@ -63,7 +71,12 @@ penalML = function(par, X, y, lambda=.1, type='L2'){
 # scale; Uses a different objective function.  Note that glmnet is actually
 # 'elasticnet' and mixes both L1 and L2 penalties
 
-penalML2 = function(par, X, y, lambda=.1, type='L2'){
+penalized_ML2 = function(par,
+                         X,
+                         y,
+                         lambda = .1,
+                         type = 'L2') {
+  
   # arguments- par: parameters to be estimated; X: predictor matrix with
   # intercept column; y: response, lambda: penalty coefficient; type: penalty
   # approach
@@ -73,12 +86,12 @@ penalML2 = function(par, X, y, lambda=.1, type='L2'){
   N = nrow(X)
   
   # linear predictor
-  LP = X%*%beta                                # linear predictor
+  LP = X %*% beta                              # linear predictor
   mu = LP                                      # identity link in the glm sense
   
   obj = switch(type,
-               'L2' = .5*crossprod(y-X%*%beta)/N + lambda*crossprod(beta[-1]),
-               'L1' = .5*crossprod(y-X%*%beta)/N + lambda*sum(abs(beta[-1]))
+               'L2' = .5*crossprod(y - X %*% beta)/N + lambda * crossprod(beta[-1]),
+               'L1' = .5*crossprod(y - X %*% beta)/N + lambda * sum(abs(beta[-1]))
   )
 }
 
@@ -93,39 +106,99 @@ X = cbind(1, X)
 # initial values; note we'd normally want to handle the sigma differently as it's
 # bounded by zero, but we'll ignore for demonstration; also sigma2 is not required
 # for the LS approach
-init = c(1, rep(0, ncol(X)));  names(init)=c('sigma2', 'intercept','b1', 'b2')
+init = c(1, rep(0, ncol(X)))
+names(init) = c('sigma2', 'intercept', 'b1', 'b2')
 
-optlmpenalMLL2 = optim(par=init, fn=penalML, X=X, y=y, lambda=1, control=list(reltol=1e-12))
-optlmpenalMLL1 = optim(par=init, fn=penalML, X=X, y=y, lambda=1, type='L1', control=list(reltol=1e-12))
+optlmpenalized_MLL2 = optim(
+  par = init,
+  fn = penalized_ML,
+  X = X,
+  y = y,
+  lambda = 1,
+  control = list(reltol = 1e-12)
+)
 
-parspenalMLL2 = optlmpenalMLL2$par
-parspenalMLL1 = optlmpenalMLL1$par
+optlmpenalized_MLL1 = optim(
+  par = init,
+  fn = penalized_ML,
+  X = X,
+  y = y,
+  lambda = 1,
+  type = 'L1',
+  control = list(reltol = 1e-12)
+)
+
+parspenalized_MLL2 = optlmpenalized_MLL2$par
+parspenalized_MLL1 = optlmpenalized_MLL1$par
 
 
 
 ##################
 ### Comparison ###
 ##################
+
 ### compare to lm
-modlm = lm(y~., dfXy)
 
-round(rbind(parspenalMLL2,
-            parspenalMLL1, 
-            modlm = c(summary(modlm)$sigma^2, coef(modlm))), 4)
+modlm = lm(y ~ ., dfXy)
 
-### compare to glmnet; setting alpha to 0 and 1 is equivalent L2 and L1 respectively; you also wouldn't want to specify lambda normally, and rather let it come about as part of the estimation procedure.  We do so here just for demonstration.
+round(
+  rbind(
+    parspenalized_MLL2,
+    parspenalized_MLL1,
+    modlm = c(summary(modlm)$sigma ^ 2, coef(modlm))
+  ), 
+  digits = 4
+)
+
+### compare to glmnet; setting alpha to 0 and 1 is equivalent to L2 and L1
+### penalties respectively; you also wouldn't want to specify lambda normally,
+### and rather let it come about as part of the estimation procedure.  We do so
+### here just for demonstration.
+
 library(glmnet)
-glmnetL2 = glmnet(X[,-1], y, alpha=0, lambda=.01, standardize=F)
-glmnetL1 = glmnet(X[,-1], y, alpha=1, lambda=.01, standardize=F)
+
+glmnetL2 = glmnet(
+  X[, -1],
+  y,
+  alpha = 0,
+  lambda = .01,
+  standardize = F
+)
+
+glmnetL1 = glmnet(
+  X[, -1],
+  y,
+  alpha = 1,
+  lambda = .01,
+  standardize = F
+)
+
+pars_L2 = optim(
+  par = init[-1],
+  fn = penalized_ML2,
+  X = X,
+  y = y,
+  lambda = .01,
+  control = list(reltol = 1e-12)
+)$par
+
+pars_L1 = optim(
+  par = init[-1],
+  fn = penalized_ML2,
+  X = X,
+  y = y,
+  lambda = .01,
+  type = 'L1',
+  control = list(reltol = 1e-12)
+)$par
 
 
-round(rbind(t(as.matrix(coef(glmnetL2))), 
-            functionoutput=optim(par=init[-1], fn=penalML2, X=X, y=y, 
-                                 lambda=.01, control=list(reltol=1e-12))$par), 
-      4)
-
-round(rbind(t(as.matrix(coef(glmnetL1))), 
-            functionoutput=optim(par=init[-1], fn=penalML2, X=X, y=y, 
-                                 lambda=.01, type='L1', control=list(reltol=1e-12))$par), 
-      4)
-
+round(
+  rbind(
+    glmnet_L2 = t(as.matrix(coef(glmnetL2))),
+    pars_L2 = pars_L2,
+    glmnet_L1 = t(as.matrix(coef(glmnetL1))),
+    pars_L1 = pars_L1
+  ),
+  digits = 4
+)

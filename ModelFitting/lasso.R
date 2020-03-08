@@ -1,7 +1,9 @@
 
 # l1 (lasso) regularization -----------------------------------------------
 
-# See Tibshirani (1996) for the source, or Murphy PML (2012) for a nice overview (watch for typos in depictions)
+# See Tibshirani (1996) for the source, or Murphy PML (2012) for a nice overview
+# (watch for typos in depictions). A more conceptual depiction of the lasso can
+# be found in penalized_ML.R
 
 # coordinate descent
 lasso <- function(
@@ -65,35 +67,64 @@ lambda = .1
 # debugonce(lasso)
 
 # note, if lambda=0, result is lm.fit
-result_soft = lasso(X, y, lambda = lambda, tol = 1e-12, soft = T)
-result_hard = lasso(X, y, lambda = lambda, tol = 1e-12, soft = F)
+result_soft = lasso(
+  X,
+  y,
+  lambda = lambda,
+  tol = 1e-12,
+  soft = T
+)
+
+result_hard = lasso(
+  X,
+  y,
+  lambda = lambda,
+  tol = 1e-12,
+  soft = F
+)
 
 
 library(glmnet)
+
 # glmnet is by default a mixture of ridge and lasso penalties, setting alpha = 1
 # reduces to lasso (alpha=0 would be ridge); We set the lambda to a couple
 # values while only wanting the one set to the same lambda value as above (s)
-glmnet_res = coef(glmnet(X, 
-                         y, 
-                         alpha = 1, 
-                         lambda = c(10, 1, lambda), 
-                         thresh = 1e-12, 
-                         intercept = F), 
-                  s = lambda)
+
+glmnet_res = coef(
+  glmnet(
+    X,
+    y,
+    alpha = 1,
+    lambda = c(10, 1, lambda),
+    thresh = 1e-12,
+    intercept = F
+  ),
+  s = lambda
+)
 
 library(lassoshooting)
-ls_res = lassoshooting(X = X, y = y, lambda = length(y)*lambda, thr = 1e-12)
+
+ls_res = lassoshooting(
+  X = X,
+  y = y,
+  lambda = length(y) * lambda,
+  thr = 1e-12
+)
 
 
 # comparison
-data.frame(lm = coef(lm(y~.-1, data.frame(X))),
-           lasso_soft = result_soft,
-           lasso_hard = result_hard,
-           lspack = ls_res$coef,
-           glmnet = glmnet_res[-1, 1],
-           truth = b)
+
+data.frame(
+  lm = coef(lm(y ~ . - 1, data.frame(X))),
+  lasso_soft = result_soft,
+  lasso_hard = result_hard,
+  lspack = ls_res$coef,
+  glmnet = glmnet_res[-1, 1],
+  truth = b
+)
 
 
 
-# for some more detailed R code, check out http://jocelynchi.com/a-coordinate-descent-algorithm-for-the-lasso-problem
+# for some more detailed R code, check out
+# http://jocelynchi.com/a-coordinate-descent-algorithm-for-the-lasso-problem
 
