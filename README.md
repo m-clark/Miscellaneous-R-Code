@@ -18,7 +18,7 @@ Code related to fitting of various models.
 [ridge regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/ridge.R),
 [newton and IRLS](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/newton_irls.R),
 nelder-mead [(Python)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.py) [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.R),
-[gradient descent regression](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gradientdescent.R) [(stochastic)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/stochastic_gradientdescent.R), 
+[gradient descent](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gradient_descent.R) [(stochastic)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/stochastic_gradient_descent.R), 
 one factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/onefactorRE.R) 
 [(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/onefactorRE.jl) 
 [(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/onefactorRE.m), 
