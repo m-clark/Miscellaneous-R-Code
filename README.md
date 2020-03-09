@@ -3,7 +3,7 @@ Miscellaneous (mostly) R Code
 
 This is a place for miscellaneous R and other code I've put together for clients, co-workers or myself for learning and demonstration purposes. The attempt is made to put together some well-commented and/or conceptually clear code from scratch, though most functionality is readily available in any number of well-developed R packages.  Typically, examples are provided using such packages for comparison of results.  I would say most of these are geared toward intermediate to advanced folks that want to dig a little deeper into the models and underlying algorithms.
 
-More recently, if it gets more involved, I usually just create a document of some kind rather than a standard `*.R` file, so you might check out the [docs](https://github.com/m-clark/docs) repo as well.
+I also have documents of varying depth on a range of modeling and programming topics that can be found at [my website](https://m-clark.github.io).
 
 
 Model Fitting
