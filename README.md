@@ -19,12 +19,12 @@ Code related to fitting of various models.
 [newton and IRLS](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/newton_irls.R),
 nelder-mead [(Python)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.py) [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.R),
 [gradient descent](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gradient_descent.R) [(stochastic)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/stochastic_gradient_descent.R), 
-one factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/onefactorRE.R) 
-[(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/onefactorRE.jl) 
-[(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/onefactorRE.m), 
-two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/twofactorRE.R) 
-[(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/twofactorRE.jl) 
-[(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed Models/twofactorRE.m), 
+one factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/onefactorRE.R) 
+[(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/onefactorRE.jl) 
+[(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/onefactorRE.m), 
+two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/twofactorRE.R) 
+[(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/twofactorRE.jl) 
+[(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/twofactorRE.m), 
 [mixed model via ML](https://m-clark.github.io/docs/mixedModels/mixedModelML.html),
 [bivariate probit](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/bivariateProbit.R),
 [heckman selection](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/heckman_selection.R),
