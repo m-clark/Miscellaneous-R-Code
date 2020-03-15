@@ -45,27 +45,27 @@ nelder_mead = function(
   f, 
   x_start,
   step = 0.1,
-  no_improve_thr = 1e-12,
+  no_improve_thr  = 1e-12,
   no_improv_break = 10,
   max_iter = 0,
-  alpha = 1,
-  gamma = 2,
-  rho = 0.5,
-  sigma = 0.5,
-  verbose = FALSE
+  alpha    = 1,
+  gamma    = 2,
+  rho      = 0.5,
+  sigma    = 0.5,
+  verbose  = FALSE
   ) {
   # init
   dim = length(x_start)
   prev_best = f(x_start)
   no_improv = 0
-  res = list(list(x_start=x_start, prev_best=prev_best))
+  res = list(list(x_start = x_start, prev_best = prev_best))
   
   
   for (i in 1:dim) {
     x = x_start
-    x[i] = x[i] + step
+    x[i]  = x[i] + step
     score = f(x)
-    res = append(res, list(list(x_start=x, prev_best=score)))
+    res = append(res, list(list(x_start = x, prev_best = score)))
   }
   
   # simplex iter
@@ -73,8 +73,8 @@ nelder_mead = function(
   
   while (TRUE) {
     # order
-    idx = sapply(res, `[[`, 2)
-    res = res[order(idx)]   # ascending order
+    idx  = sapply(res, `[[`, 2)
+    res  = res[order(idx)]   # ascending order
     best = res[[1]][[2]]
     
     # break after max_iter
@@ -102,7 +102,7 @@ nelder_mead = function(
     }
     
    # reflection
-   xr = x0 + alpha*(x0 - res[[length(res)]][[1]])
+   xr = x0 + alpha * (x0 - res[[length(res)]][[1]])
    rscore = f(xr)
    if (res[[1]][[2]] <= rscore & 
        rscore < res[[length(res)-1]][[2]]) {
@@ -113,7 +113,7 @@ nelder_mead = function(
    # expansion
    if (rscore < res[[1]][[2]]) {
      # xe = x0 + gamma*(x0 - res[[length(res)]][[1]])   # issue with this
-     xe = x0 + gamma*(xr - x0)   
+     xe = x0 + gamma * (xr - x0)   
      escore = f(xe)
      if (escore < rscore) {
        res[[length(res)]] = list(xe, escore)
@@ -126,7 +126,7 @@ nelder_mead = function(
    
    # contraction
    # xc = x0 + rho*(x0 - res[[length(res)]][[1]])  # issue with wiki consistency for rho values (and optim)
-   xc = x0 + rho*(res[[length(res)]][[1]] - x0)
+   xc = x0 + rho * (res[[length(res)]][[1]] - x0)
    cscore = f(xc)
    if (cscore < res[[length(res)]][[2]]) {
      res[[length(res)]] = list(xc, cscore)
@@ -134,12 +134,12 @@ nelder_mead = function(
    }
    
    # reduction
-   x1 = res[[1]][[1]]
+   x1   = res[[1]][[1]]
    nres = list()
    for (tup in res) {
-     redx = x1 + sigma*(tup[[1]] - x1)
+     redx  = x1 + sigma * (tup[[1]] - x1)
      score = f(redx)
-     nres = append(nres, list(list(redx, score)))
+     nres  = append(nres, list(list(redx, score)))
    }
    
    res = nres
@@ -158,20 +158,22 @@ f = function(x) {
 
 nelder_mead(
   f, 
-  c(0,0,0), 
+  c(0, 0, 0), 
   max_iter = 1000, 
   no_improve_thr = 1e-12
 )
 
 optimx::optimx(
-  par = c(0,0,0), 
-  fn = f, 
+  par = c(0, 0, 0),
+  fn = f,
   method = "Nelder-Mead",
-  control = list(alpha=1, 
-                 gamma=2,
-                 beta=0.5,     #rho
-                 maxit=1000,
-                 reltol=1e-12)  
+  control = list(
+    alpha = 1,
+    gamma = 2,
+    beta = 0.5,
+    maxit = 1000,
+    reltol = 1e-12
+  )
 )
 
 
@@ -239,12 +241,12 @@ nelder_mead2 = function(
   f,
   x_start,
   step = 0.1,
-  no_improve_thr = 1e-12,
+  no_improve_thr  = 1e-12,
   no_improv_break = 10,
   max_iter = 0,
   alpha = 1,
   gamma = 2,
-  rho = 0.5,
+  rho   = 0.5,
   sigma = 0.5,
   verbose = FALSE
 ) {
@@ -258,10 +260,10 @@ nelder_mead2 = function(
   colnames(res) = c(paste('par', 1:npar, sep = '_'), 'score')
   
   for (i in 1:npar) {
-    x = x_start
-    x[i] = x[i] + step
+    x     = x_start
+    x[i]  = x[i] + step
     score = f(x)
-    res = rbind(res, c(x, score))
+    res   = rbind(res, c(x, score))
   }
   
   # simplex iter
@@ -269,7 +271,7 @@ nelder_mead2 = function(
   
   while (TRUE) {
     # order
-    res = res[order(res[, nc]), ]   # ascending order
+    res  = res[order(res[, nc]), ]   # ascending order
     best = res[1, nc]
     
     # break after max_iter
@@ -286,7 +288,6 @@ nelder_mead2 = function(
       no_improv = no_improv + 1
     }
     
-    
     if (no_improv >= no_improv_break)
       return(res[1, ])
     
@@ -296,7 +297,7 @@ nelder_mead2 = function(
     x0 = colMeans(res[(1:npar), -nc])
     
     # reflection
-    xr = x0 + alpha * (x0 - res[nr,-nc])
+    xr = x0 + alpha * (x0 - res[nr, -nc])
     
     rscore = f(xr)
     
@@ -334,7 +335,7 @@ nelder_mead2 = function(
     nres = res
     
     for (i in 1:nr) {
-      redx = x1 + sigma * (res[i, -nc] - x1)
+      redx  = x1 + sigma * (res[i, -nc] - x1)
       score = f(redx)
       nres[i, ] = c(redx, score)
     }
@@ -347,26 +348,25 @@ nelder_mead2 = function(
 # Example -----------------------------------------------------------------
 
 f = function(x) {
-  sin(x[1]) *cos(x[2]) * (1 / (abs(x[3]) + 1))
+  sin(x[1]) * cos(x[2]) * (1 / (abs(x[3]) + 1))
 }
 
 nelder_mead2(
   f, 
-  c(0,0,0), 
+  c(0, 0, 0), 
   max_iter = 1000, 
   no_improve_thr = 1e-12
 )
 
 optimx::optimx(
-  par = c(0,0,0), 
+  par = c(0, 0, 0), 
   fn = f, 
-  method = "Nelder-Mead",
-  control = list(
-    alpha = 1,
-    gamma = 2,
-    beta = 0.5,
-    #rho
-    maxit = 1000,
+  method   = "Nelder-Mead",
+  control  = list(
+    alpha  = 1,
+    gamma  = 2,
+    beta   = 0.5,
+    maxit  = 1000,
     reltol = 1e-12
   )
 )
@@ -378,7 +378,7 @@ optimx::optimx(
 set.seed(8675309)
 N = 500
 npreds = 5
-X = cbind(1, matrix(rnorm(N*npreds), ncol=npreds))
+X = cbind(1, matrix(rnorm(N * npreds), ncol = npreds))
 beta = runif(ncol(X), -1, 1)
 y = X %*% beta + rnorm(nrow(X))
 
@@ -392,7 +392,7 @@ lm_par = lm.fit(X, y)$coef
 
 nm_par = nelder_mead2(
   f, 
-  runif(ncol(X)), 
+  runif(ncol(X)),
   max_iter = 2000,
   no_improve_thr = 1e-12
 )
@@ -400,21 +400,21 @@ nm_par = nelder_mead2(
 opt_par = optimx::optimx(
   runif(ncol(X)),
   fn = f,
-  method = 'Nelder-Mead',
-  control = list(
-    alpha = 1,
-    gamma = 2,
-    beta = 0.5,
-    #rho
-    maxit = 2000,
+  method   = 'Nelder-Mead',
+  control  = list(
+    alpha  = 1,
+    gamma  = 2,
+    beta   = 0.5,
+    maxit  = 2000,
     reltol = 1e-12
   )
-)[1:6]
+)[1:(npreds + 1)]
 
 rbind(
   lm = lm_par,
   nm = nm_par,
-  optimx = opt_par
+  optimx = opt_par,
+  truth  = beta
 )
 
 
