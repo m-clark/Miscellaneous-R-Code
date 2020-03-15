@@ -1,13 +1,13 @@
 % matlab from Statistical Modeling and Computation (2014 p 311).  See the 
 % associated twofactorRE.R file for details.
 
-function sfran_loglike(mu, sigma2_mu, sigma2, y)
+function one_factor_re_loglike(mu, sigma2_mu, sigma2, y)
 	[d ni] = size(y);
 	Sigmai = sigma2*eye(ni) + sigma2_mu*ones(ni,ni);
-	l = -(ni*d)/2*log(2*pi) - d/2*log(det(Sigmai));
+	l = -(ni*d) / 2*log(2*pi) - d / 2*log(det(Sigmai));
 	for i=1:d
-	  yi = y(i,:)';
-	  l = l - .5*(yi-mu)' * (Sigmai\(yi-mu));
+	  yi = y(i, :)';
+	  l = l - .5*(yi - mu)' * (Sigmai\(yi - mu));
 	end
 end
 
@@ -24,7 +24,7 @@ y = [22.6 20.5 20.8;
      14.9 16.3 16.6];
 
 
-f = @(theta) -sfran_loglike(theta(1), theta(2), theta(3), y);
-ybar = mean(y,2);
-theta0 = [mean(ybar) var(ybar) mean(var(y,0,2))];
+f = @(theta) -one_factor_re_loglike(theta(1), theta(2), theta(3), y);
+ybar = mean(y, 2);
+theta0 = [mean(ybar) var(ybar) mean(var(y, 0, 2))];
 thetahat = fminsearch(f, theta0);

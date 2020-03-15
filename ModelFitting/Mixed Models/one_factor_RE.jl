@@ -8,7 +8,8 @@
 #####################
 ### Main function ###
 #####################
-function sfran_loglike(par::Vector)
+
+function one_factor_re_loglike(par::Vector)
     d, ni = size(y)
     mu = par[1]
     sigma2_mu = par[2]
@@ -26,7 +27,7 @@ function sfran_loglike(par::Vector)
 
 #    for i in 1:d
 #        yi = y[i,:]'
-#        l[i,:] =  .5* (yi-mu)' * (Sigmai\(yi-mu))
+#        l[i,:] =  .5* (yi - mu)' * (Sigmai\(yi - mu))
 #    end
 #    l =  -(ni*d)/2*log(2*pi) - d/2*log(det(Sigmai)) - sum(l)
 
@@ -54,18 +55,18 @@ y = [22.6 20.5 20.8
 ### Starting values and test ###
 ################################
 mu0 = mean(y)
-sigma2_mu0 = var(mean(y,2))
+sigma2_mu0 = var(mean(y, 2))
 sigma20 = mean(var(y, 2))
 theta0 = [mu0, sigma2_mu0, sigma20]
 
 ### test
-sfran_loglike(theta0)
+one_factor_re_loglike(theta0)
 
 
 ###########
 ### Run ###
 ###########
 using Optim
-res = optimize(sfran_loglike, theta0, method=:l_bfgs)
+res = optimize(one_factor_re_loglike, theta0, method=:l_bfgs)
 
 
