@@ -19,9 +19,9 @@ Code related to fitting of various models.
 [newton and IRLS](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/newton_irls.R),
 nelder-mead [(Python)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.py) [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.R),
 [gradient descent](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gradient_descent.R) [(stochastic)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/stochastic_gradient_descent.R), 
-one factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/onefactorRE.R) 
-[(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/onefactorRE.jl) 
-[(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/onefactorRE.m), 
+one factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/one_factor_RE.R) 
+[(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/one_factor_RE.jl) 
+[(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/one_factor_RE.m), 
 two factor random effects [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/twofactorRE.R) 
 [(Julia)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/twofactorRE.jl) 
 [(Matlab)](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/Mixed%20Models/twofactorRE.m), 
