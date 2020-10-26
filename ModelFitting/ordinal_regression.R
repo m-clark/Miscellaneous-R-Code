@@ -24,7 +24,8 @@ ll_ord = function(par, X, y, probit=T) {
       ll[y==k] = log(1 - pfun(cuts[k-1] - lp[y==k])) 
     }
   }
-  return(-sum(ll))
+  
+  -sum(ll)
 }
 
 # data generation from the probit perspective, where the underlying continuous
@@ -42,27 +43,42 @@ y = y_1 + y_2 + y_3 + 1                        # target
 
 table(y)
 
-d = data.frame(x, y=factor(y))
+d = data.frame(x, y = factor(y))
 
-init = c(-1,1,2, 0,0)                          # initial values
+init = c(-1, 1, 2, 0, 0)                          # initial values
 
-result_probit = optim(init, ll_ord, y = y, X = x, probit=T,
-                      control=list(reltol=1e-10))
-result_logit  = optim(init, ll_ord, y = y, X = x, probit=F,
-                      control=list(reltol=1e-10))
+result_probit = optim(
+  init,
+  ll_ord,
+  y = y,
+  X = x,
+  probit  = TRUE,
+  control = list(reltol = 1e-10)
+)
+
+result_logit  = optim(
+  init,
+  ll_ord,
+  y = y,
+  X = x,
+  probit  = FALSE,
+  control = list(reltol = 1e-10)
+)
 
 # compare with ordinal package
 library(ordinal)
-result_ordpack_probit = clm(y ~ x1 + x2, data=d, link='probit')
-result_ordpack_logit  = clm(y ~ x1 + x2, data=d, link='logit')
+result_ordpack_probit = clm(y ~ x1 + x2, data = d, link = 'probit')
+result_ordpack_logit  = clm(y ~ x1 + x2, data = d, link = 'logit')
 
 
-resprobit = data.frame(method=c('ll_ord', 'ordpack'),
+resprobit = data.frame(method = c('ll_ord', 'ordpack'),
                        rbind(coef(result_probit), coef(result_ordpack_probit)))
 colnames(resprobit) = c('method', paste0('cut_', 1:3), 'beta1', 'beta2')
-pander::pander(resprobit, round=3)
 
-reslogit = data.frame(method=c('ll_ord', 'ordpack'),
-                       rbind(coef(result_logit), coef(result_ordpack_logit)))
+resprobit
+
+reslogit = data.frame(method = c('ll_ord', 'ordpack'),
+                      rbind(coef(result_logit), coef(result_ordpack_logit)))
 colnames(reslogit) = c('method', paste0('cut_', 1:3), 'beta1', 'beta2')
-pander::pander(reslogit, round=3)
+
+reslogit
