@@ -82,7 +82,7 @@ maxlike = function(
   beta = par[-1]
   lp = X %*% beta
   sigma = exp(par[1])  # eponentiated value to stay positive
-  ll = dnorm(y, mean = lp, sd = sigma, log = T)  # weighted likelihood
+  ll = dnorm(y, mean = lp, sd = sigma, log = TRUE)  # weighted likelihood
   
   -sum(ll*wts)
   
@@ -100,7 +100,7 @@ result = optim(
   X   = X,
   y   = y,
   wts = wts,
-  hessian = T,
+  hessian = TRUE,
   method  = 'BFGS',
   control = list(abstol = 1e-12)
 )
@@ -115,8 +115,8 @@ beta = result$par[-1]
 # standard errors, which the ipw approach uses
 glm_basic = glm(y ~ a, data = simdat, weights = wts)     # to get unscaled cov
 res = resid(glm_basic, type = 'working')                 # residuals
-glm_vcov_unsc <- summary(glm_basic)$cov.unscaled         # weighted vcov unscaled by dispersion solve(crossprod(qr(X)))
-estfun <- X * res * wts                  
+glm_vcov_unsc = summary(glm_basic)$cov.unscaled          # weighted vcov unscaled by dispersion solve(crossprod(qr(X)))
+estfun = X * res * wts                  
 x = estfun %*% glm_vcov_unsc 
 
 # get standard errors
@@ -134,7 +134,7 @@ tibble(
   init_se   = sqrt(diag(solve(result$hessian)))[c('intercept', 'b')],   # same as scaled se from glm_basic
   se_robust = se_robust,
   t = Estimate/se,
-  p = 2*pt(abs(t), df = n-ncol(X), lower.tail = F),  
+  p = 2*pt(abs(t), df = n-ncol(X), lower.tail = FALSE),  
   dispersion = dispersion             
 )
 
