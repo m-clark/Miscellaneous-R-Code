@@ -1,0 +1,96 @@
+---
+title: "Quantile Regression"
+author: "Michael Clark"
+date: "February 15, 2016"
+output:
+  html_document:
+    css: ../other.css
+    theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, R.options=list(width=120))
+```
+
+### Simple quantile regression function and demo
+
+Loss function
+
+```{r}
+library(tidyverse)
+
+qreg = function(par, X, y, tau){
+  lp = X%*%par
+  res = y - lp
+  loss = ifelse(res < 0 , -(1-tau)*res, tau*res)
+  sum(loss)
+}
+```
+
+
+
+### Data Prep
+
+We'll use the  `quantreg` package for comparison, and the classic data set on Belgian hh income and food expenditure.  Scale income if you want a meaningful centercept.
+
+```{r}
+library(quantreg)
+data(engel)          
+### engel$income = scale(engel$income)
+```
+
+### Median estimation
+
+Compare `optim` output with `quantreg` package.
+
+```{r}
+optim(
+  par = c(0, 0),
+  fn  = qreg,
+  X   = cbind(1, engel$income),
+  y   = engel$foodexp,
+  tau = .5
+)$par
+
+rq(foodexp ~ income, tau = .5, data = engel)
+```
+
+
+### Other quantiles
+
+```{r}
+# quantiles
+qs = c(.05, .1, .25, .5, .75, .9, .95)
+
+resrq = coef(rq(foodexp ~ income, tau = qs, data = engel))
+
+resoptim = sapply(qs, function(tau)
+   optim(
+    par = c(0, 0),
+    fn  = qreg,
+    X   = cbind(1, engel$income),
+    y   = engel$foodexp,
+    tau = tau
+  )$par)
+
+
+# compare results
+
+rbind(resrq, resoptim) %>% round(2)
+```
+
+### Visualize
+
+```{r, results='hide'}
+engel %>%
+  qplot(data = .,
+        income,
+        foodexp,
+        color = I(scales::alpha('orange', .25))) +
+  geom_abline(aes(
+    intercept = X1,
+    slope = X2,
+    color = group
+  ),
+  data = data.frame(t(resoptim), group = factor(qs)))
+```

@@ -12,14 +12,19 @@ library(ipw)
 
 # Data Setup --------------------------------------------------------------
 
-# this example is from the helpfile at ?iwpopint
+# this example is from the helpfile at ?ipwpoint
 set.seed(16)
 n <- 1000
 simdat <- data.frame(l = rnorm(n, 10, 5))
 a.lin <- simdat$l - 10
 pa <- plogis(a.lin)
-simdat$a <- rbinom(n, 1, prob = pa)
-simdat$y <- 10 * simdat$a + 0.5 * simdat$l + rnorm(n, -10, 5)
+
+simdat <- simdat %>% 
+  mutate(
+    a = rbinom(n, 1, prob = pa),
+    y = 10 * a + 0.5 * l + rnorm(n, -10, 5)
+  )
+
 
 ipw_result <- ipwpoint(
   exposure = a,
@@ -41,18 +46,21 @@ ps_num[simdat$a == 0] = 1 - ps_num[simdat$a == 0]
 
 ps_den = fitted(glm(a ~ l, data = simdat, family = 'binomial'))
 ps_den[simdat$a == 0] = 1 - ps_den[simdat$a == 0]
-wts = ps_num/ps_den
 
+wts = ps_num / ps_den
+
+# compare
 rbind(summary(wts), summary(ipw_result$ipw.weights))
 
 # Add inverse probability weights to the data if desired
-simdat$sw <- ipw_result$ipw.weights
+simdat <- simdat %>% 
+  mutate(sw = ipw_result$ipw.weights)
 
 
 # Marginal Structural Model -----------------------------------------------
 
-# Marginal structural model for the causal effect of a on y corrected for
-# confounding by l using inverse probability weighting with robust standard
+# Marginal structural model for the causal effect of `a` on `y` corrected for
+# confounding by `l` using inverse probability weighting with robust standard
 # error from the survey package.
 
 library("survey")
@@ -75,6 +83,7 @@ maxlike = function(
   lp = X %*% beta
   sigma = exp(par[1])  # eponentiated value to stay positive
   ll = dnorm(y, mean = lp, sd = sigma, log = T)  # weighted likelihood
+  
   -sum(ll*wts)
   
   # same as
@@ -85,14 +94,15 @@ maxlike = function(
 X = cbind(1, simdat$a)
 y = simdat$y
 
-result = optim(par = c(sigma = 0, intercept = 0, b = 0),
-               maxlike,
-               X = X,
-               y = y,
-               wts = wts,
-               hessian = T,
-               method = 'BFGS',
-               control = list(abstol=1e-12)
+result = optim(
+  par = c(sigma = 0, intercept = 0, b = 0),
+  fn  = maxlike,
+  X   = X,
+  y   = y,
+  wts = wts,
+  hessian = T,
+  method  = 'BFGS',
+  control = list(abstol = 1e-12)
 )
 
 dispersion = exp(result$par[1])^2
@@ -103,7 +113,7 @@ beta = result$par[-1]
 
 # the following is the survey package raw version to get the appropriate
 # standard errors, which the ipw approach uses
-glm_basic = glm(y ~ a, data=simdat, weights = wts)       # to get unscaled cov
+glm_basic = glm(y ~ a, data = simdat, weights = wts)     # to get unscaled cov
 res = resid(glm_basic, type = 'working')                 # residuals
 glm_vcov_unsc <- summary(glm_basic)$cov.unscaled         # weighted vcov unscaled by dispersion solve(crossprod(qr(X)))
 estfun <- X * res * wts                  
@@ -112,7 +122,7 @@ x = estfun %*% glm_vcov_unsc
 # get standard errors
 se = sqrt(diag(crossprod(x)*n/(n-1)))                    # a robust standard error
 se_robust = sqrt(diag(sandwich::sandwich(glm_basic)))    # much easier way to get it
-se_msm = sqrt(diag(vcov(msm)))
+se_msm    = sqrt(diag(vcov(msm)))
 
 tibble(se, se_robust, se_msm)
 
@@ -120,13 +130,13 @@ tibble(se, se_robust, se_msm)
 # Compare results ---------------------------------------------------------
 
 tibble(
-  Estimate = beta,
-  init_se = sqrt(diag(solve(result$hessian)))[c('intercept', 'b')],   # same as scaled se from glm_basic
+  Estimate  = beta,
+  init_se   = sqrt(diag(solve(result$hessian)))[c('intercept', 'b')],   # same as scaled se from glm_basic
   se_robust = se_robust,
   t = Estimate/se,
-  p = 2*pt(abs(t), df = n - ncol(X), lower.tail = F),  
+  p = 2*pt(abs(t), df = n-ncol(X), lower.tail = F),  
   dispersion = dispersion             
 )
 
 # compare to msm
-summary(msm)
+broom::tidy(msm)
