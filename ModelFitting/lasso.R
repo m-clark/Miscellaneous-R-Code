@@ -1,19 +1,26 @@
-
-# l1 (lasso) regularization -----------------------------------------------
-
-# See Tibshirani (1996) for the source, or Murphy PML (2012) for a nice overview
-# (watch for typos in depictions). A more conceptual depiction of the lasso can
-# be found in penalized_ML.R
-
-# coordinate descent
+#' ---
+#' title: " L1 (lasso) regularization"
+#' author: "Michael Clark"
+#' css: '../other.css'
+#' highlight: pygments
+#' date: ""
+#' ---
+#' 
+#' See Tibshirani (1996) for the source, or Murphy PML (2012) for a nice
+#' overview (watch for typos in depictions). A more conceptual depiction of the
+#' lasso can be found in penalized_ML.R.
+#' 
+#' # Coordinate descent
+#' 
+#' 
 lasso <- function(
   X,                   # model matrix
   y,                   # target
-  lambda = .1,         # penalty parameter
-  soft = T,            # soft vs. hard thresholding
-  tol = 1e-6,          # tolerance
-  iter = 100,          # number of max iterations
-  verbose = T          # print out iteration number
+  lambda  = .1,        # penalty parameter
+  soft    = TRUE,      # soft vs. hard thresholding
+  tol     = 1e-6,      # tolerance
+  iter    = 100,       # number of max iterations
+  verbose = TRUE       # print out iteration number
 ) {
   
   # soft thresholding function
@@ -54,7 +61,9 @@ lasso <- function(
   w
 }
 
-
+#' # Data setup
+#' 
+#' 
 set.seed(8675309)
 N = 500
 p = 10
@@ -66,38 +75,43 @@ lambda = .1
 
 # debugonce(lasso)
 
-# note, if lambda=0, result is lm.fit
+#' Note, if `lambda=0`, result is the same as  `lm.fit`.
+#' 
+#' 
 result_soft = lasso(
   X,
   y,
   lambda = lambda,
   tol = 1e-12,
-  soft = T
+  soft = TRUE
 )
 
 result_hard = lasso(
   X,
   y,
   lambda = lambda,
-  tol = 1e-12,
-  soft = F
+  tol    = 1e-12,
+  soft   = FALSE
 )
 
 
-library(glmnet)
 
-# glmnet is by default a mixture of ridge and lasso penalties, setting alpha = 1
-# reduces to lasso (alpha=0 would be ridge); We set the lambda to a couple
-# values while only wanting the one set to the same lambda value as above (s)
+
+#' `glmnet` is by default a mixture of ridge and lasso penalties, setting alpha
+#' = 1 reduces to lasso (alpha=0 would be ridge). We set the lambda to a couple
+#' values while only wanting the one set to the same lambda value as above (s).
+
+
+library(glmnet)
 
 glmnet_res = coef(
   glmnet(
     X,
     y,
-    alpha = 1,
+    alpha  = 1,
     lambda = c(10, 1, lambda),
     thresh = 1e-12,
-    intercept = F
+    intercept = FALSE
   ),
   s = lambda
 )
@@ -112,7 +126,7 @@ ls_res = lassoshooting(
 )
 
 
-# comparison
+#' # Comparison
 
 data.frame(
   lm = coef(lm(y ~ . - 1, data.frame(X))),
@@ -120,11 +134,15 @@ data.frame(
   lasso_hard = result_hard,
   lspack = ls_res$coef,
   glmnet = glmnet_res[-1, 1],
-  truth = b
+  truth  = b
 )
 
 
 
-# for some more detailed R code, check out
-# http://jocelynchi.com/a-coordinate-descent-algorithm-for-the-lasso-problem
+#' # Source
+#' Base R source code found at https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/lasso.R
+
+
+#' for some more detailed R code, check out
+#' http://jocelynchi.com/a-coordinate-descent-algorithm-for-the-lasso-problem (now defunct, but might find relevant article at the website)
 

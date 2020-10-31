@@ -1,19 +1,26 @@
-#---------------------------------------------------------------------------------#
-# A standard logistic regression model via maximum likelihood or exponential
-# loss. Can serve as an entry point for those starting out to the wider world of
-# computational statistics as maximum likelihood is the fundamental approach used
-# in most applied statistics, but which is also a key aspect of the Bayesian
-# approach.  Exponential loss is not confined to the standard glm setting, but
-# is widely used in more predictive/'algorithmic' approaches e.g. in
-# machine learning and elsewhere.
-
-# This follows the standard_lm.R script.
-#---------------------------------------------------------------------------------#
-
-
-##############
-# Data Setup #
-##############
+#' ---
+#' title: "Standard Logistic Models"
+#' author: "Michael Clark"
+#' css: '../other.css'
+#' highlight: pygments
+#' date: ""
+#' ---
+#' 
+#'
+#' A standard logistic regression model via maximum likelihood or exponential
+#' loss. Can serve as an entry point for those starting out to the wider world of
+#' computational statistics as maximum likelihood is the fundamental approach used
+#' in most applied statistics, but which is also a key aspect of the Bayesian
+#' approach.  Exponential loss is not confined to the standard glm setting, but
+#' is widely used in more predictive/'algorithmic' approaches e.g. in
+#' machine learning and elsewhere.
+#' 
+#' This follows the standard_lm.R script.
+#'
+#'
+#'
+#' # Data Setup 
+#' 
 
 set.seed(1235)  # ensures replication
 
@@ -33,15 +40,16 @@ dfXy = data.frame(X, y)
 
 
 
-#############
-# Functions #
-#############
+#' 
+#' # Functions 
+#' 
+#' A maximum likelihood approach.
 
-# A maximum likelihood approach
-
-logreg_ML = function(par, X, y){
-  # arguments- par: parameters to be estimated; X: predictor matrix with intercept 
-  # column; y: response
+logreg_ML = function(par, X, y) {
+  # arguments- 
+  # par: parameters to be estimated
+  # X: predictor matrix with intercept column
+  # y: response
   
   # setup
   beta = par                                # coefficients
@@ -59,11 +67,13 @@ logreg_ML = function(par, X, y){
   # (see also fnscale in optim.control)
 }
 
-# An equivalent approach via exponential loss function
+# An equivalent approach via exponential loss function.
 
-logreg_exp = function(par, X, y){
-  # arguments- par: parameters to be estimated; X: predictor matrix with intercept 
-  # column, y: response
+logreg_exp = function(par, X, y) {
+  # arguments- 
+  # par: parameters to be estimated
+  # X: predictor matrix with intercept column
+  # y: response
   
   # setup
   beta = par                                   # coefficients
@@ -76,48 +86,48 @@ logreg_exp = function(par, X, y){
 }
 
 
-##############################
-### Obtain Model Estimates ###
-##############################
-
-# Setup for use with optim
+#' # Obtain Model Estimates
+#' Setup for use with `optim`.
 
 X = cbind(1, X)
 
 # initial values
 
 init = rep(0, ncol(X))
-names(init)=c('intercept','b1', 'b2')
+names(init) = c('intercept', 'b1', 'b2')
 
 optlmML = optim(
   par = init,
-  fn = logreg_ML,
-  X = X,
-  y = y,
+  fn  = logreg_ML,
+  X   = X,
+  y   = y,
   control = list(reltol = 1e-8)
 )
 
 optglmClass = optim(
   par = init,
-  fn = logreg_exp,
-  X = X,
-  y = y, 
+  fn  = logreg_exp,
+  X   = X,
+  y   = y, 
   control = list(reltol = 1e-15)
 )
 
 pars_ML  = optlmML$par
-pars_exp  = optglmClass$par
+pars_exp = optglmClass$par
 
-##################
-### Comparison ###
-##################
 
-### compare to glm
+#' # Comparison
+#' 
+#' Compare to `glm`.
 
-modglm = glm(y~., dfXy, family = binomial)
+modglm = glm(y ~ ., dfXy, family = binomial)
 
 rbind(
   pars_ML,
   pars_exp,
   pars_GLM = coef(modglm)
 )
+
+
+#' # Source
+#' Base R source code found at https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/standard_logistic.R
