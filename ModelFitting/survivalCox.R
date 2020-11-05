@@ -9,7 +9,7 @@
 set.seed(12)
 
 dur = 1:10
-kittyblarg= rnorm(10)                                 # something happened to kitty!
+kittyblarg = rnorm(10)                                 # something happened to kitty!
 kittyhappy = rep(0:1,times=5)                         # is kitty happy?
 kittydied = sample(0:1,10,replace=T)                  # kitty died! oh noes!
 d = data.frame(kittyblarg,kittyhappy,dur,kittydied)

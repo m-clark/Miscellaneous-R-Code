@@ -7,9 +7,9 @@
 
 set.seed(123)
 
-x = matrix(sample(0:1, 50, replace = TRUE), ncol = 5)
+x  = matrix(sample(0:1, 50, replace = TRUE), ncol = 5)
 xf = data.frame(lapply(data.frame(x), factor))
-y = sample(0:1, 10, prob = c(.25, .75), replace = TRUE)
+y  = sample(0:1, 10, prob = c(.25, .75), replace = TRUE)
 
 
 # use e1071 for comparison

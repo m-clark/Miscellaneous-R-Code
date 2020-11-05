@@ -1,22 +1,29 @@
+#' ---
+#' title: " GLM estimation"
+#' subtitle: "Newton and IRLS"
+#' author: "Michael Clark"
+#' css: '../other.css'
+#' highlight: pygments
+#' date: ""
+#' ---
+#'
+#' # GLM estimation examples
 
-# GLM estimation examples -------------------------------------------------
-
-# Examples of maximum likelihood estimation via a variety of means.  See the
-# gradientdescent.R script for that approach.  Here we demonstrate Newton's and
-# Iterated Reweighted Least Squares approaches via logistic regression.
-
-# For the following, I had Murphy's PML text open and more or less followed the 
-# algorithms in chapter 8.  Note that for Newton's method, this doesn't
-# implement a line search to find a more optimal stepsize at a given iteration.
-
-
-
-# Data Prep ---------------------------------------------------------------
-
-# Predict graduate school admission based on gre, gpa, and school rank
-# (higher=more prestige). See corresponding demo here:
-# https://stats.idre.ucla.edu/stata/dae/logistic-regression/; the only
-# difference is that I treat rank as numeric rather than categorical
+#' Examples of maximum likelihood estimation via a variety of means.  See the
+#' gradientdescent.R script for that approach.  Here we demonstrate Newton's and
+#' Iterated Reweighted Least Squares approaches via logistic regression.
+#' 
+#' 
+#' For the following, I had Murphy's PML text open and more or less followed the 
+#' algorithms in chapter 8.  Note that for Newton's method, this doesn't
+#' implement a line search to find a more optimal stepsize at a given iteration.
+#' 
+#' # Data Prep
+#' 
+#' Predict graduate school admission based on gre, gpa, and school rank
+#' (higher=more prestige). See corresponding demo here:
+#' https://stats.idre.ucla.edu/stata/dae/logistic-regression/. The only
+#' difference is that I treat rank as numeric rather than categorical.
 
 
 admit = haven::read_dta('https://stats.idre.ucla.edu/stat/stata/dae/binary.dta')
@@ -29,22 +36,26 @@ X = model.matrix(comparison_model)
 y = comparison_model$y
 
 
-# Newton's method ---------------------------------------------------------
+#' # Newton's method
 
 newton <- function(
   X,
   y,
-  tol = 1e-12,
+  tol  = 1e-12,
   iter = 500,
   stepsize = .5
   ) {
   
-  # Args: X: model matrix; y: target; tol: tolerance; iter: maximum number of
-  # iterations; stepsize: (0, 1)
+  # Args: 
+  # X: model matrix
+  # y: target
+  # tol: tolerance
+  # iter: maximum number of iterations
+  # stepsize: (0, 1)
   
   # intialize
-  int = log(mean(y) / (1 - mean(y)))         # intercept
-  beta = c(int, rep(0, ncol(X) - 1))
+  int     = log(mean(y) / (1 - mean(y)))         # intercept
+  beta    = c(int, rep(0, ncol(X) - 1))
   currtol = 1
   it = 0
   ll = 0
@@ -59,14 +70,14 @@ newton <- function(
     H  = t(X) %*% S %*% X                 # hessian
     beta = beta - stepsize * solve(H) %*% g
 
-    ll = sum(dbinom(y, prob = mu, size = 1, log = T))
+    ll = sum(dbinom(y, prob = mu, size = 1, log = TRUE))
     currtol = abs(ll - ll_old)
   }
   
   list(
     beta = beta,
     iter = it,
-    tol = currtol,
+    tol  = currtol,
     loglik = ll
   )
 }
@@ -93,15 +104,14 @@ rbind(
 )
 
 
-# IRLS --------------------------------------------------------------------
-
-# Note that glm is actually using IRLS, so the results from this should be
-# fairly spot on
+#' # IRLS 
+#' Note that `glm` is actually using IRLS, so the results from this should be
+#' fairly spot on.
 
 irls <- function(X, y, tol = 1e-12, iter = 500) {
   
   # intialize
-  int = log(mean(y) / (1 - mean(y)))   # intercept
+  int  = log(mean(y) / (1 - mean(y)))   # intercept
   beta = c(int, rep(0, ncol(X) - 1))
   currtol = 1
   it = 0
@@ -133,22 +143,24 @@ irls <- function(X, y, tol = 1e-12, iter = 500) {
   list(
     beta = beta,
     iter = it,
-    tol = currtol,
-    loglik = ll,
+    tol  = currtol,
+    loglik  = ll,
     weights = plogis(X %*% beta) * (1 - plogis(X %*% beta))
   )
 }
 
-# tol set to 1e-8 as in glm default
+#' `tol` set to 1e-8 as in `glm` default.
 irls_result = irls(X = X, y = y, tol = 1e-8) 
 
-irls_result
+str(irls_result)
 comparison_model
 
-# compare all results
+#' # Comparison
+#' 
+#' Compare all results.
 rbind(
   newton = unlist(newton_result),
-  irls = unlist(irls_result[-length(irls_result)]),
+  irls   = unlist(irls_result[-length(irls_result)]),
   glm_default = c(
     beta = coef(comparison_model),
     comparison_model$iter,
@@ -158,7 +170,11 @@ rbind(
 )
 
 
-# compare weights 
+#' compare weights 
 head(cbind(irls_result$weights,
            comparison_model$weights))
 
+
+
+#' # Source
+#' Base R source code found at https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/newton_irls.R

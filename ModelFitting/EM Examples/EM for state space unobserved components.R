@@ -18,7 +18,7 @@
 ### ω^2 serves as a smoothing parameter, which itself may be estimated but
 ### which is fixed in the following. See the text for more details.
 
-d = read.csv('../Datasets/USCPI.csv', header=F)
+d = read.csv('https://raw.githubusercontent.com/m-clark/Datasets/master/us%20cpi/USCPI.csv', header=F)
 inflation = d[,1]
 summary(inflation)
 
@@ -26,7 +26,16 @@ summary(inflation)
 ################################
 ### EM for state space model ###
 ################################
-statespaceEM = function(params, y, omega2_0, omega2, tol=.00001, maxits=100, showits=T){     
+statespaceEM = function(
+  params,
+  y,
+  omega2_0,
+  omega2,
+  tol = .00001,
+  maxits = 100,
+  showits = T
+) {
+  
   # Arguments are starting parameters (variance as 'sigma2'), data, tolerance,
   # maximum iterations, and whether to show iterations
   
@@ -40,11 +49,12 @@ statespaceEM = function(params, y, omega2_0, omega2, tol=.00001, maxits=100, sho
   
   # Other initializations
   H = diag(n)
-  for (i in 1:(ncol(H)-1)){
-    H[i+1,i] = -1
+  for (i in 1:(ncol(H) - 1)) {
+    H[i + 1, i] = -1
   }
   
-  Omega2 = as.spam(diag(omega2, n)); Omega2[1,1] = omega2_0
+  Omega2 = as.spam(diag(omega2, n))
+  Omega2[1, 1] = omega2_0
   H = as.spam(H)
   HinvOmega2H = t(H) %*% chol2inv(chol(Omega2)) %*% H      # tau ~ N(0, HinvOmmega2H^-1)
   
@@ -74,22 +84,52 @@ statespaceEM = function(params, y, omega2_0, omega2, tol=.00001, maxits=100, sho
       cat(paste(format(it), "...", "\n", sep = ""))
   }
   
-  Kfinal = HinvOmega2H + diag(n)/sigma2[1];
-  taufinal = solve(K,(y/sigma2));
-  out = list(sigma2=sigma2, tau=taufinal)
+  Kfinal = HinvOmega2H + diag(n) / sigma2[1]
+  
+  taufinal = solve(K, (y / sigma2[1]))
+  
+  out = list(sigma2 = sigma2, tau = taufinal)
 }
 
 # debugonce(statespaceEM)
-ssMod_1 = statespaceEM(params=data.frame(sigma2=var(inflation)), y=inflation, tol=1e-4, omega2_0=9, omega2=1^2)
-ssMod_.5 = statespaceEM(params=data.frame(sigma2=var(inflation)), y=inflation, tol=1e-4, omega2_0=9, omega2=.5^2)
+ssMod_1 = statespaceEM(
+  params = data.frame(sigma2 = var(inflation)),
+  y = inflation,
+  tol = 1e-4,
+  omega2_0 = 9,
+  omega2 = 1 ^ 2
+)
+
+ssMod_.5 = statespaceEM(
+  params = data.frame(sigma2 = var(inflation)),
+  y = inflation,
+  tol = 1e-4,
+  omega2_0 = 9,
+  omega2 = .5 ^ 2
+)
+
 ssMod_1$sigma2
 ssMod_.5$sigma2
 
+
 library(lubridate)
-series = ymd(paste0(rep(1947:2014, e=4),'-', c('01','04','07','10'), '-', '01'))
+series = ymd(paste0(rep(1947:2014, e = 4), '-', c('01', '04', '07', '10'), '-', '01'))
 seriestext = series[1:length(inflation)]
 
 # fig. 11.1 in the text
-plot(seriestext, inflation, pch=19, cex=.5, col='gray50', ylim=c(-10,20), bty='n')
-lines(seriestext, ssMod_1$tau, col="#FF5500")
-lines(seriestext, ssMod_.5$tau, col="skyblue3")
+
+library(tidyverse)
+
+data.frame(
+  series = series[1:length(inflation)],
+  inflation,
+  Mod_1  =  ssMod_1$tau,
+  Mod_.5 = ssMod_.5$tau
+) %>% 
+  ggplot(aes(x = series, y = inflation)) +
+  geom_point(color = 'gray50') +
+  geom_line(aes(y = Mod_1), color = '#ff5500') +
+  geom_line(aes(y = Mod_.5), color = 'skyblue3') +
+  scale_x_date(date_breaks = '10 years') +
+  theme_light()
+  

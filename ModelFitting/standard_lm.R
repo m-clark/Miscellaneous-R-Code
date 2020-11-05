@@ -16,7 +16,7 @@
 #' applied statistics, but which is also a key aspect of the Bayesian approach.
 #' Least squares loss is not confined to the standard lm setting, but is widely
 #' used in more predictive/'algorithmic' approaches e.g. in machine learning and
-#' elsewhere. <span class="pack" style = "">test</span>
+#' elsewhere.
 #'
 #' # Data Setup
 #'

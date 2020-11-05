@@ -4,7 +4,7 @@
 # 1.7*parameters estimates from the probit.
 
 
-ll_ord = function(par, X, y, probit=T) {
+ll_ord = function(par, X, y, probit = TRUE) {
   K = length(unique(y))                        # number of classes K
   ncuts = K-1                                  # number of cutpoints/thresholds
   cuts = par[(1:ncuts)]                        # cutpoints
@@ -35,7 +35,7 @@ set.seed(808)
 N = 1000                                       # Sample size
 x = cbind(x1 = rnorm(N), x2 = rnorm(N))        # predictor variables
 beta = c(1,-1)                                 # coefficients
-y_star = rnorm(N, mean=x %*% beta)             # the underlying latent variable
+y_star = rnorm(N, mean = x %*% beta)           # the underlying latent variable
 y_1 = y_star > -1.5                            # -1.5 first cutpoint
 y_2 = y_star > .75                             # .75 second cutpoint
 y_3 = y_star > 1.75                            # 1.75 third cutpoint

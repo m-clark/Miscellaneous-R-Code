@@ -1,5 +1,5 @@
 ###################################################################################
-### An approach for one factor random effects model via maximum likelihood in R ###
+### An approach for two factor random effects model via maximum likelihood in R ###
 ### Matlab and Julia; It's based on Statistical Modeling and Computation (2014) ###
 ### Chapter 10, example 10.10; The data regards the breeding value of a set of  ### 
 ### five sires in raising pigs. Each sire is mated to a random group of dams,   ###

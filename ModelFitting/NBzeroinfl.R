@@ -1,8 +1,13 @@
-##########################################################################################################
-### Log likelihood function to estimate parameters for a Zero-inflated Negative Binomial model. With   ###
-### examples and comparison to pscl package output. Also includes approach based on Hilbe GLM text.    ###
-### see also: https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/poiszeroinfl.R ###
-##########################################################################################################
+#' ---
+#' title: "Zero-inflated Negative Binomial Model"
+#' author: "Michael Clark"
+#' date: ""
+#' ---
+#' 
+#' 
+#' Log likelihood function to estimate parameters for a Zero-inflated Negative Binomial model. With
+#' examples and comparison to pscl package output. Also includes approach based on Hilbe GLM text.
+#' see also: https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/poiszeroinfl.R
 
 ZINB = function(y, X, par) {
   # arguments are response y, predictor matrix X, and parameter named starting points of 'logit', 'negbin', and 'theta'
@@ -25,7 +30,7 @@ ZINB = function(y, X, par) {
   logliklogit  = log( logi0 + exp(log(1 - logi0) + suppressWarnings(dnbinom(0, size = theta, mu = munb, log = TRUE))) )
   logliknegbin = log(1 - logi0) + suppressWarnings(dnbinom(y, size = theta, mu = munb, log = TRUE))
   
-  ### Hilbe formulation
+  # Hilbe formulation
   # theta part 
   # alpha = 1/theta  
   # m = 1/alpha
@@ -42,13 +47,15 @@ ZINB = function(y, X, par) {
 }
 
 
-### Get the data ###
+#' Get the data
 library(haven)
+
 fish = read_dta("http://www.stata-press.com/data/r11/fish.dta")
 
 
-### Get starting values or simply do zeros ###
-# for this function, a named vector for the starting values; for zinb: 'logit', 'negbin', 'theta';
+#' Get starting values or simply do zeros
+#' for this function, a named vector for the starting values
+#' for zinb: 'logit', 'negbin', 'theta'
 init.mod = model.matrix(count ~ persons + livebait, data = fish) # to get X matrix
 
 startlogi  = glm(count == 0 ~ persons + livebait, data = fish, family = "binomial")
@@ -64,7 +71,7 @@ starts = c(
 #            theta = log(1))
 
 
-### Estimate with optim function ###
+#' Estimate with optim function
 optNB1 = optim(
   par = starts ,
   fn  = ZINB,
@@ -76,7 +83,7 @@ optNB1 = optim(
 )
 # optNB1
 
-### Comparison ###
+#' Comparison
 # Extract for clean display
 B  = optNB1$par
 se = sqrt(diag(solve((optNB1$hessian))))
@@ -89,42 +96,42 @@ zinbmod1 = zeroinfl(count ~ persons + livebait, data = fish, dist = "negbin")
 summary(zinbmod1)
 round(data.frame(B, se, Z, p), 4)  # note that theta here is actually log(theta)
 
-#########################
-### Optional data set ###
-#########################
 
-### Get the data ###
+#' Optional data set
+
+
+#' Get the data
 data("bioChemists", package = "pscl")
 
-### Get starting values or simply do zeros
+#' Get starting values or simply do zeros
 init.mod   = model.matrix(art ~ fem + mar + kid5 + phd + ment, data = bioChemists) # to get X matrix
 startlogi  = glm(art==0 ~ fem + mar + kid5 + phd + ment, data = bioChemists, family = "binomial")
 startcount = glm(art ~ fem + mar + kid5 + phd + ment, data = bioChemists, family = "quasipoisson")
 
 starts = c(
   negbin = coef(startcount),
-  logit = coef(startlogi),
-  theta = summary(startcount)$dispersion
+  logit  = coef(startlogi),
+  theta  = summary(startcount)$dispersion
 )  
 # starts = c(negbin = rep(0, 6),
 #            logit = rep(0, 6),
 #            theta = 1)
 
 
-### Estimate with optim function ###
+#' Estimate with optim function
 optNB2 = optim(
   par = starts ,
-  fn = ZINB,
-  X = init.mod,
-  y = bioChemists$art,
-  method = "BFGS",
+  fn  = ZINB,
+  X   = init.mod,
+  y   = bioChemists$art,
+  method  = "BFGS",
   control = list(maxit = 5000, reltol = 1e-12),
   hessian = TRUE
 )
 # optNB2
 
 
-### Comparison ###
+#' Comparison
 # Extract for clean display.
 B  = optNB2$par
 se = sqrt(diag(solve((optNB2$hessian))))

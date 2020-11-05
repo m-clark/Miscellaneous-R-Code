@@ -1,45 +1,53 @@
-#' Nelder Mead algorithm
+#' ---
+#' title: "Nelder Mead algorithm"
+#' author: "Michael Clark"
+#' css: '../other.css'
+#' highlight: pygments
+#' date: ""
+#' ---
+#' 
+#' 
 #'
-#' @param f  function to optimize, must return a scalar score and operate over
+#' This is based on the pure Python implementation by François Chollet found at
+#' https://github.com/fchollet/nelder-mead (also in this repo at
+#' nelder_mead.py). This is mostly just an academic exercise on my part.  I'm
+#' not sure how much one would use the basic NM for many situations. In my
+#' experience BFGS and other approaches would be faster, more accurate, and less
+#' sensitive to starting values for the types of problems I've played around
+#' with. Others who actually spend their time researching such things seem to
+#' agree.
+#'
+#' There were two issues on
+#' (GitHub)[https://github.com/fchollet/nelder-mead/issues/2] regarding the
+#' original code, and I've implemented the suggested corrections with notes. The
+#' initial function code is not very R-like, as the goal was to keep more
+#' similar to the original Python for comparison, which used a list approach. I
+#' also provide a more R-like/cleaner version that uses matrices instead of
+#' lists, but which still sticks the same approach for the most part.
+#'
+#' For both functions, comparisons are made using the `optimx` package, but feel
+#' free to use base R's `optim` instead.
+#' 
+#'  - `f`  function to optimize, must return a scalar score and operate over
 #'   an array of the same dimensions as x_start
-#' @param x_start initial position
-#' @param step look-around radius in initial step
-#' @param no_improve_thr See no_improv_break
-#' @param no_improv_break break after no_improv_break iterations with an
+#'  - `x_start` initial position
+#'  - `step` look-around radius in initial step
+#'  - `no_improve_thr` See no_improv_break
+#'  - `no_improv_break` break after no_improv_break iterations with an
 #'   improvement lower than no_improv_thr
-#' @param max_iter always break after this number of iterations. Set it to 0 to
+#'  - `max_iter` always break after this number of iterations. Set it to 0 to
 #'   loop indefinitely.
-#' @param alpha parameters of the algorithm (see Wikipedia page for reference)
-#' @param gamma parameters of the algorithm (see Wikipedia page for reference)
-#' @param rho parameters of the algorithm (see Wikipedia page for reference)
-#' @param sigma parameters of the algorithm (see Wikipedia page for reference)
-#' @param verbose Print iterations?
+#'  - `alpha` parameters of the algorithm (see Wikipedia page for reference)
+#'  - `gamma` parameters of the algorithm (see Wikipedia page for reference)
+#'  - `rho` parameters of the algorithm (see Wikipedia page for reference)
+#'  - `sigma` parameters of the algorithm (see Wikipedia page for reference)
+#'  - `verbose` Print iterations?
 #'
-#' @details This is based on the pure Python implementation by François Chollet
-#'   found at https://github.com/fchollet/nelder-mead (also in this repo at
-#'   nelder_mead.py). This is mostly just an academic exercise on my part.  I'm
-#'   not sure how much one would use the basic NM for many situations. In my
-#'   experience BFGS and other approaches would be faster, more accurate, and
-#'   less sensitive to starting values for the types of problems I've played
-#'   around with. Others who actually spend their time researching such things
-#'   seem to agree.
-#'   
-#'   There were two issues on
-#'   (GitHub)[https://github.com/fchollet/nelder-mead/issues/2] regarding the
-#'   original code, and I've implemented the suggested corrections with notes.
-#'   The initial function code is not very R-like, as the goal was to keep more
-#'   similar to the original Python for comparison, which used a list approach.
-#'   I also provide a more R-like/cleaner version that uses matrices instead
-#'   of lists, but which still sticks the same approach for the most part.
 #'
-#'   For both functions, comparisons are made using the optimx package, but feel
-#'   free to use base R's optim instead.
-#'
-#' @return best parameter array, best score
-
-
-
-# First version -----------------------------------------------------------
+#' This function returns the best parameter array and best score.
+#' 
+#' 
+#' # First version
 
 nelder_mead = function(
   f, 
@@ -149,9 +157,9 @@ nelder_mead = function(
 
 
 
-# Example -----------------------------------------------------------------
-
-# function to minimize
+#' ## Example
+#' The function to minimize.
+#' 
 f = function(x) {
   sin(x[1]) * cos(x[2]) * (1 / (abs(x[3]) + 1))
 }
@@ -163,6 +171,7 @@ nelder_mead(
   no_improve_thr = 1e-12
 )
 
+#' Compare to `optimx`.  You may see warnings.
 optimx::optimx(
   par = c(0, 0, 0),
   fn = f,
@@ -178,12 +187,13 @@ optimx::optimx(
 
 
 
-# A Regression Model ------------------------------------------------------
-
-# I find a regression model to be more applicable/intuitive for my needs so
-# provide an example for that case
-
-# data setup
+#' ## A Regression Model
+#' 
+#' I find a regression model to be more applicable/intuitive for my needs, so
+#' provide an example for that case.
+#' 
+#' 
+#' ### Data setup
 
 set.seed(8675309)
 N = 500
@@ -193,7 +203,7 @@ beta = runif(ncol(X), -1, 1)
 y = X %*% beta + rnorm(nrow(X))
 
 
-# least squares loss function
+#' Least squares loss function.
 
 f = function(b) {
   crossprod(y - X %*% b)[,1]  # if using optimx need scalar
@@ -207,21 +217,22 @@ nm_result = nelder_mead(
   runif(ncol(X)), 
   max_iter = 2000,
   no_improve_thr = 1e-12,
-  verbose = T
+  verbose = FALSE
 )
 
-# compare to optimx
+#' ### Comparison
+#' Compare to `optimx`.
 
 opt_out = optimx::optimx(
   runif(ncol(X)),
   fn = f,  # model function
-  method = 'Nelder-Mead',
+  method  = 'Nelder-Mead',
   control = list(
     alpha = 1,
     gamma = 2,
-    beta = 0.5,
+    beta  = 0.5,
     #rho
-    maxit = 2000,
+    maxit  = 2000,
     reltol = 1e-12
   )
 )
@@ -233,9 +244,9 @@ rbind(
 
 
 
-# Second version ----------------------------------------------------------
-
-# This is a more natural R approach.
+#' # Second version
+#' 
+#' This is a more natural R approach in my opinion.
 
 nelder_mead2 = function(
   f,
@@ -345,7 +356,7 @@ nelder_mead2 = function(
 }
 
 
-# Example -----------------------------------------------------------------
+#' ## Example function
 
 f = function(x) {
   sin(x[1]) * cos(x[2]) * (1 / (abs(x[3]) + 1))
@@ -373,7 +384,7 @@ optimx::optimx(
 
 
 
-# A Regression Model ------------------------------------------------------
+#' ## A Regression Model
 
 set.seed(8675309)
 N = 500
@@ -397,6 +408,10 @@ nm_par = nelder_mead2(
   no_improve_thr = 1e-12
 )
 
+
+#' ## Comparison
+#' Compare to `optimx`.
+
 opt_par = optimx::optimx(
   runif(ncol(X)),
   fn = f,
@@ -419,3 +434,5 @@ rbind(
 
 
 
+#' # Source
+#' Base R source code found at https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/nelder_mead.R

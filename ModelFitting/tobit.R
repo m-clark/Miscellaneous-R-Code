@@ -52,9 +52,9 @@ acad_apt = read_csv("https://stats.idre.ucla.edu/stat/data/tobit.csv") %>%
 
 # setup data and initial values
 
-initmod = lm(apt ~ read + math + prog, data=acad_apt)
+initmod = lm(apt ~ read + math + prog, data = acad_apt)
 X = model.matrix(initmod)
-init = c(coef(initmod), log_sigma=log(summary(initmod)$sigma))
+init = c(coef(initmod), log_sigma = log(summary(initmod)$sigma))
 
 res = optim(
   par = init,
@@ -68,8 +68,14 @@ res = optim(
 
 
 # this would be more akin to the default Stata default approach
-# optim(par=init, tobit, y=acad_apt$apt, X=X, ul=800,
-#       control=list(maxit=16000, reltol=1e-15))
+# optim(
+#   par = init,
+#   tobit,
+#   y = acad_apt$apt,
+#   X = X,
+#   ul = 800,
+#   control = list(maxit = 16000, reltol = 1e-15)
+# )
 
 
 # compare to AER package tobit function

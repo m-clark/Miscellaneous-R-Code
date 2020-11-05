@@ -1,8 +1,15 @@
-########################################################################################################
-### Log likelihood function to estimate parameters for a Zero-inflated Poisson model. With examples  ###
-### and comparison to pscl package output. Also includes approach based on Hilbe GLM text.           ###
-### see also: https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/NBzeroinfl.R ###
-########################################################################################################
+#' ---
+#' title: "Zero-inflated Poisson Model"
+#' author: "Michael Clark"
+#' date: ""
+#' ---
+#' 
+
+
+#' Log likelihood function to estimate parameters for a Zero-inflated Poisson model. With examples
+#' and comparison to pscl package output. Also includes approach based on Hilbe GLM text.
+#' see also: https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/NBzeroinfl.R
+
 
 ZIP = function(y, X, par) {
   # arguments are response y, predictor matrix X, and parameter named starting points of 'logit' and 'pois'
@@ -35,15 +42,16 @@ ZIP = function(y, X, par) {
   -loglik
 }
 
-### Get the data ###
+#' Get the data
 library(haven)
 library(pscl)
 
 fish = read_dta("http://www.stata-press.com/data/r11/fish.dta")
 
 
-### Get starting values or simply do zeros ###
-# for this function, a named vector for the starting values; for zip: need 'logit', 'pois'
+#' Get starting values or simply do zeros
+#' for this function, a named vector for the starting values
+#' for zip: need 'logit', 'pois'
 init.mod = glm(
   count ~ persons + livebait,
   data = fish,
@@ -52,12 +60,13 @@ init.mod = glm(
   "poisson"
 )
 
-# starts = c(logit=coef(init.mod), pois=coef(init.mod))  
+# starts = c(logit = coef(init.mod), pois = coef(init.mod))  
 starts = c(rep(0, 3), rep(0, 3))
-names(starts) = c(paste0('pois.', names(coef(init.mod))), paste0('logit.', names(coef(init.mod))))
+names(starts) = c(paste0('pois.', names(coef(init.mod))), 
+                  paste0('logit.', names(coef(init.mod))))
                                                                
 
-### Estimate with optim function ###
+#' Estimate with optim function
 optPois1 = optim(
   par = starts ,
   fn  = ZIP,
@@ -71,12 +80,12 @@ optPois1 = optim(
 # optPois1
 
 
-### Comparison ###
+#' Comparison
 # Extract for clean display
-B = optPois1$par
+B  = optPois1$par
 se = sqrt(diag(solve((optPois1$hessian))))
-Z = B/se
-p = pnorm(abs(Z), lower = FALSE)*2
+Z  = B/se
+p  = pnorm(abs(Z), lower = FALSE)*2
 
 # pscl results
 zipoismod = zeroinfl(count ~ persons + livebait, data = fish, dist = "poisson") 

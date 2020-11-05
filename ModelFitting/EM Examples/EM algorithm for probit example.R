@@ -4,7 +4,7 @@
 ### Chapter 11.4.                                      ###       
 ##########################################################
 
-mydata = read.csv("http://www.ats.ucla.edu/stat/data/binary.csv")
+mydata = haven::read_dta("https://stats.idre.ucla.edu/stat/stata/dae/binary.dta")
  
 #################################
 ### glm for a standard probit ###

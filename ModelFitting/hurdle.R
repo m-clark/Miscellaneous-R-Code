@@ -1,6 +1,11 @@
-#Hurdle
-
-# Poisson
+#' ---
+#' title: "Hurdle Models"
+#' author: "Michael Clark"
+#' date: ""
+#' ---
+#' 
+#' 
+#' # Poisson
 hurdpoisloglik = function(y, X, par) {
   # Extract parameters
   logitpars = par[grep('logit', names(par))]
@@ -8,7 +13,7 @@ hurdpoisloglik = function(y, X, par) {
   
   # Logit model part
   Xlogit = X
-  ylogit = ifelse(y==0,0,1)
+  ylogit = ifelse(y == 0, 0, 1)
   
   LPlogit = Xlogit %*% logitpars
   mulogit = plogis(LPlogit)
@@ -65,17 +70,17 @@ hurdNBloglik = function(y, X, par) {
   loglik
 }
 
-###################
-### Data Import ###
-###################
-### Import a simple data set. Example from the Stata help file for zinb command;
-### can compare results with hnblogit command
+
+#' # Data Import
+
+#' Import a simple data set. Example from the Stata help file for zinb command;
+#' can compare results with hnblogit command
 
 library(haven)
 
 fish = read_dta("http://www.stata-press.com/data/r11/fish.dta")
 
-# get some starting values
+# Get some starting values.
 
 init_mod = glm(
   count ~ persons + livebait,
@@ -85,13 +90,14 @@ init_mod = glm(
   y = TRUE
 )
 
-starts = c(logit = coef(init_mod), pois = coef(init_mod))  #for these functions, a named vector for the starting values
+#' for these functions, a named vector for the starting values
+starts = c(logit = coef(init_mod), pois = coef(init_mod))  
 
-######################
-### Poisson hurdle ###
-######################
-# Use optim to estimate parameters; I fiddle with some options to reproduce the
-# hurdle function as much as possible
+#' # Poisson hurdle 
+
+#' Use `optim` to estimate parameters. I fiddle with some options to reproduce the
+#' hurdle function as much as possible.
+#' 
 optPois1 = optim(
   par = starts,
   fn  = hurdpoisloglik,
@@ -102,7 +108,7 @@ optPois1 = optim(
 )
 # optPois1
 
-# Extract the elements from the output to create a summary table
+#' Extract the elements from the output to create a summary table.
 B  = optPois1$par
 se = sqrt(diag(solve(optPois1$hessian)))
 Z  = B/se
@@ -111,7 +117,7 @@ summarytable = round(data.frame(B, se, Z, p), 3)
 
 list(summary = summarytable, ll = optPois1$value)
 
-### Compare to hurdle from pscl package
+#' Compare to hurdle from pscl package.
 library(pscl)
 
 poismod = hurdle(
@@ -123,9 +129,9 @@ poismod = hurdle(
 
 summary(poismod)
 
-################################
-### Negative Binomial hurdle ###
-################################
+
+#' # Negative Binomial hurdle
+
 
 starts =  c(
   logit  = coef(init_mod),
