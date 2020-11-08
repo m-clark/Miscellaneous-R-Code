@@ -10,7 +10,7 @@ fs = list.files('ModelFitting/', pattern = '\\.R$')
 
 # single file
 rmarkdown::render(
-  "ModelFitting/standard_lm.R",
+  "ModelFitting/nelder_mead.R",
   output_dir = '../m-clark.github.io/docs/models/',
   # output_yaml = 'render.yaml',   # ignored
   # params = list(title = 'blah'),
@@ -23,16 +23,9 @@ map(fs, rmarkdown::render, output_dir = '../m-clark.github.io/docs/models/')
 
 
 # selection
-fs_select = fs[grepl(fs, pattern = 'standard|lasso|ridge|penalized_ML')]
+fs_select = fs[grepl(fs, pattern = 'gradient')]
 
-map(fs_select, rmarkdown::render, output_dir = '../m-clark.github.io/docs/models/')
+map(paste0('ModelFitting/', fs_select), rmarkdown::render, output_dir = '../m-clark.github.io/docs/models/')
 
 
-# single file
-rmarkdown::render(
-  "ModelFitting/standard_lm.R",
-  output_dir = '../m-clark.github.io/docs/models/',
-  # output_yaml = 'render.yaml',   # ignored
-  # params = list(title = 'blah'),
-  knit_meta = list(comment = NA)
-)
+
