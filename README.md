@@ -5,11 +5,11 @@
 Miscellaneous (mostly) R Code
 ====================
 
-NOTE: Most of the models and algorithms in this REPO have been converted to [a more organized document](https://m-clark.github.io/models-by-example/).  Most of the code that carries over (basically most of the files in `/ModelFitting`) WILL BE UPGRADED, **so refer to the document instead of these files**.  I started updating the raw code, but stopped when I decided to go with the document.  So for many of the original files, the only fix will likely be very minor, e.g. a broken link.  Again, the document should be your first point of reference.
+NOTE: Most of the models and algorithms in this REPO have been converted and now live in a [a more organized document](https://m-clark.github.io/models-by-example/).  Most of the code that carries over (basically most of the files in `/ModelFitting`) WILL BE UPGRADED, **so refer to the document instead of these files**.  I started updating the raw code, but stopped when I decided to create the new document.  So for many of the original files, the only fix will likely be very minor, e.g. a broken link.  Again, the document should now be your point of reference.
 
-However, only a handful of Bayesian demos are going to be included, as the Stan code is pretty dated at this point, and most of the functionality demonstrated now exists in rstanarm/brms, whose functionality allows one to inspect the model code.  I will transfer some that may be more unique/useful.
+However, only a handful of Bayesian demos are going to be included in that document, as the Stan code is pretty dated at this point, and most of the functionality demonstrated now exists in rstanarm/brms, whose functionality allows one to inspect the model code.  I will still likely transfer some that may be more unique/useful to the book.
 
-Once the document is fairly usable it can be found [here](https://m-clark.github.io/models-by-example/).  The updated code will be more 'tidy' and conform to widely used coding standards, which was the goal here anyway.
+The document still has some kinks to work out and some additions incoming, but can be found [here](https://m-clark.github.io/models-by-example/).  The updated code there will be more 'tidy' and conform to more widely used coding standards, which was the goal of the code here anyway.  More can be found at [my website](https://m-clark.github.io).
 
 
 ----
