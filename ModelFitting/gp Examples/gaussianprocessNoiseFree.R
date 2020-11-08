@@ -1,7 +1,7 @@
 ########################################################################################
 ### 'Noise-free' gaussian process demo.  The matrix labeling is in keeping with      ###
 ### Murphy 2012 and Rasmussen and Williams 2006.  See those sources for more detail. ###
-### Murphy's matlab code can be found here: https://code.google.com/p/pmtk3/, though ###
+### Murphy's matlab code can be found here: https://github.com/probml/pmtk3, though   ###
 ### the relevant files are housed alongside this code.                               ###
 ###                                                                                  ###
 ### The goal of this code is to plot samples from the prior and posterior predictive ###
@@ -47,19 +47,26 @@ npostpred = 3   # number of posterior predictive draws
 # data setup
 require(MASS)
 xg1 = seq(-5, 5, .2)
-yg1 = mvrnorm(nprior, mu=muFn(xg1), Sigma=Kfn(xg1, l=l, sigmaf=sigmaf)) 
+yg1 = mvrnorm(nprior,
+              mu = muFn(xg1),
+              Sigma = Kfn(xg1, l = l, sigmaf = sigmaf))
 
 # plot prior
-library(ggplot2); library(reshape2)
+library(ggplot2)
+library(reshape2)
 
 # reshape data for plotting
-gdat = melt(data.frame(x=xg1, y=t(yg1), sd=apply(yg1, 2, sd)), id=c('x', 'sd'))
+gdat = melt(data.frame(
+  x = xg1,
+  y = t(yg1),
+  sd = apply(yg1, 2, sd)
+), id = c('x', 'sd'))
 # head(gdat) # inspect if desired
 
-g1 = ggplot(aes(x=x, y=value), data=gdat) + 
-  geom_line(aes(group=variable), color='#FF5500', alpha=.5) +
-  labs(title='Prior') +
-  ggtheme
+g1 = ggplot(aes(x = x, y = value), data = gdat) +
+  geom_line(aes(group = variable), color = '#FF5500', alpha = .5) +
+  labs(title = 'Prior') +
+  theme_minimal()
 
 # g1
 
@@ -109,7 +116,7 @@ g2 = ggplot(aes(x=x, y=value), data=gdat) +
   geom_line(aes(group=variable), color='#FF5500') +
   geom_point(aes(x=Xtrain, y=ytrain), data=data.frame(Xtrain, ytrain)) +
   labs(title='Posterior Predictive') +
-  ggtheme
+  theme_minimal()
 
 # g2
 

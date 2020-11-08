@@ -1,5 +1,18 @@
+
+
+[![Lifecycle Status](https://img.shields.io/badge/lifecycle-superseded-blue.svg)](https://www.tidyverse.org/lifecycle/)
+
 Miscellaneous (mostly) R Code
 ====================
+
+NOTE: Most of the models and algorithms in this REPO have been converted to [a more organized document](https://m-clark.github.io/models-by-example/).  Most of the code that carries over (basically most of the files in `/ModelFitting`) WILL BE UPGRADED, **so refer to the document instead of these files**.  I started updating the raw code, but stopped when I decided to go with the document.  So for many of the original files, the only fix will likely be very minor, e.g. a broken link.  Again, the document should be your first point of reference.
+
+However, only a handful of Bayesian demos are going to be included, as the Stan code is pretty dated at this point, and most of the functionality demonstrated now exists in rstanarm/brms, whose functionality allows one to inspect the model code.  I will transfer some that may be more unique/useful.
+
+Once the document is fairly usable it can be found [here](https://m-clark.github.io/models-by-example/).  The updated code will be more 'tidy' and conform to widely used coding standards, which was the goal here anyway.
+
+
+----
 
 This is a place for miscellaneous R and other code I've put together for clients, co-workers or myself for learning and demonstration purposes. The attempt is made to put together some well-commented and/or conceptually clear code from scratch, though most functionality is readily available in any number of well-developed R packages.  Typically, examples are provided using such packages for comparison of results.  I would say most of these are geared toward intermediate to advanced folks that want to dig a little deeper into the models and underlying algorithms.
 
@@ -48,7 +61,7 @@ hidden Markov model [(R)](https://github.com/m-clark/Miscellaneous-R-Code/blob/m
 [EM mixture multivariate](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20Mixture%20MV.R),
 [EM probit](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20algorithm%20for%20probit%20example.R),
 [EM pca](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20for%20pca.R),
-[EM probabilistic pca](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20algorithm%20for%20ppca.R),
+[EM probabilistic pca](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20algorithm%20for%20ppca.R) ([with missing](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20algorithm%20for%20ppca%20with%20missing.R)),
 [EM state space model](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/EM%20Examples/EM%20for%20state%20space%20unobserved%20components.R),
 [Gaussian Process noisy](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoisy.R),
 [Gaussian Process noise-free](https://github.com/m-clark/Miscellaneous-R-Code/blob/master/ModelFitting/gp%20Examples/gaussianprocessNoiseFree.R), 

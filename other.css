@@ -1,21 +1,27 @@
-.emph {
-  color: #ff5503;
-  font-weight: 500;
+.emph, em {
+  color: #E32D00 ;  /*#ff5500 #D14300*/
+  font-style: normal;
+  font-weight: 450;
 }
+
+strong {
+  color: #404040;  
+}
+
 
 .pack {
-  color: #C93312;  /*darkred*/
-  font-weight: 500;
+  color: #1f65b7; /* #990071 #AC9CFF #e41a1c*/
+  font-weight: 400;
 }
 
-.func {            /*Not needed, just use ``*/
-  color: #C93312;
-  font-weight: 500;
+.func {
+  color: #007020;   /*#007199 #00CBB6; #984ea3; can just use `` instead*/
+  font-weight: 400;
 }
 
 .objclass {
-  color: #006400;  /*darkgreen*/
-  font-weight: 500;
+  color:  #947100;  /*#AAB400 #4daf4a; #FFC5D0*/
+  font-weight: 400;
 }
 
 a {
