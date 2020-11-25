@@ -5,7 +5,7 @@
 Miscellaneous (mostly) R Code
 ====================
 
-NOTE: Many of the models and algorithms in this REPO have been updated and now live in a [a more organized document](https://m-clark.github.io/models-by-example/).  Most of the code that carries over (the bulk of the files in `/ModelFitting`) *have been upgraded*, **so refer to the document instead of these files**, even if they have been relatively recently revised.  Though I started updating these initially, all subsequent work went to the document, so it should now be your point of reference.
+NOTE: **Many of the models and algorithms in this REPO have been updated and now live in a [a more organized document](https://m-clark.github.io/models-by-example/)**.  Most of the code that carries over (the bulk of the files in `/ModelFitting`) *has been upgraded*, **so refer to the document instead of these files**, even if they have been relatively recently revised.  Though I started updating these initially, all subsequent work went to the document, so it should now be your point of reference.
 
 However, only a handful of Bayesian demos are going to be included in that document, as the Stan code is pretty dated at this point, and most of the functionality demonstrated now exists in rstanarm/brms, whose functionality allows one to inspect the model code.  I will still likely transfer some that may be more unique/useful to the document.
 
